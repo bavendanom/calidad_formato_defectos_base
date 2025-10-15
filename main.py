@@ -1,7 +1,7 @@
 # main.py
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 from typing import List
 import models, schemas, crud
 from database import engine, Base, get_db
@@ -11,6 +11,7 @@ from fastapi.responses import HTMLResponse
 from fastapi import Request
 from fastapi.middleware.cors import CORSMiddleware  # IMPORTANTE: Agregar esto
 import logging
+import time
 
 logging.basicConfig(level=logging.DEBUG)
 
