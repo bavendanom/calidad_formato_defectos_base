@@ -55,10 +55,11 @@ tipoSelect.onchange = () => {
 
 /**
  * Carga los datos para los combos (líneas, productos, defectos) desde la API.
+ * "http://127.0.0.1:8001/combos/"
  */
 async function cargarDatosParaCombos() {
   try {
-    const res = await fetch("http://127.0.0.1:8001/combos/");
+    const res = await fetch("/combos/");
     if (!res.ok) throw new Error(`Error ${res.status}`);
     const data = await res.json();
     datosLineas = data.LINEA_PRODUCTO_PRESENTACION;
@@ -90,7 +91,7 @@ function inicializarCombos() {
  */
 async function cargarInspectores() {
   try {
-    const res = await fetch("http://127.0.0.1:8001/inspectores/");
+    const res = await fetch("/inspectores/");
     if (!res.ok) throw new Error(`Error ${res.status}`);
     const inspectores = await res.json();
     
@@ -110,7 +111,7 @@ async function cargarInspectores() {
 async function cargarDefectos() {
   const tbody = document.getElementById("tablaDefectos");
   try {
-    const res = await fetch("http://127.0.0.1:8001/defectos/ultimos/");
+    const res = await fetch("/defectos/ultimos/");
     const data = await res.json();
     tbody.innerHTML = "";
     if (data.length === 0) {
@@ -172,7 +173,7 @@ document.getElementById("defectoForm").addEventListener("submit", async (e) => {
   };
 
   try {
-    const res = await fetch("http://127.0.0.1:8001/defectos/", {
+    const res = await fetch("/defectos/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
@@ -203,7 +204,7 @@ btnAgregarInspector.addEventListener("click", async () => {
   }
 
   try {
-    const res = await fetch("http://127.0.0.1:8001/inspectores/", {
+    const res = await fetch("/inspectores/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre: nombre })
@@ -238,7 +239,7 @@ btnEliminarInspector.addEventListener("click", async () => {
 
   try {
     const nombreCodificado = encodeURIComponent(nombreInspector);
-    const res = await fetch(`http://127.0.0.1:8001/inspectores/${nombreCodificado}`, {
+    const res = await fetch(`/inspectores/${nombreCodificado}`, {
       method: "DELETE"
     });
 
