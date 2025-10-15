@@ -1,0 +1,30 @@
+services:
+  app:
+    build: .
+    container_name: calidad_app
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql+psycopg2://admin_calidad:admin123@db:5432/control_calidad
+    ports:
+      - "8001:8001"
+    # IMPORTANTE: Eliminar el volumen para usar la imagen construida
+    # volumes:
+    #   - .:/app
+
+  db:
+    image: postgres:15
+    container_name: calidad_db
+    restart: always
+    environment:
+      POSTGRES_USER: admin_calidad
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: control_calidad
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
