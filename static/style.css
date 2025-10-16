@@ -66,3 +66,98 @@ table {
     margin-top: 10px;
   }
 }
+
+/* Placeholders personalizados */
+.form-control::placeholder {
+    color: #6c757d;
+    opacity: 0.7;
+    font-style: italic;
+}
+
+/* Validación en tiempo real */
+.form-control:invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.form-control:valid {
+    border-color: #198754;
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+}
+
+/* Estados de botones mejorados */
+.btn {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Spinner para operaciones loading */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Alertas mejoradas */
+.alert {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Mejoras en la tabla */
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+    cursor: pointer;
+}
+
+/* Badges para estados */
+.badge {
+    font-size: 0.75em;
+}
+
+/* Tooltips personalizados */
+.tooltip-inner {
+    background-color: #333;
+    border-radius: 6px;
+    font-size: 0.875rem;
+}
+
+/* Fondo intercalado para las filas del cuerpo de la tabla */
+.table tbody tr:nth-child(odd) {
+    background-color: #f8f9fa; /* Color gris muy claro para las filas impares */
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #ffffff; /* Color blanco para las filas pares */
+}
+
+/* Asegurar que el hover funcione sobre el color de fondo */
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.1) !important; /* Azul muy suave al pasar el mouse */
+}
+
+/* Mejorar la legibilidad de las celdas */
+.table tbody td {
+    border-color: #dee2e6;
+    vertical-align: middle;
+}
+
+/* Opcional: Cabecera de tabla más distintiva */
+.table thead {
+    background-color: #e9ecef;
+}
+
+.table thead th {
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+}
