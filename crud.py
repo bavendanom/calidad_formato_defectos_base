@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 import models, schemas
 
 def get_defectos(db: Session):
-   return db.query(models.Defecto).all()
+    return db.query(models.Defecto).all()
 
 def get_ultimos_defectos(db: Session, limit: int = 10):
     """Obtiene los últimos 'limit' defectos registrados."""
