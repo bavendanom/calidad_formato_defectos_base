@@ -221,69 +221,7 @@ document.getElementById("defectoForm").addEventListener("submit", async (e) => {
   }
   setTimeout(() => alertBox.innerHTML = "", 5000);
 });
-/** 
-// --- Botón Añadir Inspector ---
-btnAgregarInspector.addEventListener("click", async () => {
-  const nombre = nuevoInspectorInput.value.trim();
-  if (!nombre) {
-    alert("Por favor, ingrese el nombre del nuevo inspector.");
-    return;
-  }
 
-  try {
-    const res = await fetch("/inspectores/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre: nombre })
-    });
-
-    if (res.ok) {
-      nuevoInspectorInput.value = "";
-      alertBox.innerHTML = `<div class="alert alert-success mt-3">✅ Inspector añadido</div>`;
-      await cargarInspectores();
-    } else {
-      const errorData = await res.json();
-      alertBox.innerHTML = `<div class="alert alert-danger mt-3">❌ ${errorData.detail}</div>`;
-    }
-  } catch (error) {
-    console.error("Error de conexión al añadir inspector:", error);
-    alertBox.innerHTML = `<div class="alert alert-warning mt-3">⚠️ Error de conexión al servidor</div>`;
-  }
-  setTimeout(() => alertBox.innerHTML = "", 4000);
-});
-
-// --- Botón Eliminar Inspector ---
-btnEliminarInspector.addEventListener("click", async () => {
-  const nombreInspector = inspectorSelect.value;
-  
-  if (!nombreInspector) {
-    alert("Por favor, seleccione un inspector de la lista para eliminar.");
-    return;
-  }
-
-  const confirmado = confirm(`¿Está seguro de que desea eliminar al inspector "${nombreInspector}"?`);
-  if (!confirmado) return;
-
-  try {
-    const nombreCodificado = encodeURIComponent(nombreInspector);
-    const res = await fetch(`/inspectores/${nombreCodificado}`, {
-      method: "DELETE"
-    });
-
-    if (res.ok) {
-      alertBox.innerHTML = `<div class="alert alert-success mt-3">✅ Inspector eliminado correctamente.</div>`;
-      await cargarInspectores();
-    } else {
-      const errorData = await res.json();
-      alertBox.innerHTML = `<div class="alert alert-danger mt-3">❌ ${errorData.detail}</div>`;
-    }
-  } catch (error) {
-    console.error("Error de conexión al eliminar inspector:", error);
-    alertBox.innerHTML = `<div class="alert alert-warning mt-3">⚠️ Error de conexión al servidor</div>`;
-  }
-  setTimeout(() => alertBox.innerHTML = "", 4000);
-});
-*/
 // --- Botón Añadir Inspector (con contraseña) ---
 btnAgregarInspector.addEventListener("click", async () => {
   const autorizado = await solicitarAutorizacion();
