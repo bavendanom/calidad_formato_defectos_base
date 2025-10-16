@@ -12,10 +12,14 @@ from fastapi import Request
 from fastapi.middleware.cors import CORSMiddleware  # IMPORTANTE: Agregar esto
 import logging
 import time
+import os
 
 logging.basicConfig(level=logging.DEBUG)
 
 print("Base de datos conectada a:", engine.url)
+
+# ====== CONFIGURACIÓN DE SEGURIDAD ======
+PASSWORD_AUTORIZACION = os.getenv("PASSWORD_ADMIN", "admin123") 
 
 # Crear tablas si no existen
 Base.metadata.create_all(bind=engine)
@@ -50,7 +54,7 @@ try:
 except Exception as e:
     print(f"❌ Error al crear tablas: {e}")
 
-app = FastAPI(title="API Control de Calidad - Defectos")
+#app = FastAPI(title="API Control de Calidad - Defectos")
 
 # ===============================
 # CONFIGURACIÓN CORS CRÍTICA
@@ -62,6 +66,20 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# ====== ENDPOINT DE VERIFICACIÓN DE AUTORIZACIÓN ======
+@app.post("/verificar-autorizacion/")
+async def verificar_autorizacion(data: dict):
+    """
+    Verifica si la contraseña ingresada es correcta para autorizar operaciones sensibles.
+    """
+    password_ingresada = data.get("password", "")
+    if password_ingresada == PASSWORD_AUTORIZACION:
+        return {"autorizado": True, "mensaje": "Autorización exitosa"}
+    else:
+        return {"autorizado": False, "mensaje": "Contraseña incorrecta"}
+
 
 # ===============================
 # Servir archivos estáticos y plantillas
