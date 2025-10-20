@@ -4,7 +4,7 @@ body {
 }
 .container {
   margin-top: 40px;
-  max-width: 1000px;
+  max-width: 1300px;
 }
 .card {
   border-radius: 12px;
@@ -160,4 +160,32 @@ table {
 .table thead th {
     border-bottom: 2px solid #dee2e6;
     font-weight: 600;
+}
+
+/* === Panel lateral de últimos registros === */
+#ultimosRegistros button {
+  transition: all 0.2s ease-in-out;
+}
+
+#ultimosRegistros button:hover {
+  background-color: #e9f2ff;
+  border-color: #0d6efd;
+  color: #0d6efd;
+}
+
+#ultimosRegistros {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+#ultimosRegistros p {
+  text-align: center;
+}
+
+/* Fijar la tarjeta lateral mientras se hace scroll */
+@media (min-width: 992px) {
+  #ultimosRegistros {
+    position: sticky;
+    top: 100px;
+  }
 }

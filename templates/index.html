@@ -20,85 +20,104 @@
       </div>
     </div>
     
+    <div class="row">
+      <div class="col-md-8">
+        <form id="defectoForm">
+          <h4 class="section-title">Información General</h4>
+          <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Fecha y Hora</label>
+                <div class="input-group">
+                  <input type="datetime-local" id="fecha_hora" class="form-control" required>
+                  <button type="button" id="btnFechaActual" class="btn btn-outline-primary" title="Usar fecha y hora actual">
+                    <i class="bi bi-clock"></i> Ahora
+                </button>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Inspector</label>
+              <select id="inspector" class="form-select" required>
+                <option value="">Cargando...</option>
+              </select>
+            </div>
 
-    <form id="defectoForm">
-      <h4 class="section-title">Información General</h4>
-      <div class="row g-3">
-        <div class="col-md-3">
-            <label class="form-label">Fecha y Hora</label>
-            <input type="datetime-local" id="fecha_hora" class="form-control" required>
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Inspector</label>
-          <select id="inspector" class="form-select" required>
-            <option value="">Cargando...</option>
-          </select>
-        </div>
+            <div class="col-md-5 align-self-end">
+              <div class="input-group">
+                <input type="text" id="nuevo_inspector_nombre" class="form-control" placeholder="Nuevo inspector...">
+                <button class="btn btn-outline-primary" type="button" id="btnAgregarInspector">Añadir</button>
+                <button class="btn btn-outline-danger" type="button" id="btnEliminarInspector">Eliminar</button>
+              </div>
+            </div>
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Lote</label>
+              <input type="text" id="lote" class="form-control" required placeholder="Ej: L-2024-001">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Línea</label>
+              <select id="linea" class="form-select" required>
+                <option value="">Seleccionar...</option>
+              </select>
+            </div>
+          </div>
+            
+          </div>
 
-        <div class="col-md-5 align-self-end">
-          <div class="input-group">
-            <input type="text" id="nuevo_inspector_nombre" class="form-control" placeholder="Nuevo inspector...">
-            <button class="btn btn-outline-primary" type="button" id="btnAgregarInspector">Añadir</button>
-            <button class="btn btn-outline-danger" type="button" id="btnEliminarInspector">Eliminar</button>
+          <h4 class="section-title">Información del Producto</h4>
+          <div class="row g-2">
+            <div class="col-md-4">
+              <label class="form-label">Producto</label>
+              <select id="producto" class="form-select" required>
+                <option value="">Seleccionar...</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Presentación</label>
+              <select id="presentacion" class="form-select" required>
+                <option value="">Seleccionar...</option>
+              </select>
+            </div>
+          </div>
+
+          <h4 class="section-title">Información del Defecto</h4>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Tipo de Defecto</label>
+              <select id="tipo_defecto" class="form-select" required>
+                <option value="">Seleccionar...</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Descripción del Defecto</label>
+              <select id="descripcion_defecto" class="form-select" required>
+                <option value="">Seleccionar...</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Cantidad de Defectos</label>
+              <input type="number" id="cantidad_defectos" class="form-control" required min="1">
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" id="btnLimpiar" class="btn btn-secondary px-4 py-2">Limpiar</button>
+            <div id="alert-container"></div>
+            <button type="submit" class="btn btn-success px-5 py-2">Guardar</button>
+          </div>
+        </form>
+      </div>
+      <div class="col-md-4 mt-4">
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white py-2">
+            <strong>Últimos registros</strong>
+          </div>
+          <div class="card-body p-3" id="ultimosRegistros">
+            <p class="text-muted mb-0">Aún no hay registros recientes.</p>
           </div>
         </div>
-      <div class="row g-3">
-        <div class="col-md-3">
-          <label class="form-label">Lote</label>
-          <input type="text" id="lote" class="form-control" required placeholder="Ej: L-2024-001">
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Línea</label>
-          <select id="linea" class="form-select" required>
-            <option value="">Seleccionar...</option>
-          </select>
-        </div>
       </div>
-        
-      </div>
-
-      <h4 class="section-title">Información del Producto</h4>
-      <div class="row g-2">
-        <div class="col-md-4">
-          <label class="form-label">Producto</label>
-          <select id="producto" class="form-select" required>
-            <option value="">Seleccionar...</option>
-          </select>
-        </div>
-        <div class="col-md-4">
-          <label class="form-label">Presentación</label>
-          <select id="presentacion" class="form-select" required>
-            <option value="">Seleccionar...</option>
-          </select>
-        </div>
-      </div>
-
-      <h4 class="section-title">Información del Defecto</h4>
-      <div class="row g-3">
-        <div class="col-md-4">
-          <label class="form-label">Tipo de Defecto</label>
-          <select id="tipo_defecto" class="form-select" required>
-            <option value="">Seleccionar...</option>
-          </select>
-        </div>
-        <div class="col-md-4">
-          <label class="form-label">Descripción del Defecto</label>
-          <select id="descripcion_defecto" class="form-select" required>
-            <option value="">Seleccionar...</option>
-          </select>
-        </div>
-        <div class="col-md-4">
-          <label class="form-label">Cantidad de Defectos</label>
-          <input type="number" id="cantidad_defectos" class="form-control" required min="1">
-        </div>
-      </div>
-
-      <div class="form-actions">
-        <button type="button" id="btnLimpiar" class="btn btn-secondary px-4 py-2">Limpiar</button>
-        <div id="alert-container"></div>
-        <button type="submit" class="btn btn-success px-5 py-2">Guardar</button>
-      </div>
-    </form>
+    </div>
+    
 
     <div class="table-container">
       <h4 class="section-title">📋 Últimos Defectos Registrados</h4>

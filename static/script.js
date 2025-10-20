@@ -202,9 +202,12 @@ document.getElementById("defectoForm").addEventListener("submit", async (e) => {
 
     if (res.ok) {
       alertBox.innerHTML = `<div class="alert alert-success mt-3">✅ Defecto guardado correctamente</div>`;
-      document.getElementById("defectoForm").reset();
+      document.getElementById("tipo_defecto").value = "";
+      document.getElementById("descripcion_defecto").innerHTML = "<option value=''>Seleccionar...</option>";
+      document.getElementById("cantidad_defectos").value = "";
       setFechaHoraActual();
       cargarDefectos();
+      cargarUltimosRegistros(); 
     } else {
       const errorData = await res.json();
       alertBox.innerHTML = `<div class="alert alert-danger mt-3">❌ Error: ${errorData.detail || 'No se pudo guardar'}</div>`;
@@ -283,6 +286,63 @@ btnEliminarInspector.addEventListener("click", async () => {
   setTimeout(() => alertBox.innerHTML = "", 4000);
 });
 
+// === Botón para establecer fecha y hora actual ===
+document.getElementById("btnFechaActual").addEventListener("click", () => {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  document.getElementById("fecha_hora").value = now.toISOString().slice(0, 16);
+});
+
+// ====== Mostrar últimos 5 registros para autocompletar ======
+async function cargarUltimosRegistros() {
+  try {
+    const res = await fetch("/defectos/ultimos/");
+    if (!res.ok) throw new Error(`Error ${res.status}`);
+    const data = await res.json();
+
+    const contenedor = document.getElementById("ultimosRegistros");
+    contenedor.innerHTML = "";
+
+    if (data.length === 0) {
+      contenedor.innerHTML = `<p class="text-muted mb-0">Aún no hay registros recientes.</p>`;
+      return;
+    }
+
+    // Solo tomar los 5 más recientes
+    const ultimos = data.slice(0, 5);
+
+    ultimos.forEach((d, i) => {
+      const boton = document.createElement("button");
+      boton.className = "btn btn-outline-secondary w-100 mb-2 text-start";
+      boton.innerHTML = `
+        <strong>${d.lote}</strong><br>
+        ${d.linea} - ${d.producto} (${d.presentacion})
+      `;
+
+      boton.addEventListener("click", () => {
+        document.getElementById("lote").value = d.lote;
+        lineaSelect.value = d.linea;
+
+        // Disparar cambio para actualizar productos y presentaciones
+        lineaSelect.dispatchEvent(new Event("change"));
+        setTimeout(() => {
+          productoSelect.value = d.producto;
+          productoSelect.dispatchEvent(new Event("change"));
+          setTimeout(() => {
+            presentacionSelect.value = d.presentacion;
+          }, 200);
+        }, 200);
+      });
+
+      contenedor.appendChild(boton);
+    });
+  } catch (error) {
+    console.error("Error al cargar últimos registros:", error);
+    document.getElementById("ultimosRegistros").innerHTML =
+      `<p class="text-danger">⚠️ Error al cargar últimos registros.</p>`;
+  }
+}
+
 
 // ====== Carga Inicial de la Página ======
 window.onload = () => {
@@ -290,4 +350,5 @@ window.onload = () => {
   cargarDatosParaCombos();
   cargarInspectores();
   cargarDefectos();
+  cargarUltimosRegistros(); 
 };
