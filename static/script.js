@@ -1,7 +1,6 @@
 // ====== Variables globales para los datos dinámicos ======
 let datosLineas = {};
 let tiposDefecto = {};
-let maquinas = [];
 
 // ====== DOM Elements ======
 const lineaSelect = document.getElementById("linea");
@@ -91,7 +90,6 @@ async function cargarDatosParaCombos() {
     const data = await res.json();
     datosLineas = data.LINEA_PRODUCTO_PRESENTACION;
     tiposDefecto = data.TIPO_DEFECTO_DESCRIPCION;
-    maquinas = data.MAQUINAS;
     inicializarCombos();
   } catch (error) {
     console.error("Error crítico cargando datos de combos:", error);
@@ -105,12 +103,9 @@ async function cargarDatosParaCombos() {
 function inicializarCombos() {
   lineaSelect.innerHTML = "<option value=''>Seleccionar...</option>";
   tipoSelect.innerHTML = "<option value=''>Seleccionar...</option>";
-  const maquinaSelect = document.getElementById("maquina");
-  maquinaSelect.innerHTML = "<option value=''>Seleccionar...</option>";
 
   for (const linea in datosLineas) lineaSelect.add(new Option(linea, linea));
   for (const tipo in tiposDefecto) tipoSelect.add(new Option(tipo, tipo));
-  maquinas.forEach(maquina => maquinaSelect.add(new Option(maquina, maquina)));
 }
 
 /**
@@ -150,7 +145,7 @@ async function cargarDefectos() {
       const row = `<tr>
         <td>${d.id}</td> <td>${fechaFormateada}</td> <td>${d.inspector}</td><td>${d.lote}</td>
         <td>${d.linea}</td> <td>${d.producto}</td> <td>${d.presentacion}</td>
-        <td>${d.maquina}</td> <td>${d.tipo_defecto}</td> <td>${d.descripcion_defecto}</td>
+        <td>${d.tipo_defecto}</td> <td>${d.descripcion_defecto}</td>
         <td class="text-center">${d.cantidad_defectos}</td>
       </tr>`;
       tbody.innerHTML += row;
@@ -193,7 +188,6 @@ document.getElementById("defectoForm").addEventListener("submit", async (e) => {
     linea: lineaSelect.value,
     producto: productoSelect.value,
     presentacion: presentacionSelect.value,
-    maquina: document.getElementById("maquina").value,
     tipo_defecto: tipoSelect.value,
     descripcion_defecto: descripcionSelect.value,
     cantidad_defectos: parseInt(document.getElementById("cantidad_defectos").value)
