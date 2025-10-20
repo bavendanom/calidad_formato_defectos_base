@@ -14,7 +14,6 @@ class Defecto(Base):
     linea = Column(String(50))
     producto = Column(String(100))
     presentacion = Column(String(50))
-    maquina = Column(String(50))
     tipo_defecto = Column(String(100))
     descripcion_defecto = Column(String(200))
     cantidad_defectos = Column(Integer)

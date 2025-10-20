@@ -17,7 +17,6 @@ class DefectoCreate(BaseModel):
     linea: str = Field(..., example="Línea 1")
     producto: str = Field(..., example="Tradicional Aguardiente")
     presentacion: str = Field(..., example="750 ml")
-    maquina: str = Field(..., example="Monoblock")
     tipo_defecto: str = Field(..., example="LLENADO")
     descripcion_defecto: str = Field(..., example="Nivel de llenado alto o bajo")
     cantidad_defectos: int = Field(..., example=5)

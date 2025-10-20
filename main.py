@@ -150,8 +150,7 @@ def obtener_combos():
     """
     return {
         "LINEA_PRODUCTO_PRESENTACION": schemas.LINEA_PRODUCTO_PRESENTACION,
-        "TIPO_DEFECTO_DESCRIPCION": schemas.TIPO_DEFECTO_DESCRIPCION,
-        "MAQUINAS": ["Encintadora", "Monoblock", "Capsuladora", "Etiquetadora", "Encajonadora", "Armadora"]
+        "TIPO_DEFECTO_DESCRIPCION": schemas.TIPO_DEFECTO_DESCRIPCION
     }
 
 # ============================================
