@@ -117,7 +117,7 @@ LINEA_PRODUCTO_PRESENTACION = {
 
 TIPO_DEFECTO_DESCRIPCION = {
     "LLENADO": [
-        "Partículas extrañas",
+        "Partículas extrañas (vidrio, cartón, metal, insectos, etc.)",
         "Nivel de llenado alto o bajo",
         "Botella rota / con fisura abierta",
         "Turbio, color diferente"
@@ -125,26 +125,25 @@ TIPO_DEFECTO_DESCRIPCION = {
     "CAPSULADO": [
         "Botella sin tapa / sin capuchón",
         "Tapa descentrada",
-        "Tapa revenida",
+        "Tapa reventada",
         "Precinto roto",
         "Litografía diferente",
         "Filtración"
     ],
     "LÁMPARA": [
-        "Partículas extrañas (vidrio, cartón, metal, insectos, etc.)",
-        "Sin etiqueta",
-        "Dos o más etiquetas",
-        "Etiqueta equivocada"
+        "Partículas extrañas (vidrio, cartón, metal, insectos, etc.)"
     ],
     "ETIQUETADO": [
+        "Sin etiqueta",
+        "Dos o mas etiquetas",
+        "etiqueta equivocada",
         "Posición incorrecta (volada, descentrada, invertida)",
         "Daño físico (rasgada, arrugada, doblada, pelada, manchada)",
         "Mal pegada",
-        "Despegada",
-        "Defectuosa",
-        "Sin video jet"
+        "Desfectos contraetiqueta"
     ],
     "VIDEO JET": [
+        "Sin video jet",
         "Video jet sin código de barras",
         "Diferente tape-etiqueta",
         "Incompleto, borroso",
@@ -154,7 +153,7 @@ TIPO_DEFECTO_DESCRIPCION = {
         "Cinta mal pegada",
         "Etiqueta dañada",
         "Faltante de unidades",
-        "Partición incompleta / sin celda",
+        "Partición incompleta o sin ella",
         "Caja deteriorada (rasgada, húmeda, sucia)",
         "Caja no corresponde con producto"
     ]
