@@ -332,6 +332,10 @@ async function cargarUltimosRegistros() {
             presentacionSelect.value = d.presentacion;
           }, 200);
         }, 200);
+        // 🔹 Actualizar fecha y hora al momento actual
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById("fecha_hora").value = now.toISOString().slice(0, 16);
       });
 
       contenedor.appendChild(boton);
