@@ -13,6 +13,16 @@ from fastapi.middleware.cors import CORSMiddleware  # IMPORTANTE: Agregar esto
 import logging
 import time
 import os
+from typing import List
+from schemas import (
+    TiposDefectosCreate,
+    TiposDefectosDescripcionCreate
+)
+
+
+
+
+
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -101,3 +111,37 @@ def obtener_inspectores(db: Session = Depends(get_db)):
     """Devuelve solo los nombres de los inspectores."""
     inspectores = crud.get_inspectores(db)
     return [inspector.nombre for inspector in inspectores]
+
+
+# ======================================================
+# MARK: GUARDADO DE DEFECTOS
+# ======================================================
+
+@app.post("/guardar_defectos/")
+def guardar_defectos(
+    registros: List[TiposDefectosCreate],
+    db: Session = Depends(get_db)
+):
+    """Guarda los totales por tipo de defecto (botón Guardar manual)."""
+    try:
+        for data in registros:
+            crud.crear_tipos_defectos(db, data)
+        return {"status": "ok", "message": f"{len(registros)} registros guardados correctamente."}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/auto_guardado/")
+def auto_guardado(
+    registros: List[TiposDefectosDescripcionCreate],
+    db: Session = Depends(get_db)
+):
+    """Autoguarda las descripciones y cantidades (cada 60 min)."""
+    try:
+        for data in registros:
+            crud.crear_tipos_defectos_descripcion(db, data)
+        return {"status": "ok", "message": f"{len(registros)} registros autoguardados correctamente."}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))

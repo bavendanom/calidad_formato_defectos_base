@@ -25,3 +25,50 @@ class InspectorOut(BaseModel):
     class Config:
         from_attributes = True
 
+# ======================================================
+# MARK: TIPOS DEFECTOS
+# ======================================================
+from datetime import datetime
+
+class TiposDefectosBase(BaseModel):
+    codigo: str
+    nombre: str
+    envase: str
+    destino: str
+    linea_produccion: str
+    tipo_defecto: str
+    suma_tipo_defecto: int
+
+class TiposDefectosCreate(TiposDefectosBase):
+    pass
+
+class TiposDefectosOut(TiposDefectosBase):
+    id: int
+    fecha_hora: datetime
+    class Config:
+        orm_mode = True
+
+
+# ======================================================
+# MARK: TIPOS DEFECTOS DESCRIPCION
+# ======================================================
+class TiposDefectosDescripcionBase(BaseModel):
+    codigo: str
+    nombre: str
+    envase: str
+    destino: str
+    linea_produccion: str
+    tipo_defecto: str
+    descripcion_defecto: str = "---"
+    cantidad_defectos: int = 0
+
+class TiposDefectosDescripcionCreate(TiposDefectosDescripcionBase):
+    pass
+
+class TiposDefectosDescripcionOut(TiposDefectosDescripcionBase):
+    id: int
+    fecha_hora: datetime
+    class Config:
+        orm_mode = True
+
+
