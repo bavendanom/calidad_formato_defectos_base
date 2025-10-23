@@ -1,0 +1,5 @@
+codigo,nombre_producto,tipo_envase,destino,posibles_lineas_produccion
+4-03-0000-0019,Ron viejo de caldas,375 ml,Generico,"Linea 1,Linea 2"
+4-03-0000-0020,Aguardiente blanco,750 ml,Exportación,"Linea 3,Linea 4"
+4-03-0000-0021,Aguardiente amarillo,750 ml,Exportación,"Linea 2,Linea 4"
+4-03-0000-0022,Aguardiente amarillo,1000 ml,Exportación,"Tetrapack"
