@@ -1,191 +1,105 @@
 body {
-  background-color: #f8f9fa;
-  font-family: 'Segoe UI', sans-serif;
+  background-color: #f5f8fa;
+  font-family: "Segoe UI", sans-serif;
 }
-.container {
-  margin-top: 40px;
-  max-width: 1300px;
+
+h2 {
+  border-bottom: 2px dashed #0d6efd;
+  padding-bottom: 5px;
 }
-.card {
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+
+.nav-pills .nav-link {
+  border: 2px solid #0d6efd;
+  color: #0d6efd;
+  margin: 2px;
+  border-radius: 20px;
+  font-weight: 600;
 }
-h4.section-title {
-  border-bottom: 2px solid #0d6efd;
-  padding-bottom: 6px;
-  margin-top: 25px;
-  margin-bottom: 20px;
+
+.nav-pills .nav-link.active {
+  background-color: #0d6efd;
+  color: white;
+}
+
+#mainCard {
+  background-color: #eaf3f8;
+  border: 1px dashed #0d6efd;
+  border-radius: 10px;
+}
+
+#infoProducto {
+  background-color: #f0f7ff;
+}
+
+#tablaDefectos {
+  background-color: #ffffff;
+  font-style: italic;
+}
+
+/* === TABLA DE DEFECTOS === */
+.defectos-table {
+  font-size: 0.9rem;
+  background-color: white;
+  border-collapse: collapse;
+}
+
+.defectos-table th {
+  background-color: #e2e9f3;
+  font-weight: bold;
+  text-align: center;
+  border: 1px solid #b8c8e2;
+}
+
+.defectos-table td {
+  border: 1px solid #b8c8e2;
+  min-width: 60px;
+  height: 32px;
+  vertical-align: middle;
+}
+
+.tipo-defecto {
+  background-color: #f6faff;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  border: 1px dashed #a0b8e0 !important;
+}
+
+.celda-input:hover {
+  background-color: #f9f9d6;
+  cursor: pointer;
+}
+
+.celda-input:focus {
+  outline: 2px solid #0d6efd;
+  background-color: #eef6ff;
+}
+
+.total-dia {
+  font-weight: bold;
   color: #0d6efd;
 }
-label {
+
+/* Colores por tipo */
+tr td:first-child {
   font-weight: 500;
 }
-.table-container {
-  margin-top: 40px;
-}
-table {
-  font-size: 0.9rem;
-}
-.form-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 30px;
+
+tbody tr:nth-child(even) {
+  background-color: #fdfdfd;
 }
 
-.header-logos {
-  padding: 0 20px;
+
+/* ======== Resaltado visual ======== */
+.highlight-row {
+  background-color: rgba(13, 110, 253, 0.1) !important;
 }
 
-.header-logos img {
-  max-width: 80px;
-  height: auto;
+.highlight-col {
+  background-color: rgba(13, 110, 253, 0.15) !important;
 }
 
-.header-logos h3 {
-  text-align: center;
-  flex-grow: 1;
-}
-
-@media (max-width: 768px) {
-  .container { padding: 10px; }
-  .form-actions { flex-direction: column; gap: 10px; }
-  
-  .header-logos {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .header-logos .logo-left,
-  .header-logos .logo-right {
-    flex-basis: 100%;
-    text-align: center;
-    margin-bottom: 10px;
-  }
-  .header-logos h3 {
-    order: 3;
-    margin-top: 10px;
-  }
-}
-
-/* Placeholders personalizados */
-.form-control::placeholder {
-    color: #6c757d;
-    opacity: 0.7;
-    font-style: italic;
-}
-
-/* Validación en tiempo real */
-.form-control:invalid {
-    border-color: #dc3545;
-    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
-}
-
-.form-control:valid {
-    border-color: #198754;
-    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
-}
-
-/* Estados de botones mejorados */
-.btn {
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-.btn:active {
-    transform: translateY(0);
-}
-
-/* Spinner para operaciones loading */
-.spinner-border-sm {
-    width: 1rem;
-    height: 1rem;
-}
-
-/* Alertas mejoradas */
-.alert {
-    border: none;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-/* Mejoras en la tabla */
-.table-hover tbody tr:hover {
-    background-color: rgba(13, 110, 253, 0.05);
-    cursor: pointer;
-}
-
-/* Badges para estados */
-.badge {
-    font-size: 0.75em;
-}
-
-/* Tooltips personalizados */
-.tooltip-inner {
-    background-color: #333;
-    border-radius: 6px;
-    font-size: 0.875rem;
-}
-
-/* Fondo intercalado para las filas del cuerpo de la tabla */
-.table tbody tr:nth-child(odd) {
-    background-color: #f8f9fa; /* Color gris muy claro para las filas impares */
-}
-
-.table tbody tr:nth-child(even) {
-    background-color: #ffffff; /* Color blanco para las filas pares */
-}
-
-/* Asegurar que el hover funcione sobre el color de fondo */
-.table-hover tbody tr:hover {
-    background-color: rgba(13, 110, 253, 0.1) !important; /* Azul muy suave al pasar el mouse */
-}
-
-/* Mejorar la legibilidad de las celdas */
-.table tbody td {
-    border-color: #dee2e6;
-    vertical-align: middle;
-}
-
-/* Opcional: Cabecera de tabla más distintiva */
-.table thead {
-    background-color: #e9ecef;
-}
-
-.table thead th {
-    border-bottom: 2px solid #dee2e6;
-    font-weight: 600;
-}
-
-/* === Panel lateral de últimos registros === */
-#ultimosRegistros button {
-  transition: all 0.2s ease-in-out;
-}
-
-#ultimosRegistros button:hover {
-  background-color: #e9f2ff;
-  border-color: #0d6efd;
-  color: #0d6efd;
-}
-
-#ultimosRegistros {
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-#ultimosRegistros p {
-  text-align: center;
-}
-
-/* Fijar la tarjeta lateral mientras se hace scroll */
-@media (min-width: 992px) {
-  #ultimosRegistros {
-    position: sticky;
-    top: 100px;
-  }
+/* Mantener contraste del texto */
+.highlight-row td,
+.highlight-col td {
+  color: #000 !important;
 }

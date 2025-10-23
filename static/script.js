@@ -1,112 +1,276 @@
-// ====== Variables globales para los datos dinámicos ======
-let datosLineas = {};
-let tiposDefecto = {};
+document.addEventListener("DOMContentLoaded", () => {
+  const tabs = document.querySelectorAll("#lineTabs .nav-link");
+  const inspectorSelect = document.getElementById("inspector");
+  const btnHoy = document.getElementById("btnHoy");
+  const btnConsultar = document.getElementById("btnConsultar");
+  const tablaContainer = document.getElementById("tablaDefectos");
 
-// ====== DOM Elements ======
-const lineaSelect = document.getElementById("linea");
-const productoSelect = document.getElementById("producto");
-const presentacionSelect = document.getElementById("presentacion");
-const tipoSelect = document.getElementById("tipo_defecto");
-const descripcionSelect = document.getElementById("descripcion_defecto");
-const alertBox = document.getElementById("alert-container");
-const inspectorSelect = document.getElementById("inspector");
+  // --- HORAS PREDEFINIDAS ---
+  const horas = ["6:00", "7:00", "8:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "Total día"];
 
-// --- Elementos para gestión de inspectores ---
-const btnAgregarInspector = document.getElementById("btnAgregarInspector");
-const nuevoInspectorInput = document.getElementById("nuevo_inspector_nombre");
-const btnEliminarInspector = document.getElementById("btnEliminarInspector");
+  // --- ESTRUCTURA DE DEFECTOS POR LÍNEA ---
+  const defectosPorLinea = {
+    "Linea 1": [
+      { tipo: "LLENADO", color: "red", descripciones: [
+        "Partículas extrañas (vidrio, cartón, metal, insectos, etc.)",
+        "Nivel de llenado alto o bajo",
+        "Botella rota / con fisura abierta",
+        "Turbio, color diferente"
+      ]},
+      { tipo: "CAPSULADO", color: "green", descripciones: [
+        "Botella sin tapa / sin capuchón",
+        "Tapa descentrada",
+        "Tapa reventada",
+        "Precinto roto",
+        "Litografía diferente",
+        "Filtración"
+      ]},
+      { tipo: "LÁMPARA", color: "blue", descripciones: [
+        "Partículas extrañas (vidrio, cartón, metal, insectos, etc.)"
+      ]},
+      { tipo: "ETIQUETADO", color: "orange", descripciones: [
+        "Sin etiqueta",
+        "Dos o más etiquetas",
+        "Etiqueta equivocada",
+        "Posición incorrecta",
+        "Daño físico",
+        "Mal pegada",
+        "Defectos contraetiqueta"
+      ]},
+      { tipo: "VIDEO JET", color: "purple", descripciones: [
+        "Sin video jet",
+        "Video jet sin código de barras",
+        "Diferente tape-etiqueta",
+        "Incompleto, borroso",
+        "Incorrecto",
+        "Cinta mal pegada",
+        "Etiqueta dañada"
+      ]},
+      { tipo: "EMBALAJE", color: "teal", descripciones: [
+        "Faltante de unidades",
+        "Partición incompleta o sin ella",
+        "Caja deteriorada (rasgada, húmeda, sucia)",
+        "Caja no corresponde con producto"
+      ]}
+    ],
+    "Linea 2": "same",
+    "Linea 3": "same",
+    "Linea 4": "same",
+    "Tetrapack": [
+      { tipo: "DEFECTOS GENERALES", color: "blue", descripciones: [
+        "Video JET",
+        "Daño manipulación",
+        "Formación envase",
+        "Sellado longitudinal",
+        "Superficie interna",
+        "Sellado transversal",
+        "Flasps despegados",
+        "Otros"
+      ]}
+    ],
+    "Shot": "sameTetrapack"
+  };
+
+  // --- Renderizar tabla de defectos ---
+  function renderTabla(linea) {
+    tablaContainer.innerHTML = "";
+    const tabla = document.createElement("table");
+    tabla.className = "table table-bordered align-middle text-center defectos-table";
+    
+    // Encabezado de horas
+    const thead = document.createElement("thead");
+    let headRow = "<tr><th class='text-start'>Defectos</th>";
+    horas.forEach(h => headRow += `<th>${h}</th>`);
+    headRow += "</tr>";
+    thead.innerHTML = headRow;
+    tabla.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+    const defectos = obtenerDefectos(linea);
+
+    defectos.forEach(grupo => {
+      // Fila de tipo
+      const rowTipo = document.createElement("tr");
+      rowTipo.innerHTML = `<td colspan="${horas.length + 1}" class="tipo-defecto" style="color:${grupo.color}; font-weight:bold;">${grupo.tipo}</td>`;
+      tbody.appendChild(rowTipo);
+
+      // Filas de descripción
+      grupo.descripciones.forEach(desc => {
+        const fila = document.createElement("tr");
+        let celdas = `<td class="text-start">${desc}</td>`;
+        horas.forEach((h, idx) => {
+          if (h === "Total día") {
+            celdas += `<td class="total-dia bg-light">0</td>`;
+          } else {
+            celdas += `<td contenteditable="true" class="celda-input" data-hora="${h}" data-tipo="${grupo.tipo}" data-desc="${desc}"></td>`;
+          }
+        });
+        fila.innerHTML = celdas;
+        tbody.appendChild(fila);
+      });
+    });
+
+        // --- Eventos de interacción en celdas ---
+    tabla.addEventListener("input", e => {
+      if (e.target.classList.contains("celda-input")) {
+        recalcularTotal(e.target.closest("tr"));
+      }
+    });
+
+    tabla.addEventListener("focusin", e => {
+      if (e.target.classList.contains("celda-input")) {
+        resaltarCelda(e.target);
+      }
+    });
+
+    tabla.addEventListener("focusout", e => {
+      if (e.target.classList.contains("celda-input")) {
+        quitarResaltado();
+      }
+    });
 
 
-// ====== Función para solicitar autorización ======
-async function solicitarAutorizacion() {
-  const password = prompt("🔒 Ingrese la contraseña de autorización:");
-  if (!password) return false;
+    tabla.appendChild(tbody);
+    tablaContainer.appendChild(tabla);
+  }
 
+function obtenerDefectos(linea) {
+  // Si Linea 2–4 → heredan estructura de Linea 1
+  if (["Linea 2", "Linea 3", "Linea 4"].includes(linea)) return defectosPorLinea["Linea 1"];
+  // Si Shot → hereda Tetrapack
+  if (linea === "Shot") return defectosPorLinea["Tetrapack"];
+  // Si Tetrapack tiene estructura propia, úsala
+  if (defectosPorLinea[linea]) return defectosPorLinea[linea];
+  // fallback de seguridad
+  console.warn(`No se encontró estructura para ${linea}, usando Línea 1`);
+  return defectosPorLinea["Linea 1"];
+}
+
+
+// =====================
+// 🔹 Persistencia por pestaña
+// =====================
+let currentLinea = "Linea 1"; // línea activa actual
+
+function makeKey(linea) {
+  return `registro_v2_state_${linea.replace(/\s+/g,'_')}`;
+}
+
+function saveState(linea) {
+  const state = {};
+  // guardar formulario
+  state.form = {
+    fecha: document.getElementById("fecha").value || "",
+    inspector: document.getElementById("inspector").value || "",
+    codigoAX: document.getElementById("codigoAX").value || "",
+    lote: document.getElementById("lote").value || ""
+  };
+  // guardar tabla
+  state.celdas = [];
+  document.querySelectorAll(".celda-input").forEach(cell => {
+    const tipo = cell.dataset.tipo || "";
+    const desc = cell.dataset.desc || "";
+    const hora = cell.dataset.hora || "";
+    const valor = cell.textContent.trim() || "";
+    state.celdas.push({ tipo, desc, hora, valor });
+  });
+  localStorage.setItem(makeKey(linea), JSON.stringify(state));
+}
+
+function loadState(linea) {
+  const raw = localStorage.getItem(makeKey(linea));
+  if (!raw) return;
   try {
-    const res = await fetch("/verificar-autorizacion/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password })
-    });
-    const data = await res.json();
-    if (data.autorizado) {
-      return true;
-    } else {
-      alert("❌ Contraseña incorrecta. No tiene permiso para realizar esta acción.");
-      return false;
+    const state = JSON.parse(raw);
+    // formulario
+    if (state.form) {
+      document.getElementById("fecha").value = state.form.fecha || "";
+      document.getElementById("inspector").value = state.form.inspector || "";
+      document.getElementById("codigoAX").value = state.form.codigoAX || "";
+      document.getElementById("lote").value = state.form.lote || "";
     }
-  } catch (error) {
-    console.error("Error al verificar autorización:", error);
-    alert("⚠️ Error de conexión al verificar la contraseña.");
-    return false;
-  }
-}
-
-
-// ====== Lógica de actualización de combos ======
-
-lineaSelect.onchange = () => {
-  productoSelect.innerHTML = "<option value=''>Seleccionar...</option>";
-  presentacionSelect.innerHTML = "<option value=''>Seleccionar...</option>";
-  const linea = lineaSelect.value;
-  if (linea && datosLineas[linea]) {
-    for (const p in datosLineas[linea]) {
-      productoSelect.add(new Option(p, p));
+    // tabla
+    if (Array.isArray(state.celdas)) {
+      document.querySelectorAll(".celda-input").forEach(c => c.textContent = "");
+      state.celdas.forEach(it => {
+        const selector = `.celda-input[data-tipo="${CSS.escape(it.tipo)}"][data-desc="${CSS.escape(it.desc)}"][data-hora="${CSS.escape(it.hora)}"]`;
+        const cell = document.querySelector(selector);
+        if (cell) cell.textContent = it.valor;
+      });
     }
-  }
-};
-
-productoSelect.onchange = () => {
-  presentacionSelect.innerHTML = "<option value=''>Seleccionar...</option>";
-  const linea = lineaSelect.value;
-  const producto = productoSelect.value;
-  if (linea && producto && datosLineas[linea][producto]) {
-    datosLineas[linea][producto].forEach(pres => {
-      presentacionSelect.add(new Option(pres, pres));
-    });
-  }
-};
-
-tipoSelect.onchange = () => {
-  descripcionSelect.innerHTML = "<option value=''>Seleccionar...</option>";
-  const tipo = tipoSelect.value;
-  if (tipo && tiposDefecto[tipo]) {
-    tiposDefecto[tipo].forEach(desc => {
-      descripcionSelect.add(new Option(desc, desc));
-    });
-  }
-};
-
-// ====== Funciones de Carga de Datos (API) ======
-
-/**
- * Carga los datos para los combos (líneas, productos, defectos) desde la API.
- * "http://127.0.0.1:8001/combos/"
- */
-async function cargarDatosParaCombos() {
-  try {
-    const res = await fetch("/combos/");
-    if (!res.ok) throw new Error(`Error ${res.status}`);
-    const data = await res.json();
-    datosLineas = data.LINEA_PRODUCTO_PRESENTACION;
-    tiposDefecto = data.TIPO_DEFECTO_DESCRIPCION;
-    inicializarCombos();
-  } catch (error) {
-    console.error("Error crítico cargando datos de combos:", error);
-    alert("No se pudo cargar la configuración inicial de la aplicación. Recargue la página.");
+  } catch (e) {
+    console.error("Error cargando estado:", e);
   }
 }
 
-/**
- * Rellena los selects iniciales una vez que los datos han sido cargados.
- */
-function inicializarCombos() {
-  lineaSelect.innerHTML = "<option value=''>Seleccionar...</option>";
-  tipoSelect.innerHTML = "<option value=''>Seleccionar...</option>";
-
-  for (const linea in datosLineas) lineaSelect.add(new Option(linea, linea));
-  for (const tipo in tiposDefecto) tipoSelect.add(new Option(tipo, tipo));
+// =====================
+// 🔹 Suma automática por fila
+// =====================
+function recalcularTotal(fila) {
+  let total = 0;
+  fila.querySelectorAll(".celda-input").forEach(celda => {
+    const val = parseInt(celda.textContent.trim());
+    if (!isNaN(val)) total += val;
+  });
+  const totalCell = fila.querySelector(".total-dia");
+  if (totalCell) totalCell.textContent = total;
 }
+
+// =====================
+// 🔹 Resaltado de celda activa
+// =====================
+let celdaActiva = null;
+
+function resaltarCelda(celda) {
+  quitarResaltado();
+  celdaActiva = celda;
+  const tabla = celda.closest("table");
+  const fila = celda.closest("tr");
+  const colIndex = Array.from(celda.parentNode.children).indexOf(celda);
+
+  // resaltar fila
+  fila.classList.add("highlight-row");
+  // resaltar columna
+  tabla.querySelectorAll(`tr td:nth-child(${colIndex + 1})`).forEach(td => {
+    td.classList.add("highlight-col");
+  });
+}
+
+function quitarResaltado() {
+  document.querySelectorAll(".highlight-row").forEach(el => el.classList.remove("highlight-row"));
+  document.querySelectorAll(".highlight-col").forEach(el => el.classList.remove("highlight-col"));
+}
+
+
+
+  // 🔹 Cambiar pestaña
+tabs.forEach(tab => {
+  tab.addEventListener("click", () => {
+    // guardar estado de la linea anterior
+    saveState(currentLinea);
+
+    document.querySelector("#lineTabs .active").classList.remove("active");
+    tab.classList.add("active");
+    const linea = tab.dataset.linea;
+    currentLinea = linea;
+    renderTabla(linea);
+
+    // pequeña espera para que DOM de la tabla esté listo
+    setTimeout(() => {
+      loadState(linea);
+    }, 50);
+  });
+});
+
+
+  // Render inicial
+  renderTabla("Linea 1");
+
+  // Fecha - Botón "Hoy"
+  btnHoy.addEventListener("click", () => {
+    const hoy = new Date().toISOString().slice(0, 10);
+    document.getElementById("fecha").value = hoy;
+  });
 
 /**
  * Carga la lista de inspectores desde la API y la muestra en el select.
@@ -127,232 +291,22 @@ async function cargarInspectores() {
   }
 }
 
-/**
- * Carga los últimos defectos registrados en la tabla.
- */
-async function cargarDefectos() {
-  const tbody = document.getElementById("tablaDefectos");
-  try {
-    const res = await fetch("/defectos/ultimos/");
-    const data = await res.json();
-    tbody.innerHTML = "";
-    if (data.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="11" class="text-center text-muted">Sin registros aún</td></tr>`;
-      return;
-    }
-    data.forEach(d => {
-      const fechaFormateada = new Date(d.fecha_hora).toLocaleString('es-CO');
-      const row = `<tr>
-        <td>${d.id}</td> <td>${fechaFormateada}</td> <td>${d.inspector}</td><td>${d.lote}</td>
-        <td>${d.linea}</td> <td>${d.producto}</td> <td>${d.presentacion}</td>
-        <td>${d.tipo_defecto}</td> <td>${d.descripcion_defecto}</td>
-        <td class="text-center">${d.cantidad_defectos}</td>
-      </tr>`;
-      tbody.innerHTML += row;
-    });
-  } catch (error) {
-    console.error("Error al cargar defectos:", error);
-    tbody.innerHTML = `<tr><td colspan="11" class="text-center text-danger">No se pudieron cargar los registros.</td></tr>`;
-  }
-}
 
-/**
- * Establece la fecha y hora actual en el campo correspondiente.
- */
-function setFechaHoraActual() {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // Ajusta a la zona horaria local
-    document.getElementById('fecha_hora').value = now.toISOString().slice(0, 16);
-}
+  // Consultar producto AX
+  btnConsultar.addEventListener("click", async () => {
+    const codigo = document.getElementById("codigoAX").value.trim();
+    if (!codigo) return alert("Ingrese un código AX");
 
-// ====== Event Listeners ======
+    const res = await fetch(`/producto/${codigo}`);
+    if (!res.ok) return alert("Código no encontrado");
 
-// --- Botón Limpiar ---
-document.getElementById("btnLimpiar").addEventListener("click", () => {
-  document.getElementById("defectoForm").reset();
-  productoSelect.innerHTML = "<option value=''>Seleccionar...</option>";
-  presentacionSelect.innerHTML = "<option value=''>Seleccionar...</option>";
-  descripcionSelect.innerHTML = "<option value=''>Seleccionar...</option>";
-  setFechaHoraActual(); // <-- Mejora UX
-  alertBox.innerHTML = `<div class="alert alert-info mt-3">Formulario limpiado</div>`;
-  setTimeout(() => alertBox.innerHTML = "", 3000);
-});
+    const prod = await res.json();
+    document.getElementById("codigoInfo").textContent = prod.codigo;
+    document.getElementById("nombreInfo").textContent = prod.nombre_producto;
+    document.getElementById("envaseInfo").textContent = prod.tipo_envase;
+    document.getElementById("destinoInfo").textContent = prod.destino;
+    document.getElementById("lineasInfo").textContent = prod.posibles_lineas_produccion;
+  });
 
-// --- Enviar Formulario de Defectos ---
-document.getElementById("defectoForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const data = {
-    fecha_hora: document.getElementById("fecha_hora").value,
-    inspector: document.getElementById("inspector").value,
-    lote: document.getElementById("lote").value,
-    linea: lineaSelect.value,
-    producto: productoSelect.value,
-    presentacion: presentacionSelect.value,
-    tipo_defecto: tipoSelect.value,
-    descripcion_defecto: descripcionSelect.value,
-    cantidad_defectos: parseInt(document.getElementById("cantidad_defectos").value)
-  };
-
-  try {
-    const res = await fetch("/defectos/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-
-    if (res.ok) {
-      alertBox.innerHTML = `<div class="alert alert-success mt-3">✅ Defecto guardado correctamente</div>`;
-      document.getElementById("tipo_defecto").value = "";
-      document.getElementById("descripcion_defecto").innerHTML = "<option value=''>Seleccionar...</option>";
-      document.getElementById("cantidad_defectos").value = "";
-      setFechaHoraActual();
-      cargarDefectos();
-      cargarUltimosRegistros(); 
-    } else {
-      const errorData = await res.json();
-      alertBox.innerHTML = `<div class="alert alert-danger mt-3">❌ Error: ${errorData.detail || 'No se pudo guardar'}</div>`;
-    }
-  } catch (error) {
-    console.error("Error de conexión:", error);
-    alertBox.innerHTML = `<div class="alert alert-warning mt-3">⚠️ Error de conexión al servidor</div>`;
-  }
-  setTimeout(() => alertBox.innerHTML = "", 5000);
-});
-
-// --- Botón Añadir Inspector (con contraseña) ---
-btnAgregarInspector.addEventListener("click", async () => {
-  const autorizado = await solicitarAutorizacion();
-  if (!autorizado) return;
-
-  const nombre = nuevoInspectorInput.value.trim();
-  if (!nombre) {
-    alert("Por favor, ingrese el nombre del nuevo inspector.");
-    return;
-  }
-
-  try {
-    const res = await fetch("/inspectores/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre: nombre })
-    });
-
-    if (res.ok) {
-      nuevoInspectorInput.value = "";
-      alertBox.innerHTML = `<div class="alert alert-success mt-3">✅ Inspector añadido</div>`;
-      await cargarInspectores();
-    } else {
-      const errorData = await res.json();
-      alertBox.innerHTML = `<div class="alert alert-danger mt-3">❌ ${errorData.detail}</div>`;
-    }
-  } catch (error) {
-    console.error("Error de conexión al añadir inspector:", error);
-    alertBox.innerHTML = `<div class="alert alert-warning mt-3">⚠️ Error de conexión al servidor</div>`;
-  }
-  setTimeout(() => alertBox.innerHTML = "", 4000);
-});
-// --- Botón Eliminar Inspector (con contraseña) ---
-btnEliminarInspector.addEventListener("click", async () => {
-  const autorizado = await solicitarAutorizacion();
-  if (!autorizado) return;
-
-  const nombreInspector = inspectorSelect.value;
-  
-  if (!nombreInspector) {
-    alert("Por favor, seleccione un inspector de la lista para eliminar.");
-    return;
-  }
-
-  const confirmado = confirm(`¿Está seguro de que desea eliminar al inspector "${nombreInspector}"?`);
-  if (!confirmado) return;
-
-  try {
-    const nombreCodificado = encodeURIComponent(nombreInspector);
-    const res = await fetch(`/inspectores/${nombreCodificado}`, {
-      method: "DELETE"
-    });
-
-    if (res.ok) {
-      alertBox.innerHTML = `<div class="alert alert-success mt-3">✅ Inspector eliminado correctamente.</div>`;
-      await cargarInspectores();
-    } else {
-      const errorData = await res.json();
-      alertBox.innerHTML = `<div class="alert alert-danger mt-3">❌ ${errorData.detail}</div>`;
-    }
-  } catch (error) {
-    console.error("Error de conexión al eliminar inspector:", error);
-    alertBox.innerHTML = `<div class="alert alert-warning mt-3">⚠️ Error de conexión al servidor</div>`;
-  }
-  setTimeout(() => alertBox.innerHTML = "", 4000);
-});
-
-// === Botón para establecer fecha y hora actual ===
-document.getElementById("btnFechaActual").addEventListener("click", () => {
-  const now = new Date();
-  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-  document.getElementById("fecha_hora").value = now.toISOString().slice(0, 16);
-});
-
-// ====== Mostrar últimos 5 registros para autocompletar ======
-async function cargarUltimosRegistros() {
-  try {
-    const res = await fetch("/defectos/ultimos/");
-    if (!res.ok) throw new Error(`Error ${res.status}`);
-    const data = await res.json();
-
-    const contenedor = document.getElementById("ultimosRegistros");
-    contenedor.innerHTML = "";
-
-    if (data.length === 0) {
-      contenedor.innerHTML = `<p class="text-muted mb-0">Aún no hay registros recientes.</p>`;
-      return;
-    }
-
-    // Solo tomar los 5 más recientes
-    const ultimos = data.slice(0, 5);
-
-    ultimos.forEach((d, i) => {
-      const boton = document.createElement("button");
-      boton.className = "btn btn-outline-secondary w-100 mb-2 text-start";
-      boton.innerHTML = `
-        <strong>${d.lote}</strong><br>
-        ${d.linea} - ${d.producto} (${d.presentacion})
-      `;
-
-      boton.addEventListener("click", () => {
-        document.getElementById("lote").value = d.lote;
-        lineaSelect.value = d.linea;
-
-        // Disparar cambio para actualizar productos y presentaciones
-        lineaSelect.dispatchEvent(new Event("change"));
-        setTimeout(() => {
-          productoSelect.value = d.producto;
-          productoSelect.dispatchEvent(new Event("change"));
-          setTimeout(() => {
-            presentacionSelect.value = d.presentacion;
-          }, 200);
-        }, 200);
-        // 🔹 Actualizar fecha y hora al momento actual
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        document.getElementById("fecha_hora").value = now.toISOString().slice(0, 16);
-      });
-
-      contenedor.appendChild(boton);
-    });
-  } catch (error) {
-    console.error("Error al cargar últimos registros:", error);
-    document.getElementById("ultimosRegistros").innerHTML =
-      `<p class="text-danger">⚠️ Error al cargar últimos registros.</p>`;
-  }
-}
-
-
-// ====== Carga Inicial de la Página ======
-window.onload = () => {
-  setFechaHoraActual();
-  cargarDatosParaCombos();
   cargarInspectores();
-  cargarDefectos();
-  cargarUltimosRegistros(); 
-};
+});
