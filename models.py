@@ -3,22 +3,21 @@ from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.sql import func
 from database import Base
 
-# --- MODELO PARA DEFECTOS ---
-class Defecto(Base):
-    __tablename__ = "defectos"
 
+
+#MARK: INFO PRODUCTO
+# --- MODELO PARA INFORMACION DEL PRODUCTO ---
+class InfoProducto(Base):
+    __tablename__ = "info_producto"
     id = Column(Integer, primary_key=True, index=True)
-    fecha_hora = Column(DateTime) 
-    inspector = Column(String(100))
-    lote = Column(String(50))
-    linea = Column(String(50))
-    producto = Column(String(100))
-    presentacion = Column(String(50))
-    tipo_defecto = Column(String(100))
-    descripcion_defecto = Column(String(200))
-    cantidad_defectos = Column(Integer)
+    codigo = Column(String, unique=True)
+    nombre_producto = Column(String)
+    tipo_envase = Column(String)
+    destino = Column(String)
+    posibles_lineas_produccion = Column(String)
 
 
+#MARK: INSPECTORES
 # --- MODELO PARA INSPECTORES ---
 class Inspector(Base):
     __tablename__ = "inspectores"
