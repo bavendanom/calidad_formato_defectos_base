@@ -9,6 +9,8 @@ services:
       DATABASE_URL: postgresql+psycopg2://admin_calidad:admin123@db:5432/control_calidad
     ports:
       - "8001:8001"
+    command: >
+      sh -c "sleep 5 && python load_info_producto.py && uvicorn main:app --host 0.0.0.0 --port 8001"
     # IMPORTANTE: Eliminar el volumen para usar la imagen construida
     # volumes:
     #   - .:/app
@@ -25,6 +27,12 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:                         # 👇 Añadido para verificar disponibilidad real
+      test: ["CMD-SHELL", "pg_isready -U admin_calidad"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s 
 
 volumes:
   postgres_data:
