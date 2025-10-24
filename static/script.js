@@ -335,48 +335,10 @@ function calcularSumaPorTipo() {
 // ======================================================
 
 /**
- * Recorre la tabla y arma un JSON con los totales por tipo de defecto.
- * Se envía a /guardar_defectos/
- */
-function recopilarDatosParaGuardar() {
-  const linea = currentLinea;
-  const codigo = document.getElementById("codigoInfo").textContent || document.getElementById("codigoAX").value || "";
-  const nombre = document.getElementById("nombreInfo").textContent || "";
-  const envase = document.getElementById("envaseInfo").textContent || "";
-  const destino = document.getElementById("destinoInfo").textContent || "";
-
-  const datos = [];
-
-  // agrupar por tipo
-  const tipos = document.querySelectorAll(".tipo-defecto");
-  tipos.forEach(tipoRow => {
-    const tipo = tipoRow.textContent.trim();
-    let suma = 0;
-    let fila = tipoRow.nextElementSibling;
-
-    while (fila && !fila.classList.contains("tipo-defecto")) {
-      const totalCell = fila.querySelector(".total-dia");
-      const val = parseInt(totalCell?.textContent.trim());
-      if (!isNaN(val)) suma += val;
-      fila = fila.nextElementSibling;
-    }
-
-    datos.push({
-      codigo, nombre, envase, destino,
-      linea_produccion: linea,
-      tipo_defecto: tipo,
-      suma_tipo_defecto: suma
-    });
-  });
-
-  return datos;
-}
-
-
-/**
  * Recorre la tabla y arma un JSON con todas las descripciones y cantidades.
  * Se envía a /auto_guardado/
  */
+
 function recopilarDatosParaGuardar() {
   const linea = currentLinea;
   const codigo = document.getElementById("codigoInfo").textContent || document.getElementById("codigoAX").value || "";
@@ -440,13 +402,11 @@ async function enviarDatos(url, registros) {
 }
 
 
-// ======================================================
-// 🔹 BOTÓN GUARDAR (manual) — con validación y suma real
-// ======================================================
-const btnGuardar = document.getElementById("btnGuardar");
 
+// ======================================================
+// 🔹 BOTÓN GUARDAR ACTUALIZADO (ambas tablas)
+// ======================================================
 btnGuardar.addEventListener("click", async () => {
-
   // === 🧩 VALIDACIÓN DE CAMPOS OBLIGATORIOS ===
   const campos = [
     { id: "fecha", nombre: "Fecha" },
@@ -465,7 +425,6 @@ btnGuardar.addEventListener("click", async () => {
 
     if (!valor.trim() || valor === "---") {
       faltantes.push(campo.nombre);
-      // resaltar campo faltante visualmente
       elemento.classList.add("campo-faltante");
       setTimeout(() => elemento.classList.remove("campo-faltante"), 2500);
     }
@@ -473,14 +432,14 @@ btnGuardar.addEventListener("click", async () => {
 
   if (faltantes.length > 0) {
     alert(`⚠️ Debes completar los siguientes campos antes de guardar:\n\n• ${faltantes.join("\n• ")}`);
-    return; // ❌ Detiene el guardado si hay faltantes
+    return;
   }
 
-  // === 🔢 Calcular las sumas por tipo antes de generar los datos ===
+  // === 🔢 CALCULAR SUMAS POR TIPO ===
   const sumasPorTipo = calcularSumaPorTipo();
-  console.log("🧮 Sumatorias calculadas antes de guardar:", sumasPorTipo);
+  console.log("🧮 Sumatorias calculadas:", sumasPorTipo);
 
-  // === 📦 Recolectar los datos base ===
+  // === 📦 RECOLECTAR DATOS PARA TIPOS_DEFECTOS (SOLO > 0) ===
   const linea = currentLinea;
   const codigo = document.getElementById("codigoInfo").textContent || document.getElementById("codigoAX").value || "---";
   const nombre = document.getElementById("nombreInfo").textContent || "---";
@@ -489,51 +448,138 @@ btnGuardar.addEventListener("click", async () => {
 
   const datosParaGuardar = [];
 
-  // Crear un registro por cada tipo con su suma real
-  document.querySelectorAll(".tipo-defecto").forEach(tipoRow => {
-    const tipo = tipoRow.textContent.trim();
-    datosParaGuardar.push({
-      codigo,
-      nombre,
-      envase,
-      destino,
-      linea_produccion: linea,
-      tipo_defecto: tipo,
-      suma_tipo_defecto: sumasPorTipo[tipo] || 0 // ✅ Ahora se envía la suma real
-    });
-  });
+  // SOLO guardar tipos con suma > 0
+  for (const [tipo, suma] of Object.entries(sumasPorTipo)) {
+    if (suma > 0) {
+      datosParaGuardar.push({
+        codigo,
+        nombre,
+        envase,
+        destino,
+        linea_produccion: linea,
+        tipo_defecto: tipo,
+        suma_tipo_defecto: suma
+      });
+    }
+  }
 
-  // === 🚨 Verificación antes de enviar ===
-  if (datosParaGuardar.length === 0) {
-    alert("⚠️ No hay datos para guardar.");
+  // === 📋 RECOLECTAR DATOS PARA TIPOS_DEFECTOS_DESCRIPCION (SOLO > 0) ===
+  const datosDescripciones = recopilarDatosDescripciones();
+
+  // === 🚨 VERIFICAR SI HAY DATOS ===
+  if (datosParaGuardar.length === 0 && datosDescripciones.length === 0) {
+    alert("⚠️ No hay datos para guardar (todos los valores son 0).");
     return;
   }
 
-  console.log("📦 Datos para guardar (POST /guardar_defectos/):", datosParaGuardar);
+  console.log("📦 Datos para tipos_defectos:", datosParaGuardar);
+  console.log("📋 Datos para tipos_defectos_descripcion:", datosDescripciones);
 
-  // === 🚀 Enviar los datos a FastAPI ===
-  await enviarDatos("/guardar_defectos/", datosParaGuardar);
-  alert("✅ Datos guardados correctamente con sumas reales.");
+  // === 🚀 ENVIAR DATOS A AMBAS TABLAS ===
+  try {
+    // Guardar en tipos_defectos
+    if (datosParaGuardar.length > 0) {
+      const resTipos = await fetch("/guardar_defectos/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(datosParaGuardar)
+      });
 
-  // === 🧹 Limpiar tabla ===
-  document.querySelectorAll(".celda-input").forEach(c => (c.textContent = ""));
-  document.querySelectorAll(".total-dia").forEach(c => (c.textContent = "0"));
+      if (!resTipos.ok) throw new Error(`Error ${resTipos.status} en tipos_defectos`);
+      const dataTipos = await resTipos.json();
+      console.log("✅ Tipos defectos guardados:", dataTipos);
+    }
+
+    // Guardar en tipos_defectos_descripcion
+    if (datosDescripciones.length > 0) {
+      const resDesc = await fetch("/auto_guardado/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(datosDescripciones)
+      });
+
+      if (!resDesc.ok) throw new Error(`Error ${resDesc.status} en tipos_defectos_descripcion`);
+      const dataDesc = await resDesc.json();
+      console.log("✅ Descripciones guardadas:", dataDesc);
+    }
+
+    alert("✅ Datos guardados correctamente en ambas tablas. Solo se guardaron valores > 0.");
+
+    // === 🧹 LIMPIAR TABLA ===
+    document.querySelectorAll(".celda-input").forEach(c => (c.textContent = ""));
+    document.querySelectorAll(".total-dia").forEach(c => (c.textContent = "0"));
+    
+  } catch (err) {
+    console.error("❌ Error al guardar:", err);
+    alert("❌ Error al guardar los datos.");
+  }
 });
 
-/* 
 // ======================================================
-// 🔹 AUTOGUARDADO CADA 60 MINUTOS
+// 🔹 FUNCIÓN CALCULAR SUMAS POR TIPO
 // ======================================================
-const MINUTOS = 2;
-const INTERVALO = MINUTOS * 60 * 1000; // 60 minutos
+function calcularSumaPorTipo() {
+  const sumas = {};
+  
+  document.querySelectorAll(".celda-input").forEach(cell => {
+    const tipo = cell.dataset.tipo;
+    const valor = parseInt(cell.textContent.trim()) || 0;
+    
+    if (!sumas[tipo]) sumas[tipo] = 0;
+    sumas[tipo] += valor;
+  });
+  
+  console.log("🔢 Sumas calculadas por tipo:", sumas);
+  return sumas;
+}   
 
-setInterval(async () => {
-  const datos = recopilarDatosAutoGuardado();
-  if (datos.length > 0) {
-    console.log("⏳ Autoguardando datos...");
-    await enviarDatos("/auto_guardado/", datos);
-  }
-}, INTERVALO);
-*/
+// ======================================================
+// 🔹 FUNCIÓN PARA RECOPILAR DATOS DETALLADOS (tipos_defectos_descripcion)
+// ======================================================
+function recopilarDatosDescripciones() {
+  const linea = currentLinea;
+  const codigo = document.getElementById("codigoInfo").textContent || document.getElementById("codigoAX").value || "";
+  const nombre = document.getElementById("nombreInfo").textContent || "";
+  const envase = document.getElementById("envaseInfo").textContent || "";
+  const destino = document.getElementById("destinoInfo").textContent || "";
 
+  const datosDescripciones = [];
+
+  // Recorrer todas las filas de descripción
+  document.querySelectorAll("tbody tr").forEach(fila => {
+    // Saltar las filas de tipo (encabezados)
+    if (fila.querySelector('.tipo-defecto')) return;
+
+    const descripcion = fila.querySelector('td:first-child').textContent.trim();
+    const totalCell = fila.querySelector('.total-dia');
+    const total = parseInt(totalCell.textContent.trim()) || 0;
+
+    // Solo guardar si el total es mayor a 0
+    if (total > 0) {
+      // Encontrar el tipo de defecto correspondiente (fila anterior que sea tipo-defecto)
+      let filaAnterior = fila.previousElementSibling;
+      while (filaAnterior && !filaAnterior.querySelector('.tipo-defecto')) {
+        filaAnterior = filaAnterior.previousElementSibling;
+      }
+      
+      if (filaAnterior) {
+        const tipo = filaAnterior.querySelector('.tipo-defecto').textContent.trim();
+        
+        datosDescripciones.push({
+          codigo,
+          nombre,
+          envase,
+          destino,
+          linea_produccion: linea,
+          tipo_defecto: tipo,
+          descripcion_defecto: descripcion,
+          cantidad_defectos: total
+        });
+      }
+    }
+  });
+
+  console.log("📋 Datos de descripciones para guardar:", datosDescripciones);
+  return datosDescripciones;
+}
 });
