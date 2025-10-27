@@ -90,9 +90,6 @@ tbody tr:nth-child(even) {
 
 
 /* ======== Resaltado visual ======== */
-.highlight-row {
-  background-color: rgba(13, 110, 253, 0.1) !important;
-}
 
 .highlight-col {
   background-color: rgba(13, 110, 253, 0.15) !important;
@@ -111,4 +108,107 @@ tbody tr:nth-child(even) {
 .btn-turno.active {
   background-color: #0d6efd;
   color: white;
+}
+/* ======== TABLA CON ENCABEZADO FIJO ======== */
+#tablaDefectos {
+  max-height: 600px; /* Ajusta según necesites */
+  overflow-y: auto;
+  position: relative;
+  background-color: #ffffff;
+  font-style: italic;
+}
+
+.defectos-table {
+  font-size: 0.9rem;
+  background-color: white;
+  border-collapse: separate; /* Cambiar a separate para sticky */
+  border-spacing: 0;
+}
+
+.defectos-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #e2e9f3;
+}
+
+.defectos-table thead th {
+  background-color: #e2e9f3;
+  font-weight: bold;
+  text-align: center;
+  border: 1px solid #b8c8e2;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Sombra para destacar */
+}
+
+/* Asegurar que el contenido del body no se solape con el header */
+.defectos-table tbody {
+  background-color: white;
+}
+
+
+/* ======== Resaltado visual mejorado ======== */
+
+/* Resaltar columna completa */
+.highlight-col {
+  background-color: rgba(13, 110, 253, 0.15) !important;
+}
+
+/* Resaltar la celda activa con efecto especial */
+.highlight-active-cell {
+  background-color: rgba(13, 110, 253, 0.3) !important;
+  box-shadow: 0 0 8px rgba(13, 110, 253, 0.5);
+  border: 2px solid #0d6efd !important;
+}
+
+/* Mantener contraste del texto */
+.highlight-row td,
+.highlight-col td,
+.highlight-row th,
+.highlight-col th {
+  color: #000 !important;
+}
+
+/* Efecto hover mejorado */
+.celda-input:hover {
+  background-color: #fff3cd;
+  cursor: pointer;
+  border: 1px solid #ffc107;
+}
+
+/* Efecto focus mejorado */
+.celda-input:focus {
+  outline: none;
+  background-color: #eef6ff;
+  box-shadow: 0 0 5px rgba(13, 110, 253, 0.4);
+
+.highlight-col {
+  background-color: rgba(173, 216, 230, 0.3) !important;
+}
+
+.highlight-active-cell {
+  background-color: #007bff !important;
+  color: white !important;
+  font-weight: bold;
+  outline: 2px solid #004a99;
+}
+
+}
+
+/* ============ ESTILOS DE RESALTADO UNIFICADOS ============ */
+
+/* Resaltar la fila completa (color base) */
+.highlight-row td {
+  background-color: rgba(173, 216, 230, 0.4) !important; /* Amarillo muy claro */
+}
+
+/* Resaltar la columna completa */
+.highlight-col {
+  background-color: rgba(173, 216, 230, 0.4) !important; /* Azul claro */
+}
+
+/* Resaltar la celda activa (la que tiene el foco) */
+.highlight-active-cell {
+  background-color: rgba(13, 110, 253, 0.3) !important; /* Azul más fuerte */
+  box-shadow: 0 0 8px rgba(13, 110, 253, 0.5);
+  border: 2px solid #0d6efd !important;
 }

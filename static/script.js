@@ -116,6 +116,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Renderizar tabla de defectos ---
   function renderTabla(linea) {
     tablaContainer.innerHTML = "";
+
+    const scrollContainer = document.createElement("div");
+    scrollContainer.style.maxHeight = "600px";
+    scrollContainer.style.overflowY = "auto";
+    scrollContainer.style.position = "relative";
+
     const tabla = document.createElement("table");
     tabla.className = "table table-bordered align-middle text-center defectos-table";
     
@@ -163,7 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (e.target.classList.contains("celda-input")) {
         resaltarCelda(e.target);
       }
-    });
+    }); 
 
     tabla.addEventListener("focusout", e => {
       if (e.target.classList.contains("celda-input")) {
@@ -279,7 +285,7 @@ function recalcularTotal(fila) {
 }
 
 // =====================
-// 🔹 Resaltado de celda activa
+// 🔹 Resaltado de celda activa (fila + columna)
 // =====================
 let celdaActiva = null;
 
@@ -290,17 +296,22 @@ function resaltarCelda(celda) {
   const fila = celda.closest("tr");
   const colIndex = Array.from(celda.parentNode.children).indexOf(celda);
 
-  // resaltar fila
+  // 👇 Resaltar TODA la fila (no solo una clase)
   fila.classList.add("highlight-row");
-  // resaltar columna
-  tabla.querySelectorAll(`tr td:nth-child(${colIndex + 1})`).forEach(td => {
+  
+  // 👇 Resaltar columna
+  tabla.querySelectorAll(`tr td:nth-child(${colIndex + 1}), tr th:nth-child(${colIndex + 1})`).forEach(td => {
     td.classList.add("highlight-col");
   });
+  
+  // 👇 Resaltar la celda activa con efecto especial
+  celda.classList.add("highlight-active-cell");
 }
 
 function quitarResaltado() {
   document.querySelectorAll(".highlight-row").forEach(el => el.classList.remove("highlight-row"));
   document.querySelectorAll(".highlight-col").forEach(el => el.classList.remove("highlight-col"));
+  document.querySelectorAll(".highlight-active-cell").forEach(el => el.classList.remove("highlight-active-cell"));
 }
 
 
