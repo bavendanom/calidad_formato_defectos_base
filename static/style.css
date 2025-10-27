@@ -108,3 +108,7 @@ tbody tr:nth-child(even) {
   border: 2px solid red !important;
   box-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
 }
+.btn-turno.active {
+  background-color: #0d6efd;
+  color: white;
+}

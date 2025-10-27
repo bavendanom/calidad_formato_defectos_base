@@ -5,8 +5,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnConsultar = document.getElementById("btnConsultar");
   const tablaContainer = document.getElementById("tablaDefectos");
 
-  // --- HORAS PREDEFINIDAS ---
-  const horas = ["6:00", "7:00", "8:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "Total día"];
+  // --- HORAS PREDEFINIDAS (por defecto turno 1) ---
+  let horas = ["7:00", "8:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "Total día"];
+
+  // --- TURNOS DISPONIBLES ---
+  const turnos = {
+    1: ["7:00", "8:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "Total día"],
+    2: ["15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00", "Total día"],
+    3: ["23:00", "0:00", "1:00", "2:00", "3:00", "4:00", "5:00", "6:00", "7:00", "Total día"],
+    4: ["7:00", "8:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "Total día"],
+    5: ["19:00", "20:00", "21:00", "22:00", "23:00", "0:00", "1:00", "2:00", "3:00", "4:00", "5:00", "6:00", "7:00", "Total día"]
+  };
 
   // --- ESTRUCTURA DE DEFECTOS POR LÍNEA ---
   const defectosPorLinea = {
@@ -70,6 +79,39 @@ document.addEventListener("DOMContentLoaded", () => {
     ],
     "Shot": "sameTetrapack"
   };
+
+  // ==============================
+  // 🔹 CAMBIO DE TURNO
+  // ==============================
+
+  const botonesTurno = document.querySelectorAll(".btn-turno");
+  let turnoActual = 1;
+
+  botonesTurno.forEach(btn => {
+    btn.addEventListener("click", () => {
+      turnoActual = parseInt(btn.dataset.turno);
+
+      // Guardar turno seleccionado para la línea actual
+      turnoPorLinea[currentLinea] = turnoActual;
+
+      // Actualizar las horas globales y la tabla
+      horas = turnos[turnoActual];
+
+      // Actualizar visualmente el botón activo
+      botonesTurno.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      // Volver a renderizar la tabla con las nuevas horas
+      renderTabla(currentLinea);
+
+      // Guardar también en localStorage (para persistencia entre sesiones)
+      localStorage.setItem(`turno_${currentLinea}`, turnoActual);
+
+      console.log(`🕒 Turno ${turnoActual} seleccionado para ${currentLinea}:`, horas);
+    });
+  });
+
+
 
   // --- Renderizar tabla de defectos ---
   function renderTabla(linea) {
@@ -152,6 +194,16 @@ function obtenerDefectos(linea) {
 // =====================
 let currentLinea = "Linea 1"; // línea activa actual
 
+let turnoPorLinea = {
+  "Linea 1": 1,
+  "Linea 2": 1,
+  "Linea 3": 1,
+  "Linea 4": 1,
+  "Tetrapack": 1,
+  "Shot": 1
+};
+
+
 function makeKey(linea) {
   return `registro_v2_state_${linea.replace(/\s+/g,'_')}`;
 }
@@ -163,7 +215,12 @@ function saveState(linea) {
     fecha: document.getElementById("fecha").value || "",
     inspector: document.getElementById("inspector").value || "",
     codigoAX: document.getElementById("codigoAX").value || "",
-    lote: document.getElementById("lote").value || ""
+    lote: document.getElementById("lote").value || "",
+    codigoInfo: document.getElementById("codigoInfo").textContent || "---",
+    nombreInfo: document.getElementById("nombreInfo").textContent || "---",
+    envaseInfo: document.getElementById("envaseInfo").textContent || "---",
+    destinoInfo: document.getElementById("destinoInfo").textContent || "---",
+    lineasInfo: document.getElementById("lineasInfo").textContent || "---"
   };
   // guardar tabla
   state.celdas = [];
@@ -188,6 +245,11 @@ function loadState(linea) {
       document.getElementById("inspector").value = state.form.inspector || "";
       document.getElementById("codigoAX").value = state.form.codigoAX || "";
       document.getElementById("lote").value = state.form.lote || "";
+      document.getElementById("codigoInfo").textContent = state.form.codigoInfo || "---";
+      document.getElementById("nombreInfo").textContent = state.form.nombreInfo || "---";
+      document.getElementById("envaseInfo").textContent = state.form.envaseInfo || "---";
+      document.getElementById("destinoInfo").textContent = state.form.destinoInfo || "---";
+      document.getElementById("lineasInfo").textContent = state.form.lineasInfo || "---";
     }
     // tabla
     if (Array.isArray(state.celdas)) {
@@ -244,27 +306,54 @@ function quitarResaltado() {
 
 
   // 🔹 Cambiar pestaña
-tabs.forEach(tab => {
-  tab.addEventListener("click", () => {
-    // guardar estado de la linea anterior
-    saveState(currentLinea);
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      // Guardar estado de la línea anterior
+      saveState(currentLinea);
 
-    document.querySelector("#lineTabs .active").classList.remove("active");
-    tab.classList.add("active");
-    const linea = tab.dataset.linea;
-    currentLinea = linea;
-    renderTabla(linea);
+      // Cambiar visualmente la pestaña activa
+      document.querySelector("#lineTabs .active").classList.remove("active");
+      tab.classList.add("active");
 
-    // pequeña espera para que DOM de la tabla esté listo
-    setTimeout(() => {
-      loadState(linea);
-    }, 50);
+      const linea = tab.dataset.linea;
+      currentLinea = linea;
+
+      // Cargar turno guardado (desde memoria o localStorage)
+      const turnoGuardado = parseInt(localStorage.getItem(`turno_${linea}`)) || turnoPorLinea[linea] || 1;
+      turnoPorLinea[linea] = turnoGuardado;
+      turnoActual = turnoGuardado;
+      horas = turnos[turnoGuardado];
+
+      // Renderizar tabla con el horario correcto
+      renderTabla(linea);
+
+      // Marcar el botón del turno activo
+      botonesTurno.forEach(b => {
+        if (parseInt(b.dataset.turno) === turnoGuardado) b.classList.add("active");
+        else b.classList.remove("active");
+      });
+
+      // Cargar celdas guardadas
+      setTimeout(() => loadState(linea), 50);
+    });
   });
-});
+
 
 
   // Render inicial
   renderTabla("Linea 1");
+
+  // Cargar turno guardado para la línea inicial
+  const turnoInicial = parseInt(localStorage.getItem("turno_Linea 1")) || turnoPorLinea["Linea 1"];
+  horas = turnos[turnoInicial];
+  turnoActual = turnoInicial;
+
+  // Marcar botón activo en la interfaz
+  botonesTurno.forEach(b => {
+    if (parseInt(b.dataset.turno) === turnoInicial) b.classList.add("active");
+    else b.classList.remove("active");
+  });
+
 
   // Fecha - Botón "Hoy"
   btnHoy.addEventListener("click", () => {
@@ -503,11 +592,23 @@ btnGuardar.addEventListener("click", async () => {
       console.log("✅ Descripciones guardadas:", dataDesc);
     }
 
-    alert("✅ Datos guardados correctamente en ambas tablas. Solo se guardaron valores > 0.");
+    alert("✅ Datos guardados correctamente en ambas tablas.");
 
     // === 🧹 LIMPIAR TABLA ===
     document.querySelectorAll(".celda-input").forEach(c => (c.textContent = ""));
     document.querySelectorAll(".total-dia").forEach(c => (c.textContent = "0"));
+    // === Limpiar formulario principal ===
+    document.getElementById("fecha").value = "";
+    document.getElementById("inspector").value = "";
+    document.getElementById("codigoAX").value = "";
+    document.getElementById("lote").value = "";
+
+    // === Limpiar información del producto ===
+    document.getElementById("codigoInfo").textContent = "---";
+    document.getElementById("nombreInfo").textContent = "---";
+    document.getElementById("envaseInfo").textContent = "---";
+    document.getElementById("destinoInfo").textContent = "---";
+    document.getElementById("lineasInfo").textContent = "---";
     
   } catch (err) {
     console.error("❌ Error al guardar:", err);
