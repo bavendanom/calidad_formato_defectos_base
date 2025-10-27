@@ -345,7 +345,7 @@ function quitarResaltado() {
 
   // Cargar turno guardado para la línea inicial
   const turnoInicial = parseInt(localStorage.getItem("turno_Linea 1")) || turnoPorLinea["Linea 1"];
-  horas = turnos[turnoInicial];
+  horas = turnos[turnoInicial]; 
   turnoActual = turnoInicial;
 
   // Marcar botón activo en la interfaz
@@ -635,10 +635,11 @@ function calcularSumaPorTipo() {
 }   
 
 // ======================================================
-// 🔹 FUNCIÓN PARA RECOPILAR DATOS DETALLADOS (tipos_defectos_descripcion)
+// 🔹 FUNCIÓN PARA RECOPILAR DATOS POR HORA Y DESCRIPCIÓN
 // ======================================================
 function recopilarDatosDescripciones() {
   const linea = currentLinea;
+  const fecha = document.getElementById("fecha").value || new Date().toISOString().slice(0, 10);
   const codigo = document.getElementById("codigoInfo").textContent || document.getElementById("codigoAX").value || "";
   const nombre = document.getElementById("nombreInfo").textContent || "";
   const envase = document.getElementById("envaseInfo").textContent || "";
@@ -646,27 +647,31 @@ function recopilarDatosDescripciones() {
 
   const datosDescripciones = [];
 
-  // Recorrer todas las filas de descripción
+  // Recorre todas las filas del cuerpo de la tabla
   document.querySelectorAll("tbody tr").forEach(fila => {
     // Saltar las filas de tipo (encabezados)
     if (fila.querySelector('.tipo-defecto')) return;
 
     const descripcion = fila.querySelector('td:first-child').textContent.trim();
-    const totalCell = fila.querySelector('.total-dia');
-    const total = parseInt(totalCell.textContent.trim()) || 0;
 
-    // Solo guardar si el total es mayor a 0
-    if (total > 0) {
-      // Encontrar el tipo de defecto correspondiente (fila anterior que sea tipo-defecto)
-      let filaAnterior = fila.previousElementSibling;
-      while (filaAnterior && !filaAnterior.querySelector('.tipo-defecto')) {
-        filaAnterior = filaAnterior.previousElementSibling;
-      }
-      
-      if (filaAnterior) {
-        const tipo = filaAnterior.querySelector('.tipo-defecto').textContent.trim();
-        
+    // Buscar el tipo de defecto (fila anterior tipo-defecto)
+    let filaAnterior = fila.previousElementSibling;
+    while (filaAnterior && !filaAnterior.querySelector('.tipo-defecto')) {
+      filaAnterior = filaAnterior.previousElementSibling;
+    }
+    if (!filaAnterior) return;
+
+    const tipo = filaAnterior.querySelector('.tipo-defecto').textContent.trim();
+
+    // Recorre cada celda editable (una por hora)
+    fila.querySelectorAll(".celda-input").forEach(celda => {
+      const valor = parseInt(celda.textContent.trim()) || 0;
+      const hora = celda.dataset.hora;
+
+      if (valor > 0 && hora && hora !== "Total día") {
         datosDescripciones.push({
+          fecha,                 // 🔹 Nueva columna
+          hora,                  // 🔹 Nueva columna
           codigo,
           nombre,
           envase,
@@ -674,13 +679,14 @@ function recopilarDatosDescripciones() {
           linea_produccion: linea,
           tipo_defecto: tipo,
           descripcion_defecto: descripcion,
-          cantidad_defectos: total
+          cantidad_defectos: valor
         });
       }
-    }
+    });
   });
 
-  console.log("📋 Datos de descripciones para guardar:", datosDescripciones);
+  console.log("📋 Datos detallados por hora para guardar:", datosDescripciones);
   return datosDescripciones;
 }
+
 });

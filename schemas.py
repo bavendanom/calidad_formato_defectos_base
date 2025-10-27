@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 from pydantic import BaseModel, validator
 from typing import ClassVar
+from datetime import date
 
 
 #MARK: INFO PRODUCTO
@@ -53,6 +54,8 @@ class TiposDefectosOut(TiposDefectosBase):
 # MARK: TIPOS DEFECTOS DESCRIPCION
 # ======================================================
 class TiposDefectosDescripcionBase(BaseModel):
+    fecha: date                            
+    hora: str 
     codigo: str
     nombre: str
     envase: str
@@ -67,7 +70,6 @@ class TiposDefectosDescripcionCreate(TiposDefectosDescripcionBase):
 
 class TiposDefectosDescripcionOut(TiposDefectosDescripcionBase):
     id: int
-    fecha_hora: datetime
     class Config:
         orm_mode = True
 

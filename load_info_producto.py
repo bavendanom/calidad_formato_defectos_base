@@ -1,8 +1,13 @@
 #load_info_productos
 import csv
 from database import SessionLocal
+from database import SessionLocal, engine, Base
 import models
 
+# CREAR TABLAS PRIMERO
+print("Creando tablas...")
+Base.metadata.create_all(bind=engine)
+print("Tablas creadas exitosamente!")
 
 count = 0
 db = SessionLocal()

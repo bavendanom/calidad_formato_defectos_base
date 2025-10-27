@@ -2,7 +2,7 @@
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.sql import func
 from database import Base
-
+from sqlalchemy import Date  
 
 
 #MARK: INFO PRODUCTO
@@ -46,7 +46,8 @@ class TiposDefectosDescripcion(Base):
     __tablename__ = "tipos_defectos_descripcion"
 
     id = Column(Integer, primary_key=True, index=True)
-    fecha_hora = Column(DateTime(timezone=True), server_default=func.now())
+    fecha = Column(Date, nullable=False) 
+    hora = Column(String, nullable=False) 
     codigo = Column(String)
     nombre = Column(String)
     envase = Column(String)
