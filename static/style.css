@@ -1,3 +1,4 @@
+/* ============ ESTILOS GENERALES ============ */
 body {
   background-color: #f5f8fa;
   font-family: "Segoe UI", sans-serif;
@@ -8,6 +9,7 @@ h2 {
   padding-bottom: 5px;
 }
 
+/* ============ LAYOUT Y NAVEGACIÓN ============ */
 .nav-pills .nav-link {
   border: 2px solid #0d6efd;
   color: #0d6efd;
@@ -31,25 +33,48 @@ h2 {
   background-color: #f0f7ff;
 }
 
-#tablaDefectos {
-  background-color: #ffffff;
-  font-style: italic;
+.btn-turno.active {
+  background-color: #0d6efd;
+  color: white;
 }
 
-/* === TABLA DE DEFECTOS === */
+/* ============ ESTILOS DE TABLA DE DEFECTOS ============ */
+
+/* Contenedor de la tabla (para scroll) */
+#tablaDefectos {
+  background-color: #ffffff;
+  font-style: italic; /* Estilo original */
+  max-height: 600px;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* Tabla principal */
 .defectos-table {
   font-size: 0.9rem;
   background-color: white;
-  border-collapse: collapse;
+  border-collapse: separate; /* Necesario para 'position: sticky' */
+  border-spacing: 0;
 }
 
+/* Encabezado fijo (sticky) */
+.defectos-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #e2e9f3; /* Fondo para el 'thead' pegajoso */
+}
+
+/* Celdas del encabezado (th) */
 .defectos-table th {
   background-color: #e2e9f3;
   font-weight: bold;
   text-align: center;
   border: 1px solid #b8c8e2;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Sombra para destacar */
 }
 
+/* Celdas del cuerpo (td) */
 .defectos-table td {
   border: 1px solid #b8c8e2;
   min-width: 60px;
@@ -57,6 +82,7 @@ h2 {
   vertical-align: middle;
 }
 
+/* Filas de tipo de defecto (separadores) */
 .tipo-defecto {
   background-color: #f6faff;
   text-transform: uppercase;
@@ -64,22 +90,12 @@ h2 {
   border: 1px dashed #a0b8e0 !important;
 }
 
-.celda-input:hover {
-  background-color: #f9f9d6;
-  cursor: pointer;
-}
-
-.celda-input:focus {
-  outline: 2px solid #0d6efd;
-  background-color: #eef6ff;
-}
-
+/* Estilos de filas y celdas específicas */
 .total-dia {
   font-weight: bold;
   color: #0d6efd;
 }
 
-/* Colores por tipo */
 tr td:first-child {
   font-weight: 500;
 }
@@ -88,115 +104,25 @@ tbody tr:nth-child(even) {
   background-color: #fdfdfd;
 }
 
+/* ============ INTERACCIÓN DE CELDAS ============ */
 
-/* ======== Resaltado visual ======== */
-
-.highlight-col {
-  background-color: rgba(13, 110, 253, 0.15) !important;
-}
-
-/* Mantener contraste del texto */
-.highlight-row td,
-.highlight-col td {
-  color: #000 !important;
-}
-
-.campo-faltante {
-  border: 2px solid red !important;
-  box-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
-}
-.btn-turno.active {
-  background-color: #0d6efd;
-  color: white;
-}
-/* ======== TABLA CON ENCABEZADO FIJO ======== */
-#tablaDefectos {
-  max-height: 600px; /* Ajusta según necesites */
-  overflow-y: auto;
-  position: relative;
-  background-color: #ffffff;
-  font-style: italic;
-}
-
-.defectos-table {
-  font-size: 0.9rem;
-  background-color: white;
-  border-collapse: separate; /* Cambiar a separate para sticky */
-  border-spacing: 0;
-}
-
-.defectos-table thead {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background-color: #e2e9f3;
-}
-
-.defectos-table thead th {
-  background-color: #e2e9f3;
-  font-weight: bold;
-  text-align: center;
-  border: 1px solid #b8c8e2;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Sombra para destacar */
-}
-
-/* Asegurar que el contenido del body no se solape con el header */
-.defectos-table tbody {
-  background-color: white;
-}
-
-
-/* ======== Resaltado visual mejorado ======== */
-
-/* Resaltar columna completa */
-.highlight-col {
-  background-color: rgba(13, 110, 253, 0.15) !important;
-}
-
-/* Resaltar la celda activa con efecto especial */
-.highlight-active-cell {
-  background-color: rgba(13, 110, 253, 0.3) !important;
-  box-shadow: 0 0 8px rgba(13, 110, 253, 0.5);
-  border: 2px solid #0d6efd !important;
-}
-
-/* Mantener contraste del texto */
-.highlight-row td,
-.highlight-col td,
-.highlight-row th,
-.highlight-col th {
-  color: #000 !important;
-}
-
-/* Efecto hover mejorado */
+/* Hover mejorado */
 .celda-input:hover {
-  background-color: #fff3cd;
+  background-color: #fff3cd; /* Amarillo suave */
   cursor: pointer;
   border: 1px solid #ffc107;
 }
 
-/* Efecto focus mejorado */
+/* Focus mejorado (con sintaxis corregida) */
 .celda-input:focus {
   outline: none;
   background-color: #eef6ff;
   box-shadow: 0 0 5px rgba(13, 110, 253, 0.4);
-
-.highlight-col {
-  background-color: rgba(173, 216, 230, 0.3) !important;
 }
 
-.highlight-active-cell {
-  background-color: #007bff !important;
-  color: white !important;
-  font-weight: bold;
-  outline: 2px solid #004a99;
-}
+/* ============ RESALTADO DE FILA/COLUMNA/CELDA ============ */
 
-}
-
-/* ============ ESTILOS DE RESALTADO UNIFICADOS ============ */
-
-/* Resaltar la fila completa (color base) */
+/* Resaltar la fila completa */
 .highlight-row td {
   background-color: rgba(173, 216, 230, 0.4) !important; /* Amarillo muy claro */
 }
@@ -211,4 +137,17 @@ tbody tr:nth-child(even) {
   background-color: rgba(13, 110, 253, 0.3) !important; /* Azul más fuerte */
   box-shadow: 0 0 8px rgba(13, 110, 253, 0.5);
   border: 2px solid #0d6efd !important;
+}
+
+/* Asegurar que el texto sea legible al resaltar */
+.highlight-row td,
+.highlight-col td {
+  color: #000 !important;
+}
+
+/* ============ VALIDACIÓN ============ */
+
+.campo-faltante {
+  border: 2px solid red !important;
+  box-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
 }
