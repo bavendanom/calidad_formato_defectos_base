@@ -316,38 +316,72 @@ function quitarResaltado() {
 
 
 
-  // 🔹 Cambiar pestaña
-  tabs.forEach(tab => {
-    tab.addEventListener("click", () => {
-      // Guardar estado de la línea anterior
-      saveState(currentLinea);
+  // ======================================================
+// MARK: CAMBIAR PESTAÑA (con lógica para ocultar formulario en Admin)
+// ======================================================
+tabs.forEach(tab => {
+  tab.addEventListener("click", () => {
+    const linea = tab.dataset.linea;
 
+    // 🆕 Si es pestaña Admin, ocultar formulario y mostrar panel admin
+    if (linea === "Admin") {
+      ocultarFormulario();
+      mostrarPanelAdmin();
+      
       // Cambiar visualmente la pestaña activa
       document.querySelector("#lineTabs .active").classList.remove("active");
       tab.classList.add("active");
+      
+      return; // No ejecutar el resto del código de líneas normales
+    }
 
-      const linea = tab.dataset.linea;
-      currentLinea = linea;
+    // 🆕 Si NO es Admin, mostrar formulario normal
+    mostrarFormulario();
 
-      // Cargar turno guardado (desde memoria o localStorage)
-      const turnoGuardado = parseInt(localStorage.getItem(`turno_${linea}`)) || turnoPorLinea[linea] || 1;
-      turnoPorLinea[linea] = turnoGuardado;
-      turnoActual = turnoGuardado;
-      horas = turnos[turnoGuardado];
+    // Guardar estado de la línea anterior
+    saveState(currentLinea);
 
-      // Renderizar tabla con el horario correcto
-      renderTabla(linea);
+    // Cambiar visualmente la pestaña activa
+    document.querySelector("#lineTabs .active").classList.remove("active");
+    tab.classList.add("active");
 
-      // Marcar el botón del turno activo
-      botonesTurno.forEach(b => {
-        if (parseInt(b.dataset.turno) === turnoGuardado) b.classList.add("active");
-        else b.classList.remove("active");
-      });
+    currentLinea = linea;
 
-      // Cargar celdas guardadas
-      setTimeout(() => loadState(linea), 50);
+    // Cargar turno guardado (desde memoria o localStorage)
+    const turnoGuardado = parseInt(localStorage.getItem(`turno_${linea}`)) || turnoPorLinea[linea] || 1;
+    turnoPorLinea[linea] = turnoGuardado;
+    turnoActual = turnoGuardado;
+    horas = turnos[turnoGuardado];
+
+    // Renderizar tabla con el horario correcto
+    renderTabla(linea);
+
+    // Marcar el botón del turno activo
+    botonesTurno.forEach(b => {
+      if (parseInt(b.dataset.turno) === turnoGuardado) b.classList.add("active");
+      else b.classList.remove("active");
     });
+
+    // Cargar celdas guardadas
+    setTimeout(() => loadState(linea), 50);
   });
+});
+
+// 🆕 NUEVO: Función para ocultar el formulario
+function ocultarFormulario() {
+  const formSection = document.getElementById("formSection");
+  if (formSection) {
+    formSection.style.display = "none";
+  }
+}
+
+// 🆕 NUEVO: Función para mostrar el formulario
+function mostrarFormulario() {
+  const formSection = document.getElementById("formSection");
+  if (formSection) {
+    formSection.style.display = "block";
+  }
+}
 
 
 

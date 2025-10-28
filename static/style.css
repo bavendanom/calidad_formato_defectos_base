@@ -195,3 +195,67 @@ tbody tr:nth-child(even) {
   border-color: #0d6efd;
   box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
+
+/* ============ PANEL DE ADMINISTRACIÓN MEJORADO ============ */
+
+.admin-panel {
+  padding: 30px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 15px;
+  min-height: 500px;
+}
+
+.admin-panel h4 {
+  color: #0d6efd;
+  border-bottom: 3px solid #0d6efd;
+  padding-bottom: 10px;
+  margin-bottom: 30px;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.admin-panel .card {
+  border: 1px solid #dee2e6;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+
+.admin-panel .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.admin-panel .table {
+  margin-bottom: 0;
+  font-size: 0.95rem;
+}
+
+.admin-panel .table thead {
+  background-color: #0d6efd;
+  color: white;
+}
+
+.admin-panel .table tbody tr:hover {
+  background-color: #f0f7ff;
+}
+
+.admin-panel .btn-danger:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s;
+}
+
+#nuevoInspector {
+  border: 2px solid #ced4da;
+  font-size: 1rem;
+  padding: 10px;
+}
+
+#nuevoInspector:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+#btnAgregarInspector {
+  padding: 10px 20px;
+  font-weight: 600;
+}
