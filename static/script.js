@@ -196,7 +196,7 @@ function obtenerDefectos(linea) {
 
 
 // =====================
-// 🔹 Persistencia por pestaña
+// MARK: Persistencia por pestaña
 // =====================
 let currentLinea = "Linea 1"; // línea activa actual
 
@@ -272,7 +272,7 @@ function loadState(linea) {
 }
 
 // =====================
-// 🔹 Suma automática por fila
+// MARK: Suma automática por fila
 // =====================
 function recalcularTotal(fila) {
   let total = 0;
@@ -285,7 +285,7 @@ function recalcularTotal(fila) {
 }
 
 // =====================
-// 🔹 Resaltado de celda activa (fila + columna)
+// MARK: Resaltado de celda activa (fila + columna)
 // =====================
 let celdaActiva = null;
 
@@ -504,7 +504,7 @@ async function enviarDatos(url, registros) {
 
 
 // ======================================================
-// 🔹 BOTÓN GUARDAR ACTUALIZADO (ambas tablas)
+// MARK: BOTÓN GUARDAR ACTUALIZADO (ambas tablas)
 // ======================================================
 btnGuardar.addEventListener("click", async () => {
   // === 🧩 VALIDACIÓN DE CAMPOS OBLIGATORIOS ===

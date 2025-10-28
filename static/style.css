@@ -62,12 +62,12 @@ h2 {
   position: sticky;
   top: 0;
   z-index: 10;
-  background-color: #e2e9f3; /* Fondo para el 'thead' pegajoso */
+  background-color: #9ab8e6; /* Fondo para el 'thead' pegajoso */
 }
 
 /* Celdas del encabezado (th) */
 .defectos-table th {
-  background-color: #e2e9f3;
+  background-color: #9ab8e6;
   font-weight: bold;
   text-align: center;
   border: 1px solid #b8c8e2;
