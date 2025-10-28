@@ -700,4 +700,152 @@ function recopilarDatosDescripciones() {
   return datosDescripciones;
 }
 
+// ======================================================
+// MARK: GESTIÓN DE INSPECTORES (ADMIN)
+// ======================================================
+
+// Detectar cuando se activa la pestaña Admin
+tabs.forEach(tab => {
+  if (tab.dataset.linea === "Admin") {
+    tab.addEventListener("click", () => {
+      mostrarPanelAdmin();
+    });
+  }
+});
+
+async function mostrarPanelAdmin() {
+  tablaContainer.innerHTML = `
+    <div class="admin-panel">
+      <h4 class="mb-4">🔧 Administración de Inspectores</h4>
+      
+      <!-- Formulario para agregar inspector -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5>➕ Agregar Inspector</h5>
+          <div class="input-group">
+            <input type="text" id="nuevoInspector" class="form-control" placeholder="Nombre del inspector" maxlength="100">
+            <button class="btn btn-success" id="btnAgregarInspector">Agregar</button>
+          </div>
+          <small class="text-muted">Mínimo 3 caracteres</small>
+        </div>
+      </div>
+
+      <!-- Tabla de inspectores -->
+      <div class="card">
+        <div class="card-body">
+          <h5>👥 Inspectores Registrados</h5>
+          <table class="table table-striped table-hover">
+            <thead class="table-primary">
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaInspectores">
+              <tr><td colspan="3" class="text-center">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Cargar inspectores
+  await cargarInspectoresAdmin();
+
+  // Event listener para agregar inspector
+  document.getElementById("btnAgregarInspector").addEventListener("click", agregarInspector);
+  
+  // Permitir agregar con Enter
+  document.getElementById("nuevoInspector").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") agregarInspector();
+  });
+}
+
+async function cargarInspectoresAdmin() {
+  try {
+    const res = await fetch("/api/inspectores/");
+    if (!res.ok) throw new Error(`Error ${res.status}`);
+    
+    const inspectores = await res.json();
+    const tbody = document.getElementById("tablaInspectores");
+    
+    if (inspectores.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No hay inspectores registrados</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = inspectores.map(inspector => `
+      <tr>
+        <td>${inspector.id}</td>
+        <td><strong>${inspector.nombre}</strong></td>
+        <td>
+          <button class="btn btn-danger btn-sm" onclick="eliminarInspector(${inspector.id}, '${inspector.nombre}')">
+            🗑️ Eliminar
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (error) {
+    console.error("Error al cargar inspectores:", error);
+    document.getElementById("tablaInspectores").innerHTML = 
+      '<tr><td colspan="3" class="text-center text-danger">Error al cargar inspectores</td></tr>';
+  }
+}
+
+async function agregarInspector() {
+  const input = document.getElementById("nuevoInspector");
+  const nombre = input.value.trim();
+
+  if (nombre.length < 3) {
+    alert("⚠️ El nombre debe tener al menos 3 caracteres");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/inspectores/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre })
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.detail || "Error al crear inspector");
+    }
+
+    alert(`✅ Inspector "${nombre}" agregado correctamente`);
+    input.value = ""; // Limpiar input
+    await cargarInspectoresAdmin(); // Recargar tabla
+  } catch (error) {
+    alert(`❌ ${error.message}`);
+  }
+}
+
+async function eliminarInspector(id, nombre) {
+  if (!confirm(`¿Estás seguro de eliminar al inspector "${nombre}"?`)) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/inspectores/${id}`, {
+      method: "DELETE"
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.detail || "Error al eliminar inspector");
+    }
+
+    alert(`✅ Inspector "${nombre}" eliminado correctamente`);
+    await cargarInspectoresAdmin(); // Recargar tabla
+  } catch (error) {
+    alert(`❌ ${error.message}`);
+  }
+}
+
+// Hacer la función global para que onclick funcione
+window.eliminarInspector = eliminarInspector;
+
 });

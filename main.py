@@ -112,6 +112,32 @@ def obtener_inspectores(db: Session = Depends(get_db)):
     inspectores = crud.get_inspectores(db)
     return [inspector.nombre for inspector in inspectores]
 
+# 🆕 NUEVO: Obtener inspectores completos (con ID)
+@app.get("/api/inspectores/", response_model=List[schemas.InspectorResponse])
+def obtener_inspectores_completos(db: Session = Depends(get_db)):
+    """Devuelve todos los inspectores con su ID (para admin)."""
+    return crud.get_inspectores(db)
+
+
+# 🆕 NUEVO: Crear inspector
+@app.post("/api/inspectores/", response_model=schemas.InspectorResponse)
+def crear_inspector(inspector: schemas.InspectorCreate, db: Session = Depends(get_db)):
+    """Crea un nuevo inspector."""
+    try:
+        return crud.crear_inspector(db, inspector.nombre)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+# 🆕 NUEVO: Eliminar inspector
+@app.delete("/api/inspectores/{inspector_id}")
+def eliminar_inspector(inspector_id: int, db: Session = Depends(get_db)):
+    """Elimina un inspector por ID."""
+    try:
+        return crud.eliminar_inspector(db, inspector_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
 
 # ======================================================
 # MARK: GUARDADO DE DEFECTOS

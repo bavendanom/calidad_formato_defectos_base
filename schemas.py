@@ -26,6 +26,17 @@ class InspectorOut(BaseModel):
     class Config:
         from_attributes = True
 
+# 🆕 NUEVO: Esquema para crear inspector
+class InspectorCreate(BaseModel):
+    nombre: str = Field(..., min_length=3, max_length=100)
+
+# 🆕 NUEVO: Esquema completo con ID
+class InspectorResponse(BaseModel):
+    id: int
+    nombre: str
+    class Config:
+        orm_mode = True
+
 # ======================================================
 # MARK: TIPOS DEFECTOS
 # ======================================================
