@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // ==============================
-  // 🔹 CAMBIO DE TURNO
+  // 🔹 CAMBIO DE TURNO (MANTIENE DATOS POR POSICIÓN)
   // ==============================
 
   const botonesTurno = document.querySelectorAll(".btn-turno");
@@ -89,25 +89,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
   botonesTurno.forEach(btn => {
     btn.addEventListener("click", () => {
+      // 🆕 CAPTURAR DATOS ACTUALES POR POSICIÓN (no por hora)
+      const datosActuales = capturarDatosPorPosicion();
+      
       turnoActual = parseInt(btn.dataset.turno);
-
-      // Guardar turno seleccionado para la línea actual
       turnoPorLinea[currentLinea] = turnoActual;
-
-      // Actualizar las horas globales y la tabla
       horas = turnos[turnoActual];
 
-      // Actualizar visualmente el botón activo
+      // Actualizar botón activo
       botonesTurno.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
 
-      // Volver a renderizar la tabla con las nuevas horas
+      // Renderizar nueva tabla
       renderTabla(currentLinea);
+      
+      // 🆕 RESTAURAR DATOS POR POSICIÓN después de renderizar
+      setTimeout(() => {
+        restaurarDatosPorPosicion(datosActuales);
+      }, 100);
 
-      // Guardar también en localStorage (para persistencia entre sesiones)
       localStorage.setItem(`turno_${currentLinea}`, turnoActual);
-
-      console.log(`🕒 Turno ${turnoActual} seleccionado para ${currentLinea}:`, horas);
     });
   });
 
@@ -331,6 +332,73 @@ function recalcularTotal(fila) {
   });
   const totalCell = fila.querySelector(".total-dia");
   if (totalCell) totalCell.textContent = total;
+}
+
+// ==============================
+// 🔹 FUNCIONES PARA DATOS POR POSICIÓN (CORREGIDO)
+// ==============================
+
+/**
+ * Captura todos los datos de la tabla actual por posición (índice de fila y columna)
+ */
+function capturarDatosPorPosicion() {
+  const datos = [];
+  const filas = document.querySelectorAll("tbody tr");
+  let filaRealIndex = 0; // 🆕 Solo cuenta filas de datos, no encabezados
+  
+  filas.forEach((fila, filaIndex) => {
+    // Saltar filas de tipo (encabezados)
+    if (fila.querySelector('.tipo-defecto')) return;
+    
+    const celdas = fila.querySelectorAll('.celda-input');
+    const filaDatos = [];
+    
+    celdas.forEach((celda, colIndex) => {
+      filaDatos.push({
+        valor: celda.textContent.trim(),
+        colIndex: colIndex
+      });
+    });
+    
+    datos.push({
+      filaIndex: filaRealIndex, // 🆕 Usar índice real de filas de datos
+      celdas: filaDatos
+    });
+    
+    filaRealIndex++; // 🆕 Incrementar solo para filas de datos
+  });
+  
+  return datos;
+}
+
+/**
+ * Restaura los datos en la nueva tabla por posición
+ */
+function restaurarDatosPorPosicion(datos) {
+  const filas = document.querySelectorAll("tbody tr");
+  let filaRealIndex = 0; // 🆕 Solo contar filas de datos
+  
+  filas.forEach((fila, filaIndex) => {
+    // Saltar filas de tipo
+    if (fila.querySelector('.tipo-defecto')) return;
+    
+    // Buscar datos para esta fila usando el índice real
+    const datosFila = datos.find(d => d.filaIndex === filaRealIndex);
+    if (datosFila) {
+      const celdas = fila.querySelectorAll('.celda-input');
+      
+      datosFila.celdas.forEach(datoCelda => {
+        if (datoCelda.colIndex < celdas.length) {
+          celdas[datoCelda.colIndex].textContent = datoCelda.valor;
+        }
+      });
+      
+      // Recalcular total para esta fila
+      recalcularTotal(fila);
+    }
+    
+    filaRealIndex++; // 🆕 Incrementar solo para filas de datos
+  });
 }
 
 
