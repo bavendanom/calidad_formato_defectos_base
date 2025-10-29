@@ -259,3 +259,35 @@ tbody tr:nth-child(even) {
   padding: 10px 20px;
   font-weight: 600;
 }
+
+/* ============ VALIDACIÓN DE ENTRADA ============ */
+
+/* Efecto cuando se intenta ingresar caracter inválido */
+.celda-invalida {
+  background-color: #ffe6e6 !important;
+  animation: shake 0.2s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+/* Indicador visual de que solo acepta números */
+.celda-input::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  background-color: #28a745;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.celda-input:focus::before {
+  opacity: 1;
+}

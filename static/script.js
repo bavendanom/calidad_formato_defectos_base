@@ -158,10 +158,56 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-        // --- Eventos de interacción en celdas ---
+    // --- Eventos de interacción en celdas ---
     tabla.addEventListener("input", e => {
       if (e.target.classList.contains("celda-input")) {
+        validarSoloNumeros(e.target);
         recalcularTotal(e.target.closest("tr"));
+      }
+    });
+
+    // 🆕 NUEVO: Prevenir entrada de caracteres no numéricos
+    tabla.addEventListener("keydown", e => {
+      if (e.target.classList.contains("celda-input")) {
+        const tecla = e.key;
+        
+        // Permitir: números, backspace, delete, tab, enter, flechas
+        const teclasPermitidas = [
+          'Backspace', 'Delete', 'Tab', 'Enter', 
+          'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+          '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
+        ];
+        
+        // Permitir Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+        if (e.ctrlKey || e.metaKey) {
+          return;
+        }
+        
+        // Si la tecla no está permitida, prevenir
+        if (!teclasPermitidas.includes(tecla)) {
+          e.preventDefault();
+          // Feedback visual opcional
+          e.target.classList.add('celda-invalida');
+          setTimeout(() => e.target.classList.remove('celda-invalida'), 200);
+        }
+      }
+    });
+
+    // 🆕 NUEVO: Prevenir pegado de texto no numérico
+    tabla.addEventListener("paste", e => {
+      if (e.target.classList.contains("celda-input")) {
+        e.preventDefault();
+        
+        // Obtener texto pegado
+        const texto = (e.clipboardData || window.clipboardData).getData('text');
+        
+        // Extraer solo números
+        const soloNumeros = texto.replace(/\D/g, '');
+        
+        // Insertar solo números
+        if (soloNumeros) {
+          document.execCommand('insertText', false, soloNumeros);
+        }
       }
     });
 
@@ -284,6 +330,45 @@ function recalcularTotal(fila) {
   if (totalCell) totalCell.textContent = total;
 }
 
+
+// =====================
+// 🔹 Validación: Solo números en celdas
+// =====================
+function validarSoloNumeros(celda) {
+  const texto = celda.textContent;
+  
+  // Si está vacío, permitir (para poder borrar)
+  if (texto.trim() === '') {
+    return;
+  }
+  
+  // Extraer solo dígitos
+  const soloNumeros = texto.replace(/\D/g, '');
+  
+  // Si el contenido cambió, actualizar
+  if (texto !== soloNumeros) {
+    // Guardar posición del cursor
+    const seleccion = window.getSelection();
+    const rango = seleccion.getRangeAt(0);
+    const posicion = rango.startOffset;
+    
+    // Actualizar contenido
+    celda.textContent = soloNumeros;
+    
+    // Restaurar cursor (si es posible)
+    try {
+      const nuevoRango = document.createRange();
+      nuevoRango.setStart(celda.childNodes[0] || celda, Math.min(posicion, soloNumeros.length));
+      nuevoRango.collapse(true);
+      seleccion.removeAllRanges();
+      seleccion.addRange(nuevoRango);
+    } catch (e) {
+      // Si falla, colocar cursor al final
+      celda.focus();
+    }
+  }
+}
+
 // =====================
 // MARK: Resaltado de celda activa (fila + columna)
 // =====================
@@ -367,7 +452,7 @@ tabs.forEach(tab => {
   });
 });
 
-// 🆕 NUEVO: Función para ocultar el formulario
+// Función para ocultar el formulario
 function ocultarFormulario() {
   const formSection = document.getElementById("formSection");
   if (formSection) {
@@ -375,7 +460,7 @@ function ocultarFormulario() {
   }
 }
 
-// 🆕 NUEVO: Función para mostrar el formulario
+// Función para mostrar el formulario
 function mostrarFormulario() {
   const formSection = document.getElementById("formSection");
   if (formSection) {
