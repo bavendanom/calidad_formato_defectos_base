@@ -10,17 +10,31 @@ h2 {
 }
 
 /* ============ LAYOUT Y NAVEGACIÓN ============ */
-.nav-pills .nav-link {
-  border: 2px solid #0d6efd;
-  color: #0d6efd;
-  margin: 2px;
-  border-radius: 20px;
-  font-weight: 600;
+/* 🔹 Estilo para los botones de las líneas */
+#lineTabs .nav-link {
+  font-size: 1.1rem;        /* tamaño del texto (aumenta o reduce) */
+  padding: 0.6rem 1.4rem;   /* altura y ancho del botón */
+  border-radius: 30px;      /* forma más redondeada */
+  font-weight: 600;         /* texto más marcado */
+  transition: all 0.2s ease; /* Suaviza el efecto al pasar el mouse */
 }
 
-.nav-pills .nav-link.active {
-  background-color: #0d6efd;
+/* 🔹 Espaciado entre botones */
+#lineTabs .nav-item {
+  margin: 0 10px;             /* Espacio horizontal entre los botones */
+}
+
+/* 🔹 Botón activo (seleccionado) */
+#lineTabs .nav-link.active {
+  background-color: #0d6efd; /* azul Bootstrap */
   color: white;
+  transform: scale(1.05);    /* efecto leve de agrandado al activo */
+}
+
+/* 🔹 Efecto hover (opcional para mejor sensación visual) */
+#lineTabs .nav-link:hover {
+  background-color: #3c84f0;
+  transform: scale(1.03);
 }
 
 #mainCard {
