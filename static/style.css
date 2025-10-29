@@ -399,7 +399,7 @@ tbody tr:nth-child(even) {
   font-style: italic;
 }
 
-
+/*MARK: HISTORIAL DE REGISTROS*/
 /* ============ HISTORIAL DE REGISTROS ============ */
 
 .historial-section {
@@ -481,12 +481,12 @@ tbody tr:nth-child(even) {
 }
 
 .table-responsive::-webkit-scrollbar-thumb {
-  background: #0d6efd;
+  background: #6b7280;
   border-radius: 5px;
 }
 
 .table-responsive::-webkit-scrollbar-thumb:hover {
-  background: #0b5ed7;
+  background: #6b7280;
 }
 
 /* ============ MODAL DE CONFIRMACIÓN ============ */
@@ -538,4 +538,50 @@ tbody tr:nth-child(even) {
 
 #modalConfirmarGuardado .bi-question-circle-fill {
   animation: pulse-warning 2s infinite;
+}
+
+/* ============ MODAL DE LOGIN ADMIN ============ */
+
+#modalLoginAdmin .modal-content {
+  border-radius: 15px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+#modalLoginAdmin .modal-header {
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+
+#modalLoginAdmin .bi-shield-lock-fill {
+  animation: pulse-lock 2s infinite;
+}
+
+@keyframes pulse-lock {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+#passwordAdmin {
+  border: 2px solid #ced4da;
+  transition: all 0.3s;
+}
+
+#passwordAdmin:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.admin-panel .btn-danger {
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+.admin-panel .btn-danger:hover {
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.5);
+  transform: translateY(-2px);
 }

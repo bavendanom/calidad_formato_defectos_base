@@ -12,6 +12,7 @@ from fastapi import Request
 from fastapi.middleware.cors import CORSMiddleware  # IMPORTANTE: Agregar esto
 import logging
 import time
+from pydantic import BaseModel
 import os
 from typing import List
 from schemas import (
@@ -244,3 +245,34 @@ def auto_guardado(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+# 🆕 NUEVO: Autenticación para Admin
+# ======================================================
+# MARK: AUTENTICACIÓN ADMIN
+# ======================================================
+
+# Contraseña configurable (puedes cambiarla aquí o usar variables de entorno)
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
+
+class LoginRequest(BaseModel):
+    password: str
+
+@app.post("/api/admin/login")
+def admin_login(request: LoginRequest):
+    """
+    Verifica la contraseña de administrador.
+    Retorna un token de sesión si es correcta.
+    """
+    if request.password == ADMIN_PASSWORD:
+        return {
+            "success": True,
+            "message": "Autenticación exitosa",
+            "session_token": "admin_authenticated"
+        }
+    else:
+        raise HTTPException(
+            status_code=401,
+            detail="Contraseña incorrecta"
+        )
+

@@ -84,9 +84,59 @@
       <p>[ Aquí se cargará dinámicamente la tabla de defectos según la línea seleccionada ]</p>
     </div>
 
-    <!-- 🔹 Botón guardar -->
-    <div class="text-end mt-4">
+    <!-- 🔹 Botón guardar (ocultar en Admin) -->
+    <div class="text-end mt-4" id="contenedorBtnGuardar">
       <button class="btn btn-success px-4" id="btnGuardar">Guardar</button>
+    </div>
+    <!-- 🆕 NUEVO: Modal de Login para Admin -->
+    <div class="modal fade" id="modalLoginAdmin" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalLoginAdminLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="modalLoginAdminLabel">
+              🔒 Acceso Administrativo
+            </h5>
+          </div>
+          <div class="modal-body">
+            <div class="text-center mb-3">
+              <i class="bi bi-shield-lock-fill text-primary" style="font-size: 3rem;"></i>
+            </div>
+            <p class="text-center mb-3">Ingrese la contraseña de administrador para continuar</p>
+            
+            <div class="mb-3">
+              <label for="passwordAdmin" class="form-label fw-bold">Contraseña:</label>
+              <input 
+                type="password" 
+                class="form-control" 
+                id="passwordAdmin" 
+                placeholder="Ingrese la contraseña"
+                autocomplete="off">
+            </div>
+
+            <!-- Mensaje de error -->
+            <div id="errorLoginAdmin" class="alert alert-danger d-none" role="alert">
+              <strong>❌ Error:</strong> <span id="mensajeErrorLogin"></span>
+            </div>
+
+            <!-- Mensaje de bloqueo -->
+            <div id="bloqueoLoginAdmin" class="alert alert-warning d-none" role="alert">
+              <strong>⏳ Bloqueado:</strong> Demasiados intentos fallidos. Espere <span id="tiempoBloqueo">30</span> segundos.
+            </div>
+
+            <div class="text-muted small">
+              <strong>Intentos restantes:</strong> <span id="intentosRestantes">3</span>/3
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btnCancelarLoginAdmin">
+              ❌ Cancelar
+            </button>
+            <button type="button" class="btn btn-primary" id="btnIngresarAdmin">
+              ✅ Ingresar
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 🆕 NUEVO: Modal de confirmación para guardar -->

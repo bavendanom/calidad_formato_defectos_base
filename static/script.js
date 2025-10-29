@@ -473,56 +473,103 @@ function quitarResaltado() {
 
 
   // ======================================================
-// MARK: CAMBIAR PESTAÑA (con lógica para ocultar formulario en Admin)
-// ======================================================
-tabs.forEach(tab => {
-  tab.addEventListener("click", () => {
-    const linea = tab.dataset.linea;
+  // MARK: CAMBIAR PESTAÑA (con autenticación para Admin)
+  // ======================================================
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      const linea = tab.dataset.linea;
 
-    // 🆕 Si es pestaña Admin, ocultar formulario y mostrar panel admin
-    if (linea === "Admin") {
-      ocultarFormulario();
-      ocultarHistorial();
-      mostrarPanelAdmin();
-      
+      // 🆕 Si es pestaña Admin, verificar autenticación
+      if (linea === "Admin") {
+        ocultarFormulario();
+        ocultarHistorial();
+        ocultarBotonGuardar(); // 🆕 Ocultar botón Guardar
+        verificarAccesoAdmin(linea);
+        
+        // Cambiar visualmente la pestaña activa
+        document.querySelector("#lineTabs .active").classList.remove("active");
+        tab.classList.add("active");
+        
+        return;
+      }
+
+      // 🆕 Si NO es Admin, mostrar formulario y botón guardar
+      mostrarFormulario();
+      mostrarBotonGuardar(); // 🆕 Mostrar botón Guardar
+
+      // Cerrar sesión de admin al cambiar de pestaña
+      if (adminAutenticado) {
+        adminAutenticado = false;
+      }
+
+      // Guardar estado de la línea anterior
+      saveState(currentLinea);
+
       // Cambiar visualmente la pestaña activa
       document.querySelector("#lineTabs .active").classList.remove("active");
       tab.classList.add("active");
-      
-      return; // No ejecutar el resto del código de líneas normales
-    }
 
-    // 🆕 Si NO es Admin, mostrar formulario normal
-    mostrarFormulario();
+      currentLinea = linea;
 
-    // Guardar estado de la línea anterior
-    saveState(currentLinea);
+      // Cargar turno guardado
+      const turnoGuardado = parseInt(localStorage.getItem(`turno_${linea}`)) || turnoPorLinea[linea] || 1;
+      turnoPorLinea[linea] = turnoGuardado;
+      turnoActual = turnoGuardado;
+      horas = turnos[turnoGuardado];
 
-    // Cambiar visualmente la pestaña activa
-    document.querySelector("#lineTabs .active").classList.remove("active");
-    tab.classList.add("active");
+      // Renderizar tabla
+      renderTabla(linea);
 
-    currentLinea = linea;
+      // Marcar botón del turno activo
+      botonesTurno.forEach(b => {
+        if (parseInt(b.dataset.turno) === turnoGuardado) b.classList.add("active");
+        else b.classList.remove("active");
+      });
 
-    // Cargar turno guardado (desde memoria o localStorage)
-    const turnoGuardado = parseInt(localStorage.getItem(`turno_${linea}`)) || turnoPorLinea[linea] || 1;
-    turnoPorLinea[linea] = turnoGuardado;
-    turnoActual = turnoGuardado;
-    horas = turnos[turnoGuardado];
-
-    // Renderizar tabla con el horario correcto
-    renderTabla(linea);
-
-    // Marcar el botón del turno activo
-    botonesTurno.forEach(b => {
-      if (parseInt(b.dataset.turno) === turnoGuardado) b.classList.add("active");
-      else b.classList.remove("active");
+      // Cargar celdas guardadas
+      setTimeout(() => loadState(linea), 50);
     });
-
-    // Cargar celdas guardadas
-    setTimeout(() => loadState(linea), 50);
   });
-});
+
+  // 🆕 Función para ocultar botón Guardar
+  function ocultarBotonGuardar() {
+    const contenedor = document.getElementById("contenedorBtnGuardar");
+    if (contenedor) {
+      contenedor.style.display = "none";
+    }
+  }
+
+  // 🆕 Función para mostrar botón Guardar
+  function mostrarBotonGuardar() {
+    const contenedor = document.getElementById("contenedorBtnGuardar");
+    if (contenedor) {
+      contenedor.style.display = "block";
+    }
+  }
+
+  // Función para ocultar el formulario
+  function ocultarFormulario() {
+    const formSection = document.getElementById("formSection");
+    if (formSection) {
+      formSection.style.display = "none";
+    }
+  }
+
+  // Función para mostrar el formulario
+  function mostrarFormulario() {
+    const formSection = document.getElementById("formSection");
+    if (formSection) {
+      formSection.style.display = "block";
+    }
+  }
+
+  // Función para ocultar historial
+  function ocultarHistorial() {
+    const historialSection = document.getElementById("seccionHistorial");
+    if (historialSection) {
+      historialSection.style.display = "none";
+    }
+  }
 
 // Función para ocultar el formulario
 function ocultarFormulario() {
@@ -1075,23 +1122,206 @@ function recopilarDatosDescripciones() {
   return datosDescripciones;
 }
 
+
 // ======================================================
-// MARK: GESTIÓN DE INSPECTORES (ADMIN)
+// MARK: AUTENTICACIÓN Y GESTIÓN DE INSPECTORES (ADMIN)
 // ======================================================
 
-// Detectar cuando se activa la pestaña Admin
-tabs.forEach(tab => {
-  if (tab.dataset.linea === "Admin") {
-    tab.addEventListener("click", () => {
-      mostrarPanelAdmin();
+let adminAutenticado = false;
+let intentosLogin = 3;
+let bloqueadoHasta = null;
+
+// Variables para manejar el modal
+let modalLoginAdmin = null;
+let destinoPendiente = null; // Guardar la línea a la que se quiere ir
+
+/**
+ * Verifica si el usuario está autenticado para acceder a Admin
+ */
+function verificarAccesoAdmin(linea) {
+  if (adminAutenticado) {
+    // Ya está autenticado, mostrar panel directamente
+    mostrarPanelAdmin();
+    return;
+  }
+
+  // Guardar destino y mostrar modal de login
+  destinoPendiente = linea;
+  mostrarModalLogin();
+}
+
+/**
+ * Muestra el modal de login
+ */
+function mostrarModalLogin() {
+  // Limpiar campos
+  document.getElementById("passwordAdmin").value = "";
+  document.getElementById("errorLoginAdmin").classList.add("d-none");
+  document.getElementById("bloqueoLoginAdmin").classList.add("d-none");
+  
+  // Actualizar intentos
+  actualizarIntentosRestantes();
+
+  // Verificar si está bloqueado
+  if (bloqueadoHasta && Date.now() < bloqueadoHasta) {
+    mostrarBloqueo();
+  }
+
+  // Mostrar modal
+  modalLoginAdmin = new bootstrap.Modal(document.getElementById('modalLoginAdmin'));
+  modalLoginAdmin.show();
+
+  // Focus en el input de contraseña
+  setTimeout(() => {
+    document.getElementById("passwordAdmin").focus();
+  }, 500);
+}
+
+/**
+ * Intenta autenticar al usuario
+ */
+async function intentarLogin() {
+  // Verificar bloqueo
+  if (bloqueadoHasta && Date.now() < bloqueadoHasta) {
+    mostrarBloqueo();
+    return;
+  }
+
+  const password = document.getElementById("passwordAdmin").value.trim();
+
+  if (!password) {
+    mostrarErrorLogin("Debe ingresar una contraseña");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password })
     });
+
+    if (res.ok) {
+      // Login exitoso
+      adminAutenticado = true;
+      intentosLogin = 3;
+      bloqueadoHasta = null;
+      
+      modalLoginAdmin.hide();
+      
+      // Mostrar panel admin
+      mostrarPanelAdmin();
+    } else {
+      // Login fallido
+      intentosLogin--;
+      actualizarIntentosRestantes();
+
+      if (intentosLogin <= 0) {
+        // Bloquear por 30 segundos
+        bloqueadoHasta = Date.now() + 30000;
+        mostrarBloqueo();
+      } else {
+        mostrarErrorLogin(`Contraseña incorrecta. Intentos restantes: ${intentosLogin}`);
+      }
+    }
+  } catch (error) {
+    console.error("Error en login:", error);
+    mostrarErrorLogin("Error al conectar con el servidor");
+  }
+}
+
+/**
+ * Muestra mensaje de error en el modal
+ */
+function mostrarErrorLogin(mensaje) {
+  document.getElementById("mensajeErrorLogin").textContent = mensaje;
+  document.getElementById("errorLoginAdmin").classList.remove("d-none");
+}
+
+/**
+ * Muestra el bloqueo temporal
+ */
+function mostrarBloqueo() {
+  document.getElementById("btnIngresarAdmin").disabled = true;
+  document.getElementById("bloqueoLoginAdmin").classList.remove("d-none");
+  
+  const intervalo = setInterval(() => {
+    const tiempoRestante = Math.ceil((bloqueadoHasta - Date.now()) / 1000);
+    
+    if (tiempoRestante <= 0) {
+      clearInterval(intervalo);
+      intentosLogin = 3;
+      bloqueadoHasta = null;
+      document.getElementById("btnIngresarAdmin").disabled = false;
+      document.getElementById("bloqueoLoginAdmin").classList.add("d-none");
+      actualizarIntentosRestantes();
+    } else {
+      document.getElementById("tiempoBloqueo").textContent = tiempoRestante;
+    }
+  }, 1000);
+}
+
+/**
+ * Actualiza el contador de intentos restantes
+ */
+function actualizarIntentosRestantes() {
+  document.getElementById("intentosRestantes").textContent = intentosLogin;
+}
+
+/**
+ * Cancela el login y vuelve a la pestaña anterior
+ */
+function cancelarLogin() {
+  modalLoginAdmin.hide();
+  adminAutenticado = false;
+  
+  // Volver a la pestaña anterior (Línea 1 por defecto)
+  const tabLineaActual = document.querySelector(`[data-linea="${currentLinea}"]`);
+  if (tabLineaActual) {
+    tabLineaActual.click();
+  }
+}
+
+/**
+ * Cierra la sesión de admin
+ */
+function cerrarSesionAdmin() {
+  if (confirm("¿Está seguro de cerrar la sesión de administrador?")) {
+    adminAutenticado = false;
+    intentosLogin = 3;
+    
+    // Volver a Línea 1
+    const tabLinea1 = document.querySelector('[data-linea="Linea 1"]');
+    if (tabLinea1) {
+      tabLinea1.click();
+    }
+  }
+}
+
+// Event listeners para el modal de login
+document.getElementById("btnIngresarAdmin").addEventListener("click", intentarLogin);
+document.getElementById("btnCancelarLoginAdmin").addEventListener("click", cancelarLogin);
+
+// Permitir login con Enter
+document.getElementById("passwordAdmin").addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    intentarLogin();
   }
 });
+
+// ======================================================
+// PANEL DE ADMINISTRACIÓN
+// ======================================================
 
 async function mostrarPanelAdmin() {
   tablaContainer.innerHTML = `
     <div class="admin-panel">
-      <h4 class="mb-4">🔧 Administración de Inspectores</h4>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">🔧 Administración de Inspectores</h4>
+        <button class="btn btn-danger btn-sm" id="btnCerrarSesionAdmin">
+          🔒 Cerrar Sesión
+        </button>
+      </div>
       
       <!-- Formulario para agregar inspector -->
       <div class="card mb-4">
@@ -1129,10 +1359,10 @@ async function mostrarPanelAdmin() {
   // Cargar inspectores
   await cargarInspectoresAdmin();
 
-  // Event listener para agregar inspector
+  // Event listeners
+  document.getElementById("btnCerrarSesionAdmin").addEventListener("click", cerrarSesionAdmin);
   document.getElementById("btnAgregarInspector").addEventListener("click", agregarInspector);
   
-  // Permitir agregar con Enter
   document.getElementById("nuevoInspector").addEventListener("keypress", (e) => {
     if (e.key === "Enter") agregarInspector();
   });
@@ -1199,7 +1429,7 @@ async function agregarInspector() {
 }
 
 async function eliminarInspector(id, nombre) {
-  if (!confirm(`¿Estás seguro de eliminar al inspector "${nombre}"?`)) {
+  if (!confirm(`¿Está seguro de eliminar al inspector "${nombre}"?`)) {
     return;
   }
 
@@ -1220,10 +1450,8 @@ async function eliminarInspector(id, nombre) {
   }
 }
 
-// Hacer la función global para que onclick funcione
+// Hacer función global
 window.eliminarInspector = eliminarInspector;
-
-
 // ======================================================
 // MARK: HISTORIAL DE REGISTROS
 // ======================================================
