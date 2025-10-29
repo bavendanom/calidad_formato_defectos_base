@@ -488,3 +488,54 @@ tbody tr:nth-child(even) {
 .table-responsive::-webkit-scrollbar-thumb:hover {
   background: #0b5ed7;
 }
+
+/* ============ MODAL DE CONFIRMACIÓN ============ */
+
+.modal-content {
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  border-bottom: none;
+}
+
+.modal-footer {
+  border-top: none;
+  padding: 1.5rem;
+}
+
+#modalConfirmarGuardado .modal-body {
+  padding: 2rem;
+}
+
+#modalConfirmarGuardado .btn {
+  min-width: 120px;
+  font-weight: 600;
+}
+
+/* Animación de entrada del modal */
+.modal.fade .modal-dialog {
+  transition: transform 0.3s ease-out;
+  transform: translate(0, -50px);
+}
+
+.modal.show .modal-dialog {
+  transform: none;
+}
+
+/* Icono de advertencia animado */
+@keyframes pulse-warning {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+#modalConfirmarGuardado .bi-question-circle-fill {
+  animation: pulse-warning 2s infinite;
+}

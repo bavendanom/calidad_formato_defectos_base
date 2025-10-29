@@ -855,10 +855,46 @@ async function enviarDatos(url, registros) {
 
 
 // ======================================================
-// MARK: BOTÓN GUARDAR ACTUALIZADO (ambas tablas)
+// MARK: BOTÓN GUARDAR CON CONFIRMACIÓN
 // ======================================================
-btnGuardar.addEventListener("click", async () => {
-  // === 🧩 VALIDACIÓN DE CAMPOS OBLIGATORIOS ===
+
+// 🆕 Al hacer clic en "Guardar", mostrar modal de confirmación
+btnGuardar.addEventListener("click", () => {
+  // Validar campos antes de mostrar el modal
+  const camposValidos = validarCamposObligatorios();
+  
+  if (!camposValidos) {
+    return; // No mostrar modal si hay campos faltantes
+  }
+
+  // Verificar si hay datos para guardar
+  const sumasPorTipo = calcularSumaPorTipo();
+  const datosDescripciones = recopilarDatosDescripciones();
+  
+  if (Object.keys(sumasPorTipo).every(tipo => sumasPorTipo[tipo] === 0) && datosDescripciones.length === 0) {
+    alert("⚠️ No hay datos para guardar (todos los valores son 0).");
+    return;
+  }
+
+  // Mostrar modal de confirmación
+  const modal = new bootstrap.Modal(document.getElementById('modalConfirmarGuardado'));
+  modal.show();
+});
+
+// 🆕 Al confirmar en el modal, ejecutar el guardado
+document.getElementById("btnConfirmarGuardado").addEventListener("click", async () => {
+  // Cerrar modal
+  const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarGuardado'));
+  modal.hide();
+
+  // Ejecutar guardado
+  await ejecutarGuardado();
+});
+
+/**
+ * 🆕 Valida los campos obligatorios y retorna true si todo está bien
+ */
+function validarCamposObligatorios() {
   const campos = [
     { id: "fecha", nombre: "Fecha" },
     { id: "inspector", nombre: "Inspector" },
@@ -883,51 +919,53 @@ btnGuardar.addEventListener("click", async () => {
 
   if (faltantes.length > 0) {
     alert(`⚠️ Debes completar los siguientes campos antes de guardar:\n\n• ${faltantes.join("\n• ")}`);
-    return;
+    return false;
   }
 
-  // === 🔢 CALCULAR SUMAS POR TIPO ===
-  const sumasPorTipo = calcularSumaPorTipo();
-  console.log("🧮 Sumatorias calculadas:", sumasPorTipo);
+  return true;
+}
 
-  // === 📦 RECOLECTAR DATOS PARA TIPOS_DEFECTOS (SOLO > 0) ===
-  const linea = currentLinea;
-  const codigo = document.getElementById("codigoInfo").textContent || document.getElementById("codigoAX").value || "---";
-  const nombre = document.getElementById("nombreInfo").textContent || "---";
-  const envase = document.getElementById("envaseInfo").textContent || "---";
-  const destino = document.getElementById("destinoInfo").textContent || "---";
-
-  const datosParaGuardar = [];
-
-  // SOLO guardar tipos con suma > 0
-  for (const [tipo, suma] of Object.entries(sumasPorTipo)) {
-    if (suma > 0) {
-      datosParaGuardar.push({
-        codigo,
-        nombre,
-        envase,
-        destino,
-        linea_produccion: linea,
-        tipo_defecto: tipo,
-        suma_tipo_defecto: suma
-      });
-    }
-  }
-
-  // === 📋 RECOLECTAR DATOS PARA TIPOS_DEFECTOS_DESCRIPCION (SOLO > 0) ===
-  const datosDescripciones = recopilarDatosDescripciones();
-
-  // === 🚨 VERIFICAR SI HAY DATOS ===
-  if (datosParaGuardar.length === 0 && datosDescripciones.length === 0) {
-    alert("⚠️ No hay datos para guardar (todos los valores son 0).");
-    return;
-  }
-
-  console.log("📦 Datos para tipos_defectos:", datosParaGuardar);
-  console.log("📋 Datos para tipos_defectos_descripcion:", datosDescripciones);
-
-  // === 🚀 ENVIAR DATOS A AMBAS TABLAS ===
+/**
+ * 🆕 Ejecuta el proceso de guardado completo
+ */
+async function ejecutarGuardado() {
   try {
+    // === 🔢 CALCULAR SUMAS POR TIPO ===
+    const sumasPorTipo = calcularSumaPorTipo();
+    console.log("🧮 Sumatorias calculadas:", sumasPorTipo);
+
+    // === 📦 RECOLECTAR DATOS PARA TIPOS_DEFECTOS (SOLO > 0) ===
+    const linea = currentLinea;
+    const codigo = document.getElementById("codigoInfo").textContent || document.getElementById("codigoAX").value || "---";
+    const nombre = document.getElementById("nombreInfo").textContent || "---";
+    const envase = document.getElementById("envaseInfo").textContent || "---";
+    const destino = document.getElementById("destinoInfo").textContent || "---";
+
+    const datosParaGuardar = [];
+
+    // SOLO guardar tipos con suma > 0
+    for (const [tipo, suma] of Object.entries(sumasPorTipo)) {
+      if (suma > 0) {
+        datosParaGuardar.push({
+          codigo,
+          nombre,
+          envase,
+          destino,
+          linea_produccion: linea,
+          tipo_defecto: tipo,
+          suma_tipo_defecto: suma
+        });
+      }
+    }
+
+    // === 📋 RECOLECTAR DATOS PARA TIPOS_DEFECTOS_DESCRIPCION (SOLO > 0) ===
+    const datosDescripciones = recopilarDatosDescripciones();
+
+    console.log("📦 Datos para tipos_defectos:", datosParaGuardar);
+    console.log("📋 Datos para tipos_defectos_descripcion:", datosDescripciones);
+
+    // === 🚀 ENVIAR DATOS A AMBAS TABLAS ===
+    
     // Guardar en tipos_defectos
     if (datosParaGuardar.length > 0) {
       const resTipos = await fetch("/guardar_defectos/", {
@@ -959,6 +997,7 @@ btnGuardar.addEventListener("click", async () => {
     // === 🧹 LIMPIAR TABLA ===
     document.querySelectorAll(".celda-input").forEach(c => (c.textContent = ""));
     document.querySelectorAll(".total-dia").forEach(c => (c.textContent = "0"));
+    
     // === Limpiar formulario principal ===
     document.getElementById("fecha").value = "";
     document.getElementById("inspector").value = "";
@@ -972,7 +1011,7 @@ btnGuardar.addEventListener("click", async () => {
     document.getElementById("destinoInfo").textContent = "---";
     document.getElementById("lineasInfo").textContent = "---";
     
-    // 🆕 NUEVO: Refrescar historial después de guardar
+    // 🆕 Refrescar historial después de guardar
     paginaActualHistorial = 1;
     cargarHistorial(currentLinea);
 
@@ -980,8 +1019,7 @@ btnGuardar.addEventListener("click", async () => {
     console.error("❌ Error al guardar:", err);
     alert("❌ Error al guardar los datos.");
   }
-});
-
+}
 // ======================================================
 // 🔹 FUNCIÓN PARA RECOPILAR DATOS POR HORA Y DESCRIPCIÓN
 // ======================================================
