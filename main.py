@@ -104,7 +104,23 @@ def get_producto(codigo: str, db: Session = Depends(get_db)):
         return {"error": "No encontrado"}
     return producto
 
-
+#  Búsqueda de productos para autocompletado
+@app.get("/api/productos/buscar/")
+def buscar_productos(q: str, db: Session = Depends(get_db)):
+    """
+    Busca productos por código para autocompletado.
+    Parámetro q: término de búsqueda (mínimo 2 caracteres)
+    """
+    if len(q) < 2:
+        return []
+    
+    # Buscar productos cuyo código contenga el término de búsqueda
+    productos = db.query(models.InfoProducto).filter(
+        models.InfoProducto.codigo.ilike(f"%{q}%")
+    ).limit(10).all()
+    
+    # Retornar solo los códigos
+    return [{"codigo": p.codigo} for p in productos]
 
 @app.get("/inspectores/", response_model=List[str])  
 def obtener_inspectores(db: Session = Depends(get_db)):

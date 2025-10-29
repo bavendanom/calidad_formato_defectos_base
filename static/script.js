@@ -530,6 +530,158 @@ async function cargarInspectores() {
   cargarInspectores();
 
 
+// ======================================================
+// MARK: AUTOCOMPLETADO DE CÓDIGO AX
+// ======================================================
+
+let autocompletadoActivo = false;
+let sugerenciaSeleccionada = -1;
+
+const inputCodigoAX = document.getElementById("codigoAX");
+const autocompletadoContainer = document.createElement("div");
+autocompletadoContainer.id = "autocompletado";
+autocompletadoContainer.className = "autocompletado-container";
+inputCodigoAX.parentElement.style.position = "relative";
+inputCodigoAX.parentElement.appendChild(autocompletadoContainer);
+
+// Evento: Escribir en el campo
+inputCodigoAX.addEventListener("input", async (e) => {
+  const termino = e.target.value.trim();
+  
+  // Si tiene menos de 2 caracteres, ocultar sugerencias
+  if (termino.length < 2) {
+    ocultarAutocompletado();
+    return;
+  }
+  
+  // Buscar sugerencias
+  await buscarSugerencias(termino);
+});
+
+// Evento: Navegación con teclado
+inputCodigoAX.addEventListener("keydown", (e) => {
+  if (!autocompletadoActivo) return;
+  
+  const sugerencias = autocompletadoContainer.querySelectorAll(".sugerencia-item");
+  
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    sugerenciaSeleccionada = Math.min(sugerenciaSeleccionada + 1, sugerencias.length - 1);
+    actualizarSeleccion(sugerencias);
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    sugerenciaSeleccionada = Math.max(sugerenciaSeleccionada - 1, -1);
+    actualizarSeleccion(sugerencias);
+  } else if (e.key === "Enter" && sugerenciaSeleccionada >= 0) {
+    e.preventDefault();
+    sugerencias[sugerenciaSeleccionada].click();
+  } else if (e.key === "Escape") {
+    ocultarAutocompletado();
+  }
+});
+
+// Cerrar al hacer clic fuera
+document.addEventListener("click", (e) => {
+  if (!inputCodigoAX.contains(e.target) && !autocompletadoContainer.contains(e.target)) {
+    ocultarAutocompletado();
+  }
+});
+
+/**
+ * Busca sugerencias en el backend
+ */
+async function buscarSugerencias(termino) {
+  try {
+    const res = await fetch(`/api/productos/buscar/?q=${encodeURIComponent(termino)}`);
+    if (!res.ok) throw new Error("Error en búsqueda");
+    
+    const resultados = await res.json();
+    mostrarSugerencias(resultados);
+  } catch (error) {
+    console.error("Error al buscar sugerencias:", error);
+    ocultarAutocompletado();
+  }
+}
+
+/**
+ * Muestra las sugerencias en el DOM
+ */
+function mostrarSugerencias(resultados) {
+  if (resultados.length === 0) {
+    ocultarAutocompletado();
+    return;
+  }
+  
+  autocompletadoContainer.innerHTML = resultados.map((item, index) => `
+    <div class="sugerencia-item" data-codigo="${item.codigo}" data-index="${index}">
+      <span class="codigo-sugerencia">${item.codigo}</span>
+    </div>
+  `).join('');
+  
+  // Agregar eventos de clic a cada sugerencia
+  autocompletadoContainer.querySelectorAll(".sugerencia-item").forEach(item => {
+    item.addEventListener("click", () => seleccionarSugerencia(item.dataset.codigo));
+  });
+  
+  autocompletadoActivo = true;
+  sugerenciaSeleccionada = -1;
+  autocompletadoContainer.style.display = "block";
+}
+
+/**
+ * Oculta el panel de sugerencias
+ */
+function ocultarAutocompletado() {
+  autocompletadoContainer.style.display = "none";
+  autocompletadoActivo = false;
+  sugerenciaSeleccionada = -1;
+}
+
+/**
+ * Actualiza la selección visual con teclado
+ */
+function actualizarSeleccion(sugerencias) {
+  sugerencias.forEach((item, index) => {
+    if (index === sugerenciaSeleccionada) {
+      item.classList.add("seleccionado");
+    } else {
+      item.classList.remove("seleccionado");
+    }
+  });
+}
+
+/**
+ * Selecciona una sugerencia y ejecuta la consulta
+ */
+async function seleccionarSugerencia(codigo) {
+  // Autocompletar el campo
+  inputCodigoAX.value = codigo;
+  ocultarAutocompletado();
+  
+  // Ejecutar consulta automáticamente
+  try {
+    const res = await fetch(`/producto/${codigo}`);
+    if (!res.ok) {
+      alert("Error al consultar producto");
+      return;
+    }
+    
+    const prod = await res.json();
+    document.getElementById("codigoInfo").textContent = prod.codigo;
+    document.getElementById("nombreInfo").textContent = prod.nombre_producto;
+    document.getElementById("envaseInfo").textContent = prod.tipo_envase;
+    document.getElementById("destinoInfo").textContent = prod.destino;
+    document.getElementById("lineasInfo").textContent = prod.posibles_lineas_produccion;
+    
+    // Feedback visual
+    inputCodigoAX.classList.add("consulta-exitosa");
+    setTimeout(() => inputCodigoAX.classList.remove("consulta-exitosa"), 1000);
+  } catch (error) {
+    console.error("Error al consultar producto:", error);
+    alert("Error al consultar producto");
+  }
+}
+
 
 /**
  * Calcula la suma de todos los defectos por tipo.
