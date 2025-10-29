@@ -60,3 +60,74 @@ def crear_tipos_defectos_descripcion(db: Session, data: schemas.TiposDefectosDes
     db.commit()
     db.refresh(registro)
     return registro
+
+
+# ======================================================
+# MARK: HISTORIAL DE REGISTROS
+# ======================================================
+def obtener_historial_registros(
+    db: Session, 
+    linea_produccion: str = None, 
+    limite: int = 20, 
+    offset: int = 0,
+    fecha_inicio: str = None,
+    fecha_fin: str = None,
+    tipo_defecto: str = None
+):
+    """
+    Obtiene el historial de registros con filtros opcionales.
+    
+    Args:
+        db: Sesión de base de datos
+        linea_produccion: Filtrar por línea (None = todas)
+        limite: Número máximo de registros
+        offset: Número de registros a saltar (para paginación)
+        fecha_inicio: Fecha inicial (formato: YYYY-MM-DD)
+        fecha_fin: Fecha final (formato: YYYY-MM-DD)
+        tipo_defecto: Filtrar por tipo de defecto
+    """
+    query = db.query(models.TiposDefectosDescripcion)
+    
+    # Filtrar por línea de producción
+    if linea_produccion:
+        query = query.filter(models.TiposDefectosDescripcion.linea_produccion == linea_produccion)
+    
+    # Filtrar por rango de fechas
+    if fecha_inicio:
+        query = query.filter(models.TiposDefectosDescripcion.fecha >= fecha_inicio)
+    if fecha_fin:
+        query = query.filter(models.TiposDefectosDescripcion.fecha <= fecha_fin)
+    
+    # Filtrar por tipo de defecto
+    if tipo_defecto and tipo_defecto != "todos":
+        query = query.filter(models.TiposDefectosDescripcion.tipo_defecto == tipo_defecto)
+    
+    # Ordenar por fecha y hora descendente (más recientes primero)
+    query = query.order_by(
+        models.TiposDefectosDescripcion.fecha.desc(),
+        models.TiposDefectosDescripcion.hora.desc(),
+        models.TiposDefectosDescripcion.id.desc()
+    )
+    
+    # Aplicar paginación
+    registros = query.offset(offset).limit(limite).all()
+    
+    # Obtener total de registros (para paginación)
+    total = query.count()
+    
+    return {
+        "registros": registros,
+        "total": total,
+        "pagina_actual": offset // limite + 1,
+        "total_paginas": (total + limite - 1) // limite
+    }
+
+
+def obtener_tipos_defectos_unicos(db: Session, linea_produccion: str = None):
+    """Obtiene lista única de tipos de defectos para filtros."""
+    query = db.query(models.TiposDefectosDescripcion.tipo_defecto).distinct()
+    
+    if linea_produccion:
+        query = query.filter(models.TiposDefectosDescripcion.linea_produccion == linea_produccion)
+    
+    return [tipo[0] for tipo in query.all() if tipo[0]]

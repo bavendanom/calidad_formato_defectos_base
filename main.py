@@ -155,6 +155,63 @@ def eliminar_inspector(inspector_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail=str(e))
 
 
+# 🆕 NUEVO: Obtener historial de registros
+@app.get("/api/historial/")
+def obtener_historial(
+    linea: str = None,
+    limite: int = 20,
+    pagina: int = 1,
+    fecha_inicio: str = None,
+    fecha_fin: str = None,
+    tipo_defecto: str = None,
+    db: Session = Depends(get_db)
+):
+    """
+    Obtiene el historial de registros con filtros opcionales.
+    """
+    offset = (pagina - 1) * limite
+    resultado = crud.obtener_historial_registros(
+        db=db,
+        linea_produccion=linea,
+        limite=limite,
+        offset=offset,
+        fecha_inicio=fecha_inicio,
+        fecha_fin=fecha_fin,
+        tipo_defecto=tipo_defecto
+    )
+    
+    # Serializar registros
+    registros_serializados = []
+    for reg in resultado["registros"]:
+        registros_serializados.append({
+            "id": reg.id,
+            "fecha": reg.fecha.isoformat() if reg.fecha else None,
+            "hora": reg.hora,
+            "codigo": reg.codigo,
+            "nombre": reg.nombre,
+            "envase": reg.envase,
+            "destino": reg.destino,
+            "linea_produccion": reg.linea_produccion,
+            "tipo_defecto": reg.tipo_defecto,
+            "descripcion_defecto": reg.descripcion_defecto,
+            "cantidad_defectos": reg.cantidad_defectos
+        })
+    
+    return {
+        "registros": registros_serializados,
+        "total": resultado["total"],
+        "pagina_actual": resultado["pagina_actual"],
+        "total_paginas": resultado["total_paginas"]
+    }
+
+
+# 🆕 NUEVO: Obtener tipos de defectos únicos para filtros
+@app.get("/api/tipos-defectos/")
+def obtener_tipos_defectos(linea: str = None, db: Session = Depends(get_db)):
+    """Obtiene lista única de tipos de defectos."""
+    return crud.obtener_tipos_defectos_unicos(db, linea)
+
+
 # ======================================================
 # MARK: GUARDADO DE DEFECTOS
 # ======================================================

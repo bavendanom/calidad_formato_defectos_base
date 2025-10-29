@@ -226,6 +226,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     tabla.appendChild(tbody);
     tablaContainer.appendChild(tabla);
+
+    // Mostrar sección de historial (ya está en el HTML)
+    mostrarSeccionHistorial(linea);
   }
 
 function obtenerDefectos(linea) {
@@ -411,6 +414,7 @@ tabs.forEach(tab => {
     // 🆕 Si es pestaña Admin, ocultar formulario y mostrar panel admin
     if (linea === "Admin") {
       ocultarFormulario();
+      ocultarHistorial();
       mostrarPanelAdmin();
       
       // Cambiar visualmente la pestaña activa
@@ -465,6 +469,14 @@ function mostrarFormulario() {
   const formSection = document.getElementById("formSection");
   if (formSection) {
     formSection.style.display = "block";
+  }
+}
+
+// Función para ocultar historial
+function ocultarHistorial() {
+  const historialSection = document.getElementById("seccionHistorial");
+  if (historialSection) {
+    historialSection.style.display = "none";
   }
 }
 
@@ -749,7 +761,7 @@ function recopilarDatosParaGuardar() {
     });
   });
 
-  console.log("📦 Datos recopilados para guardar:", datos); // <-- para depuración
+  console.log("📦 Datos recopilados para guardar:", datos);
   return datos;
 }
 
@@ -892,29 +904,15 @@ btnGuardar.addEventListener("click", async () => {
     document.getElementById("destinoInfo").textContent = "---";
     document.getElementById("lineasInfo").textContent = "---";
     
+    // 🆕 NUEVO: Refrescar historial después de guardar
+    paginaActualHistorial = 1;
+    cargarHistorial(currentLinea);
+
   } catch (err) {
     console.error("❌ Error al guardar:", err);
     alert("❌ Error al guardar los datos.");
   }
 });
-
-// ======================================================
-// 🔹 FUNCIÓN CALCULAR SUMAS POR TIPO
-// ======================================================
-function calcularSumaPorTipo() {
-  const sumas = {};
-  
-  document.querySelectorAll(".celda-input").forEach(cell => {
-    const tipo = cell.dataset.tipo;
-    const valor = parseInt(cell.textContent.trim()) || 0;
-    
-    if (!sumas[tipo]) sumas[tipo] = 0;
-    sumas[tipo] += valor;
-  });
-  
-  console.log("🔢 Sumas calculadas por tipo:", sumas);
-  return sumas;
-}   
 
 // ======================================================
 // 🔹 FUNCIÓN PARA RECOPILAR DATOS POR HORA Y DESCRIPCIÓN
@@ -952,8 +950,8 @@ function recopilarDatosDescripciones() {
 
       if (valor > 0 && hora && hora !== "Total día") {
         datosDescripciones.push({
-          fecha,                 // 🔹 Nueva columna
-          hora,                  // 🔹 Nueva columna
+          fecha,
+          hora,
           codigo,
           nombre,
           envase,
@@ -1087,8 +1085,8 @@ async function agregarInspector() {
     }
 
     alert(`✅ Inspector "${nombre}" agregado correctamente`);
-    input.value = ""; // Limpiar input
-    await cargarInspectoresAdmin(); // Recargar tabla
+    input.value = "";
+    await cargarInspectoresAdmin();
   } catch (error) {
     alert(`❌ ${error.message}`);
   }
@@ -1110,7 +1108,7 @@ async function eliminarInspector(id, nombre) {
     }
 
     alert(`✅ Inspector "${nombre}" eliminado correctamente`);
-    await cargarInspectoresAdmin(); // Recargar tabla
+    await cargarInspectoresAdmin();
   } catch (error) {
     alert(`❌ ${error.message}`);
   }
@@ -1118,5 +1116,217 @@ async function eliminarInspector(id, nombre) {
 
 // Hacer la función global para que onclick funcione
 window.eliminarInspector = eliminarInspector;
+
+
+// ======================================================
+// MARK: HISTORIAL DE REGISTROS
+// ======================================================
+
+let paginaActualHistorial = 1;
+let filtroFechaInicio = '';
+let filtroFechaFin = '';
+let filtroTipoDefecto = 'todos';
+
+/**
+ * Muestra la sección de historial y configura los event listeners
+ */
+function mostrarSeccionHistorial(linea) {
+  const historialSection = document.getElementById("seccionHistorial");
+  const tituloLinea = document.getElementById("tituloLineaHistorial");
+  
+  // Mostrar sección
+  historialSection.style.display = "block";
+  
+  // Actualizar título
+  tituloLinea.textContent = linea === "Admin" ? "Todas las Líneas" : linea;
+  
+  // Cargar tipos de defectos para el filtro
+  cargarTiposDefectosParaFiltro(linea);
+  
+  // Cargar historial inicial
+  cargarHistorial(linea);
+  
+  // Configurar event listeners (solo una vez)
+  const btnRefrescar = document.getElementById("btnRefrescarHistorial");
+  const btnAplicarFiltros = document.getElementById("btnAplicarFiltros");
+  
+  // Remover listeners anteriores si existen
+  const nuevoRefrescar = btnRefrescar.cloneNode(true);
+  btnRefrescar.parentNode.replaceChild(nuevoRefrescar, btnRefrescar);
+  
+  const nuevoAplicar = btnAplicarFiltros.cloneNode(true);
+  btnAplicarFiltros.parentNode.replaceChild(nuevoAplicar, btnAplicarFiltros);
+  
+  // Agregar nuevos listeners
+  document.getElementById("btnRefrescarHistorial").addEventListener("click", () => {
+    paginaActualHistorial = 1;
+    cargarHistorial(currentLinea);
+  });
+  
+  document.getElementById("btnAplicarFiltros").addEventListener("click", () => {
+    filtroFechaInicio = document.getElementById("filtroFechaInicio").value;
+    filtroFechaFin = document.getElementById("filtroFechaFin").value;
+    filtroTipoDefecto = document.getElementById("filtroTipoDefecto").value;
+    paginaActualHistorial = 1;
+    cargarHistorial(currentLinea);
+  });
+}
+
+/**
+ * Carga los tipos de defectos para el filtro
+ */
+async function cargarTiposDefectosParaFiltro(linea) {
+  try {
+    const lineaParam = linea === "Admin" ? "" : `?linea=${encodeURIComponent(linea)}`;
+    const res = await fetch(`/api/tipos-defectos/${lineaParam}`);
+    
+    if (!res.ok) throw new Error("Error al cargar tipos de defectos");
+    
+    const tipos = await res.json();
+    const select = document.getElementById("filtroTipoDefecto");
+    
+    // Limpiar opciones existentes (excepto "Todos")
+    select.innerHTML = '<option value="todos">Todos</option>';
+    
+    // Agregar tipos únicos
+    tipos.forEach(tipo => {
+      const option = document.createElement("option");
+      option.value = tipo;
+      option.textContent = tipo;
+      select.appendChild(option);
+    });
+  } catch (error) {
+    console.error("Error al cargar tipos de defectos:", error);
+  }
+}
+
+/**
+ * Carga el historial de registros desde el backend
+ */
+async function cargarHistorial(linea, pagina = 1) {
+  try {
+    const tbody = document.getElementById("historialTableBody");
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center">Cargando...</td></tr>';
+    
+    // Construir URL con parámetros
+    let url = `/api/historial/?pagina=${pagina}&limite=20`;
+    
+    // Filtrar por línea (excepto Admin)
+    if (linea !== "Admin") {
+      url += `&linea=${encodeURIComponent(linea)}`;
+    }
+    
+    // Aplicar filtros adicionales
+    if (filtroFechaInicio) url += `&fecha_inicio=${filtroFechaInicio}`;
+    if (filtroFechaFin) url += `&fecha_fin=${filtroFechaFin}`;
+    if (filtroTipoDefecto !== "todos") url += `&tipo_defecto=${encodeURIComponent(filtroTipoDefecto)}`;
+    
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Error al cargar historial");
+    
+    const data = await res.json();
+    mostrarHistorial(data);
+  } catch (error) {
+    console.error("Error al cargar historial:", error);
+    const tbody = document.getElementById("historialTableBody");
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center text-danger">Error al cargar historial</td></tr>';
+  }
+}
+
+/**
+ * Muestra el historial en la tabla
+ */
+function mostrarHistorial(data) {
+  const tbody = document.getElementById("historialTableBody");
+  
+  if (data.registros.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No hay registros</td></tr>';
+    document.getElementById("paginacionHistorial").innerHTML = '';
+    return;
+  }
+  
+  // Mapeo de colores por tipo de defecto
+  const coloresTipoDefecto = {
+    "LLENADO": "#ffe6e6",
+    "CAPSULADO": "#e6ffe6",
+    "LÁMPARA": "#e6e6ff",
+    "LAMPARA": "#e6e6ff",
+    "ETIQUETADO": "#fff3e6",
+    "VIDEO JET": "#ffe6ff",
+    "EMBALAJE": "#e6ffff",
+    "DEFECTOS GENERALES": "#f0f0f0"
+  };
+  
+  tbody.innerHTML = data.registros.map(reg => {
+    const color = coloresTipoDefecto[reg.tipo_defecto] || "#ffffff";
+    return `
+      <tr style="background-color: ${color};">
+        <td>${reg.fecha || '---'}</td>
+        <td>${reg.hora || '---'}</td>
+        <td><strong>${reg.codigo || '---'}</strong></td>
+        <td>${reg.nombre || '---'}</td>
+        <td>${reg.envase || '---'}</td>
+        <td>${reg.destino || '---'}</td>
+        <td><span class="badge" style="background-color: ${color}; color: #000; border: 1px solid #ddd;">${reg.tipo_defecto || '---'}</span></td>
+        <td>${reg.descripcion_defecto || '---'}</td>
+        <td class="text-center"><strong>${reg.cantidad_defectos || 0}</strong></td>
+      </tr>
+    `;
+  }).join('');
+  
+  // Mostrar paginación
+  mostrarPaginacion(data, currentLinea);
+}
+
+/**
+ * Muestra los controles de paginación
+ */
+function mostrarPaginacion(data, linea) {
+  const container = document.getElementById("paginacionHistorial");
+  
+  if (data.total_paginas <= 1) {
+    container.innerHTML = '';
+    return;
+  }
+  
+  let html = '<div class="d-flex justify-content-between align-items-center mt-3">';
+  html += `<span class="text-muted">Mostrando ${data.registros.length} de ${data.total} registros</span>`;
+  html += '<div class="btn-group">';
+  
+  // Botón anterior
+  if (data.pagina_actual > 1) {
+    html += `<button class="btn btn-sm btn-outline-primary" onclick="cambiarPagina(${data.pagina_actual - 1})">← Anterior</button>`;
+  }
+  
+  // Números de página
+  for (let i = 1; i <= data.total_paginas; i++) {
+    if (i === data.pagina_actual) {
+      html += `<button class="btn btn-sm btn-primary" disabled>${i}</button>`;
+    } else if (Math.abs(i - data.pagina_actual) <= 2 || i === 1 || i === data.total_paginas) {
+      html += `<button class="btn btn-sm btn-outline-primary" onclick="cambiarPagina(${i})">${i}</button>`;
+    } else if (Math.abs(i - data.pagina_actual) === 3) {
+      html += `<button class="btn btn-sm btn-outline-secondary" disabled>...</button>`;
+    }
+  }
+  
+  // Botón siguiente
+  if (data.pagina_actual < data.total_paginas) {
+    html += `<button class="btn btn-sm btn-outline-primary" onclick="cambiarPagina(${data.pagina_actual + 1})">Siguiente →</button>`;
+  }
+  
+  html += '</div></div>';
+  container.innerHTML = html;
+}
+
+/**
+ * Cambia de página en el historial
+ */
+function cambiarPagina(pagina) {
+  paginaActualHistorial = pagina;
+  cargarHistorial(currentLinea, pagina);
+}
+
+// Hacer función global para onclick
+window.cambiarPagina = cambiarPagina;
 
 });
