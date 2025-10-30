@@ -50,6 +50,7 @@ class TiposDefectosBase(BaseModel):
     linea_produccion: str
     tipo_defecto: str
     suma_tipo_defecto: int
+    observaciones: str = "---"
 
 class TiposDefectosCreate(TiposDefectosBase):
     pass

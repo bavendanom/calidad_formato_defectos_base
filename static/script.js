@@ -531,19 +531,19 @@ function quitarResaltado() {
     });
   });
 
-  // 🆕 Función para ocultar botón Guardar
+  // 🆕 Función para ocultar botón Guardar Y observaciones
   function ocultarBotonGuardar() {
-    const contenedor = document.getElementById("contenedorBtnGuardar");
-    if (contenedor) {
-      contenedor.style.display = "none";
+    const contenedorObservaciones = document.getElementById("contenedorObservaciones");
+    if (contenedorObservaciones) {
+      contenedorObservaciones.style.display = "none";
     }
   }
 
-  // 🆕 Función para mostrar botón Guardar
+  // 🆕 Función para mostrar botón Guardar Y observaciones
   function mostrarBotonGuardar() {
-    const contenedor = document.getElementById("contenedorBtnGuardar");
-    if (contenedor) {
-      contenedor.style.display = "block";
+    const contenedorObservaciones = document.getElementById("contenedorObservaciones");
+    if (contenedorObservaciones) {
+      contenedorObservaciones.style.display = "block";
     }
   }
 
@@ -635,6 +635,30 @@ async function cargarInspectores() {
     console.error("Error al cargar inspectores:", error);
     inspectorSelect.innerHTML = "<option value=''>Error al cargar</option>";
   }
+}
+
+
+// ======================================================
+// 🆕 CONTADOR DE CARACTERES PARA OBSERVACIONES
+// ======================================================
+const inputObservaciones = document.getElementById("observaciones");
+const contadorObservaciones = document.getElementById("contadorObservaciones");
+
+if (inputObservaciones && contadorObservaciones) {
+  inputObservaciones.addEventListener("input", () => {
+    const longitud = inputObservaciones.value.length;
+    contadorObservaciones.textContent = longitud;
+    
+    // Cambiar color si se acerca al límite
+    if (longitud > 90) {
+      contadorObservaciones.classList.add("text-danger");
+    } else if (longitud > 70) {
+      contadorObservaciones.classList.add("text-warning");
+      contadorObservaciones.classList.remove("text-danger");
+    } else {
+      contadorObservaciones.classList.remove("text-warning", "text-danger");
+    }
+  });
 }
 
 
@@ -990,6 +1014,9 @@ async function ejecutarGuardado() {
 
     const datosParaGuardar = [];
 
+    // 🆕 OBTENER OBSERVACIONES
+    const observaciones = document.getElementById("observaciones").value.trim() || "---";
+
     // SOLO guardar tipos con suma > 0
     for (const [tipo, suma] of Object.entries(sumasPorTipo)) {
       if (suma > 0) {
@@ -1000,7 +1027,8 @@ async function ejecutarGuardado() {
           destino,
           linea_produccion: linea,
           tipo_defecto: tipo,
-          suma_tipo_defecto: suma
+          suma_tipo_defecto: suma,
+          observaciones: observaciones  // 🆕 AGREGAR OBSERVACIONES
         });
       }
     }
@@ -1057,6 +1085,10 @@ async function ejecutarGuardado() {
     document.getElementById("envaseInfo").textContent = "---";
     document.getElementById("destinoInfo").textContent = "---";
     document.getElementById("lineasInfo").textContent = "---";
+
+    // 🆕 LIMPIAR OBSERVACIONES
+    document.getElementById("observaciones").value = "";
+    document.getElementById("contadorObservaciones").textContent = "0";
     
     // 🆕 Refrescar historial después de guardar
     paginaActualHistorial = 1;

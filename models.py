@@ -39,6 +39,7 @@ class TiposDefectos(Base):
     linea_produccion = Column(String)
     tipo_defecto = Column(String)
     suma_tipo_defecto = Column(Integer, default=0)
+    observaciones = Column(String(100), default="---")
 
 
 #MARK: TIPOS DEFECTOS DESCRIPCION

@@ -108,10 +108,29 @@
       <p>[ Aquí se cargará dinámicamente la tabla de defectos según la línea seleccionada ]</p>
     </div>
 
-    <!-- 🔹 Botón guardar (ocultar en Admin) -->
-    <div class="text-end mt-4" id="contenedorBtnGuardar">
-      <button class="btn btn-success px-4" id="btnGuardar">Guardar</button>
+    <!-- 🆕 NUEVO: Campo de observaciones -->
+    <div class="card mt-4 p-3" id="contenedorObservaciones">
+      <div class="row align-items-end">
+        <div class="col-md-10">
+          <label class="form-label fw-bold">Observaciones:</label>
+          <input 
+            type="text" 
+            id="observaciones" 
+            class="form-control" 
+            placeholder="Ingrese observaciones adicionales (opcional, máx. 100 caracteres)"
+            maxlength="100">
+          <small class="text-muted">
+            <span id="contadorObservaciones">0</span>/100 caracteres
+          </small>
+        </div>
+        <div class="col-md-2 text-end">
+          <button class="btn btn-success w-100" id="btnGuardar">
+            💾 Guardar
+          </button>
+        </div>
+      </div>
     </div>
+
     <!-- 🆕 NUEVO: Modal de Login para Admin -->
     <div class="modal fade" id="modalLoginAdmin" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalLoginAdminLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
