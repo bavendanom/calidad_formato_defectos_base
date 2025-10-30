@@ -32,52 +32,76 @@
   <!-- 🔹 Contenido principal -->
   <div class="card shadow-sm p-4" id="mainCard">
     <div id="formSection">
-      <div class="row g-3 align-items-center mb-3">
-        <div class="col-md-3">
-          <label class="form-label fw-bold">Fecha:</label>
-          <div class="input-group">
-            <input type="date" id="fecha" class="form-control">
-            <button class="btn btn-outline-success" id="btnHoy">Hoy</button>
+      <!-- 🆕 NUEVA DISTRIBUCIÓN: Formulario (izquierda) + Info Producto (derecha) -->
+      <div class="row g-4 mb-3">
+        
+        <!-- 👈 COLUMNA IZQUIERDA: Campos del formulario -->
+        <div class="col-lg-6">
+          <div class="row g-3">
+            
+            <!-- Fecha -->
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Fecha:</label>
+              <div class="input-group">
+                <input type="date" id="fecha" class="form-control">
+                <button class="btn btn-outline-success" id="btnHoy">Hoy</button>
+              </div>
+            </div>
+
+            <!-- Inspector -->
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Inspector:</label>
+              <select id="inspector" class="form-select" required>
+                <option value="">Cargando...</option>
+              </select>
+            </div>
+
+            <!-- Código AX -->
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Código AX:</label>
+              <div class="input-group">
+                <input type="text" id="codigoAX" class="form-control" placeholder="Ej: 4-03-0000-0019">
+                <button class="btn btn-outline-primary" id="btnConsultar">Consultar</button>
+              </div>
+            </div>
+
+            <!-- Lote -->
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Lote:</label>
+              <input type="text" id="lote" class="form-control" placeholder="Ej: 115">
+            </div>
+
+          </div>
+          <!-- Selector de Turno (se mantiene igual) -->
+          <div class="mt-3 mb-2 d-flex flex-column align-items-start">
+            <label class="fw-bold mb-2">Turno:</label>
+            <div class="d-flex flex-wrap gap-2">
+              <button class="btn btn-outline-primary btn-turno" data-turno="1">7:00 - 15:00</button>
+              <button class="btn btn-outline-primary btn-turno" data-turno="2">15:00 - 23:00</button>
+              <button class="btn btn-outline-primary btn-turno" data-turno="3">23:00 - 7:00</button>
+              <button class="btn btn-outline-primary btn-turno" data-turno="4">7:00 - 19:00</button>
+              <button class="btn btn-outline-primary btn-turno" data-turno="5">19:00 - 7:00</button>
+            </div>
           </div>
         </div>
-        <div class="col-md-3">
-          <label class="form-label fw-bold">Inspector:</label>
-          <select id="inspector" class="form-select" required>
-            <option value="">Cargando...</option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label class="form-label fw-bold">Código AX:</label>
-          <div class="input-group">
-            <input type="text" id="codigoAX" class="form-control" placeholder="Ej: 4-03-0000-0019">
-            <button class="btn btn-outline-primary" id="btnConsultar">Consultar</button>
+
+        <!-- 👉 COLUMNA DERECHA: Información del producto -->
+        <div class="col-lg-6">
+          <label class="form-label fw-bold mb-2">Información del Producto:</label>
+          <div id="infoProducto" class="p-3 border rounded bg-light h-95">
+            <p class="mb-2"><strong>Código:</strong> <span id="codigoInfo">---</span></p>
+            <p class="mb-2"><strong>Nombre:</strong> <span id="nombreInfo">---</span></p>
+            <p class="mb-2"><strong>Envase:</strong> <span id="envaseInfo">---</span></p>
+            <p class="mb-2"><strong>Destino:</strong> <span id="destinoInfo">---</span></p>
+            <p class="mb-0"><strong>Lineas de producción:</strong> <span id="lineasInfo">---</span></p>
           </div>
-        </div>
-        <div class="col-md-3">
-          <label class="form-label fw-bold">Lote:</label>
-          <input type="text" id="lote" class="form-control" placeholder="Ej: 115">
         </div>
       </div>
 
-      <!-- Información producto -->
-      <div id="infoProducto" class="p-3 border rounded bg-light">
-        <p class="mb-1"><strong>Código:</strong> <span id="codigoInfo">---</span></p>
-        <p class="mb-1"><strong>Nombre:</strong> <span id="nombreInfo">---</span></p>
-        <p class="mb-1"><strong>Envase:</strong> <span id="envaseInfo">---</span></p>
-        <p class="mb-0"><strong>Destino:</strong> <span id="destinoInfo">---</span></p>
-        <p class="mb-0"><strong>Lineas de producción:</strong> <span id="lineasInfo">---</span></p>
-      </div>
-
-      <!-- Selector de Turno -->
-      <div class="mt-3 mb-2 d-flex align-items-center gap-2">
-        <label class="fw-bold">Turno:</label>
-        <button class="btn btn-outline-primary btn-turno" data-turno="1">7:00 - 15:00</button>
-        <button class="btn btn-outline-primary btn-turno" data-turno="2">15:00 - 23:00</button>
-        <button class="btn btn-outline-primary btn-turno" data-turno="3">23:00 - 7:00</button>
-        <button class="btn btn-outline-primary btn-turno" data-turno="4">7:00 - 19:00</button>
-        <button class="btn btn-outline-primary btn-turno" data-turno="5">19:00 - 7:00</button>
-      </div>
+      
     </div>
+
+
 
     <!-- 🔹 Tabla simulada (placeholder visual) -->
     <div id="tablaDefectos" class="mt-4 text-center text-muted border p-5 rounded">
