@@ -700,7 +700,7 @@ inputCodigoAX.addEventListener("input", async (e) => {
   const termino = e.target.value.trim();
   
   // Si tiene menos de 2 caracteres, ocultar sugerencias
-  if (termino.length < 2) {
+  if (termino.length < 1) {
     ocultarAutocompletado();
     return;
   }
@@ -970,6 +970,7 @@ function validarCamposObligatorios() {
     { id: "fecha", nombre: "Fecha" },
     { id: "inspector", nombre: "Inspector" },
     { id: "codigoAX", nombre: "Código AX" },
+    { id: "lote", nombre: "Lote" },
     { id: "nombreInfo", nombre: "Nombre del producto" },
     { id: "envaseInfo", nombre: "Envase" },
     { id: "destinoInfo", nombre: "Destino" }
@@ -1627,6 +1628,7 @@ function mostrarHistorial(data) {
     const color = coloresTipoDefecto[reg.tipo_defecto] || "#ffffff";
     return `
       <tr style="background-color: ${color};">
+        <td>${reg.id || '---'}</td>
         <td>${reg.fecha || '---'}</td>
         <td>${reg.hora || '---'}</td>
         <td><strong>${reg.codigo || '---'}</strong></td>

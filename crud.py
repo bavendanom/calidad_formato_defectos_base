@@ -104,8 +104,8 @@ def obtener_historial_registros(
     
     # Ordenar por fecha y hora descendente (más recientes primero)
     query = query.order_by(
-        models.TiposDefectosDescripcion.fecha.desc(),
-        models.TiposDefectosDescripcion.hora.desc(),
+        #models.TiposDefectosDescripcion.fecha.desc(),
+        #models.TiposDefectosDescripcion.hora.desc(),
         models.TiposDefectosDescripcion.id.desc()
     )
     
