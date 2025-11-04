@@ -284,7 +284,7 @@ function saveState(linea) {
     destinoInfo: document.getElementById("destinoInfo").textContent || "---",
     lineasInfo: document.getElementById("lineasInfo").textContent || "---"
   };
-  // guardar tabla
+  // 📊 Guardar datos de la tabla
   state.celdas = [];
   document.querySelectorAll(".celda-input").forEach(cell => {
     const tipo = cell.dataset.tipo || "";
@@ -293,6 +293,18 @@ function saveState(linea) {
     const valor = cell.textContent.trim() || "";
     state.celdas.push({ tipo, desc, hora, valor });
   });
+  
+  // 🆕 GUARDAR OBSERVACIONES POR TIPO
+  state.observaciones = [];
+  document.querySelectorAll(".observacion-input").forEach(input => {
+    const tipo = input.dataset.tipo || "";
+    const valor = input.value.trim() || "";
+    if (valor) { // Solo guardar si tiene contenido
+      state.observaciones.push({ tipo, valor });
+    }
+  });
+  
+  // Guardar en localStorage
   localStorage.setItem(makeKey(linea), JSON.stringify(state));
 }
 
@@ -313,13 +325,29 @@ function loadState(linea) {
       document.getElementById("destinoInfo").textContent = state.form.destinoInfo || "---";
       document.getElementById("lineasInfo").textContent = state.form.lineasInfo || "---";
     }
-    // tabla
+    // 📊 Restaurar tabla
     if (Array.isArray(state.celdas)) {
+      // Limpiar celdas primero
       document.querySelectorAll(".celda-input").forEach(c => c.textContent = "");
+      
+      // Restaurar valores
       state.celdas.forEach(it => {
         const selector = `.celda-input[data-tipo="${CSS.escape(it.tipo)}"][data-desc="${CSS.escape(it.desc)}"][data-hora="${CSS.escape(it.hora)}"]`;
         const cell = document.querySelector(selector);
         if (cell) cell.textContent = it.valor;
+      });
+    }
+    
+    // 🆕 RESTAURAR OBSERVACIONES POR TIPO
+    if (Array.isArray(state.observaciones)) {
+      // Limpiar observaciones primero
+      document.querySelectorAll(".observacion-input").forEach(input => input.value = "");
+      
+      // Restaurar valores
+      state.observaciones.forEach(obs => {
+        const selector = `.observacion-input[data-tipo="${CSS.escape(obs.tipo)}"]`;
+        const input = document.querySelector(selector);
+        if (input) input.value = obs.valor;
       });
     }
   } catch (e) {
@@ -374,13 +402,29 @@ function capturarDatosPorPosicion() {
     filaRealIndex++; // 🆕 Incrementar solo para filas de datos
   });
   
-  return datos;
+  // 🆕 CAPTURAR OBSERVACIONES
+  const observaciones = [];
+  document.querySelectorAll(".observacion-input").forEach(input => {
+    observaciones.push({
+      tipo: input.dataset.tipo,
+      valor: input.value.trim()
+    });
+  });
+  
+  return {
+    celdas: datos,
+    observaciones: observaciones
+  };
 }
 
 /**
  * Restaura los datos en la nueva tabla por posición
  */
 function restaurarDatosPorPosicion(datos) {
+
+  // 🆕 Manejar formato antiguo y nuevo
+  const datosCeldas = datos.celdas || datos;
+  const datosObservaciones = datos.observaciones || [];
   const filas = document.querySelectorAll("tbody tr");
   let filaRealIndex = 0; // 🆕 Solo contar filas de datos
   
@@ -389,7 +433,7 @@ function restaurarDatosPorPosicion(datos) {
     if (fila.querySelector('.tipo-defecto')) return;
     
     // Buscar datos para esta fila usando el índice real
-    const datosFila = datos.find(d => d.filaIndex === filaRealIndex);
+    const datosFila = datosCeldas.find(d => d.filaIndex === filaRealIndex);
     if (datosFila) {
       const celdas = fila.querySelectorAll('.celda-input');
       
@@ -404,6 +448,13 @@ function restaurarDatosPorPosicion(datos) {
     }
     
     filaRealIndex++; // 🆕 Incrementar solo para filas de datos
+  });
+  // 🆕 RESTAURAR OBSERVACIONES
+  datosObservaciones.forEach(obs => {
+    const input = document.querySelector(`.observacion-input[data-tipo="${CSS.escape(obs.tipo)}"]`);
+    if (input) {
+      input.value = obs.valor;
+    }
   });
 }
 
