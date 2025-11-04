@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // ======================================================
-  // 🆕 VARIABLES GLOBALES DE HISTORIAL (DECLARAR AQUÍ)
+  // MARK: VARIABLES GLOBALES DE HISTORIAL (DECLARAR AQUÍ)
   // ======================================================
   let tipoHistorialActual = "detallado"; // "detallado" o "resumen"
   let paginaActualHistorial = 1;
@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   // ==============================
-  // 🔹 CAMBIO DE TURNO (MANTIENE DATOS POR POSICIÓN)
+  // MARK: CAMBIO DE TURNO (MANTIENE DATOS POR POSICIÓN)
   // ==============================
 
   const botonesTurno = document.querySelectorAll(".btn-turno");
@@ -123,8 +123,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-
-  // --- Renderizar tabla de defectos ---
+  // ==============================
+  // MARK: Renderizar tabla de defectos 
+  // ==============================
   function renderTabla(linea) {
     tablaContainer.innerHTML = "";
 
@@ -340,7 +341,7 @@ function recalcularTotal(fila) {
 }
 
 // ==============================
-// 🔹 FUNCIONES PARA DATOS POR POSICIÓN (CORREGIDO)
+// MARK: FUNCIONES PARA DATOS POR POSICIÓN (CORREGIDO)
 // ==============================
 
 /**
@@ -408,7 +409,7 @@ function restaurarDatosPorPosicion(datos) {
 
 
 // =====================
-// 🔹 Validación: Solo números en celdas
+// MARK: Validación: Solo números en celdas
 // =====================
 function validarSoloNumeros(celda) {
   const texto = celda.textContent;
@@ -536,7 +537,9 @@ function quitarResaltado() {
     });
   });
 
-  // 🆕 Función para ocultar botón Guardar Y observaciones
+  // ==============================
+  // MARK: Función para ocultar botón Guardar Y observaciones
+  // ==============================
   function ocultarBotonGuardar() {
     const contenedorObservaciones = document.getElementById("contenedorObservaciones");
     if (contenedorObservaciones) {
@@ -544,7 +547,9 @@ function quitarResaltado() {
     }
   }
 
-  // 🆕 Función para mostrar botón Guardar Y observaciones
+  // ==============================
+  // MARK: Función para mostrar botón Guardar Y observaciones
+  // ==============================
   function mostrarBotonGuardar() {
     const contenedorObservaciones = document.getElementById("contenedorObservaciones");
     if (contenedorObservaciones) {
@@ -552,7 +557,9 @@ function quitarResaltado() {
     }
   }
 
-  // Función para ocultar el formulario
+  // ==============================
+  // MARK: Función para ocultar el formulario
+  // ==============================
   function ocultarFormulario() {
     const formSection = document.getElementById("formSection");
     if (formSection) {
@@ -560,15 +567,18 @@ function quitarResaltado() {
     }
   }
 
-  // Función para mostrar el formulario
+  // ==============================
+  // MARK: Función para mostrar el formulario
+  // ==============================
   function mostrarFormulario() {
     const formSection = document.getElementById("formSection");
     if (formSection) {
       formSection.style.display = "block";
     }
   }
-
-  // Función para ocultar historial
+  // ==============================
+  // MARK: Función para ocultar historial
+  // ==============================
   function ocultarHistorial() {
     const historialSection = document.getElementById("seccionHistorial");
     if (historialSection) {
@@ -576,7 +586,9 @@ function quitarResaltado() {
     }
   }
 
-// Función para ocultar el formulario
+// ==============================
+// MARK: Función para ocultar el formulario
+// ==============================
 function ocultarFormulario() {
   const formSection = document.getElementById("formSection");
   if (formSection) {
@@ -584,7 +596,9 @@ function ocultarFormulario() {
   }
 }
 
-// Función para mostrar el formulario
+// ==============================
+// MARK: Función para mostrar el formulario
+// ==============================
 function mostrarFormulario() {
   const formSection = document.getElementById("formSection");
   if (formSection) {
@@ -592,7 +606,9 @@ function mostrarFormulario() {
   }
 }
 
-// Función para ocultar historial
+// ==============================
+// MARK: Función para ocultar historial
+// ==============================
 function ocultarHistorial() {
   const historialSection = document.getElementById("seccionHistorial");
   if (historialSection) {
@@ -644,7 +660,7 @@ async function cargarInspectores() {
 
 
 // ======================================================
-// 🆕 CONTADOR DE CARACTERES PARA OBSERVACIONES
+// MARK: CONTADOR DE CARACTERES PARA OBSERVACIONES
 // ======================================================
 const inputObservaciones = document.getElementById("observaciones");
 const contadorObservaciones = document.getElementById("contadorObservaciones");
@@ -858,7 +874,7 @@ function calcularSumaPorTipo() {
 
 
 // ======================================================
-// 🔹 FUNCIONES DE GUARDADO (Manual y Automático)
+// MARK: FUNCIONES DE GUARDADO (Manual y Automático)
 // ======================================================
 
 /**
@@ -934,7 +950,7 @@ async function enviarDatos(url, registros) {
 // MARK: BOTÓN GUARDAR CON CONFIRMACIÓN
 // ======================================================
 
-// 🆕 Al hacer clic en "Guardar", mostrar modal de confirmación
+// Al hacer clic en "Guardar", mostrar modal de confirmación
 btnGuardar.addEventListener("click", () => {
   // Validar campos antes de mostrar el modal
   const camposValidos = validarCamposObligatorios();
@@ -957,7 +973,7 @@ btnGuardar.addEventListener("click", () => {
   modal.show();
 });
 
-// 🆕 Al confirmar en el modal, ejecutar el guardado
+// Al confirmar en el modal, ejecutar el guardado
 document.getElementById("btnConfirmarGuardado").addEventListener("click", async () => {
   // Cerrar modal
   const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarGuardado'));
@@ -968,7 +984,7 @@ document.getElementById("btnConfirmarGuardado").addEventListener("click", async 
 });
 
 /**
- * 🆕 Valida los campos obligatorios y retorna true si todo está bien
+ * Valida los campos obligatorios y retorna true si todo está bien
  */
 function validarCamposObligatorios() {
   const campos = [
@@ -1003,7 +1019,7 @@ function validarCamposObligatorios() {
 }
 
 /**
- * 🆕 Ejecuta el proceso de guardado completo
+ *  Ejecuta el proceso de guardado completo
  */
 async function ejecutarGuardado() {
   try {
@@ -1057,7 +1073,7 @@ async function ejecutarGuardado() {
 
       if (!resTipos.ok) throw new Error(`Error ${resTipos.status} en tipos_defectos`);
       const dataTipos = await resTipos.json();
-      console.log("✅ Tipos defectos guardados:", dataTipos);
+      console.log("Tipos defectos guardados:", dataTipos);
     }
 
     // Guardar en tipos_defectos_descripcion
@@ -1070,10 +1086,10 @@ async function ejecutarGuardado() {
 
       if (!resDesc.ok) throw new Error(`Error ${resDesc.status} en tipos_defectos_descripcion`);
       const dataDesc = await resDesc.json();
-      console.log("✅ Descripciones guardadas:", dataDesc);
+      console.log("Descripciones guardadas:", dataDesc);
     }
 
-    alert("✅ Datos guardados correctamente en ambas tablas.");
+    alert("Datos guardados correctamente");
 
     // Limpiar tabla
     document.querySelectorAll(".celda-input").forEach(c => (c.textContent = ""));
@@ -1092,7 +1108,7 @@ async function ejecutarGuardado() {
     document.getElementById("destinoInfo").textContent = "---";
     document.getElementById("lineasInfo").textContent = "---";
 
-    // 🆕 LIMPIAR OBSERVACIONES POR TIPO
+    // LIMPIAR OBSERVACIONES POR TIPO
     document.querySelectorAll(".observacion-input").forEach(input => {
       input.value = "";
     });
