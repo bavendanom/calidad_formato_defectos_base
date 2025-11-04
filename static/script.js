@@ -80,6 +80,16 @@ document.addEventListener("DOMContentLoaded", () => {
     "Shot": "sameTetrapack"
   };
 
+  // ======================================================
+  // 🆕 VARIABLES GLOBALES DE HISTORIAL (DECLARAR AQUÍ)
+  // ======================================================
+  let tipoHistorialActual = "detallado"; // "detallado" o "resumen"
+  let paginaActualHistorial = 1;
+  let filtroFechaInicio = '';
+  let filtroFechaFin = '';
+  let filtroTipoDefecto = 'todos';
+
+
   // ==============================
   // 🔹 CAMBIO DE TURNO (MANTIENE DATOS POR POSICIÓN)
   // ==============================
@@ -157,9 +167,24 @@ document.addEventListener("DOMContentLoaded", () => {
         fila.innerHTML = celdas;
         tbody.appendChild(fila);
       });
+
+      // 🆕 NUEVA FILA: Observaciones para este tipo
+      const rowObservaciones = document.createElement("tr");
+      rowObservaciones.innerHTML = `
+        <td class="text-start fw-bold">📝 Observaciones:</td>
+        <td colspan="${horas.length}" class="observaciones-tipo">
+          <input 
+            type="text" 
+            class="form-control form-control-sm observacion-input" 
+            data-tipo="${grupo.tipo}"
+            placeholder="Observaciones para ${grupo.tipo} (máx. 100 caracteres)" 
+            maxlength="100">
+        </td>
+      `;
+      tbody.appendChild(rowObservaciones);
     });
 
-    // --- Eventos de interacción en celdas ---
+    // Eventos de interacción en celdas (mantener código existente)
     tabla.addEventListener("input", e => {
       if (e.target.classList.contains("celda-input")) {
         validarSoloNumeros(e.target);
@@ -167,45 +192,28 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // 🆕 NUEVO: Prevenir entrada de caracteres no numéricos
     tabla.addEventListener("keydown", e => {
       if (e.target.classList.contains("celda-input")) {
         const tecla = e.key;
-        
-        // Permitir: números, backspace, delete, tab, enter, flechas
         const teclasPermitidas = [
           'Backspace', 'Delete', 'Tab', 'Enter', 
           'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
           '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
         ];
-        
-        // Permitir Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-        if (e.ctrlKey || e.metaKey) {
-          return;
-        }
-        
-        // Si la tecla no está permitida, prevenir
+        if (e.ctrlKey || e.metaKey) return;
         if (!teclasPermitidas.includes(tecla)) {
           e.preventDefault();
-          // Feedback visual opcional
           e.target.classList.add('celda-invalida');
           setTimeout(() => e.target.classList.remove('celda-invalida'), 200);
         }
       }
     });
 
-    // 🆕 NUEVO: Prevenir pegado de texto no numérico
     tabla.addEventListener("paste", e => {
       if (e.target.classList.contains("celda-input")) {
         e.preventDefault();
-        
-        // Obtener texto pegado
         const texto = (e.clipboardData || window.clipboardData).getData('text');
-        
-        // Extraer solo números
         const soloNumeros = texto.replace(/\D/g, '');
-        
-        // Insertar solo números
         if (soloNumeros) {
           document.execCommand('insertText', false, soloNumeros);
         }
@@ -224,14 +232,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-
     tabla.appendChild(tbody);
     tablaContainer.appendChild(tabla);
 
-    // Mostrar sección de historial (ya está en el HTML)
     mostrarSeccionHistorial(linea);
   }
-
 function obtenerDefectos(linea) {
   // Si Linea 2–4 → heredan estructura de Linea 1
   if (["Linea 2", "Linea 3", "Linea 4"].includes(linea)) return defectosPorLinea["Linea 1"];
@@ -1002,11 +1007,9 @@ function validarCamposObligatorios() {
  */
 async function ejecutarGuardado() {
   try {
-    // === 🔢 CALCULAR SUMAS POR TIPO ===
     const sumasPorTipo = calcularSumaPorTipo();
     console.log("🧮 Sumatorias calculadas:", sumasPorTipo);
 
-    // === 📦 RECOLECTAR DATOS PARA TIPOS_DEFECTOS (SOLO > 0) ===
     const linea = currentLinea;
     const codigo = document.getElementById("codigoInfo").textContent || document.getElementById("codigoAX").value || "---";
     const nombre = document.getElementById("nombreInfo").textContent || "---";
@@ -1015,8 +1018,13 @@ async function ejecutarGuardado() {
 
     const datosParaGuardar = [];
 
-    // 🆕 OBTENER OBSERVACIONES
-    const observaciones = document.getElementById("observaciones").value.trim() || "---";
+    // 🆕 OBTENER OBSERVACIONES POR TIPO
+    const observacionesPorTipo = {};
+    document.querySelectorAll(".observacion-input").forEach(input => {
+      const tipo = input.dataset.tipo;
+      const obs = input.value.trim() || "---";
+      observacionesPorTipo[tipo] = obs;
+    });
 
     // SOLO guardar tipos con suma > 0
     for (const [tipo, suma] of Object.entries(sumasPorTipo)) {
@@ -1029,19 +1037,16 @@ async function ejecutarGuardado() {
           linea_produccion: linea,
           tipo_defecto: tipo,
           suma_tipo_defecto: suma,
-          observaciones: observaciones  // 🆕 AGREGAR OBSERVACIONES
+          observaciones: observacionesPorTipo[tipo] || "---"  // 🆕 Observación específica
         });
       }
     }
 
-    // === 📋 RECOLECTAR DATOS PARA TIPOS_DEFECTOS_DESCRIPCION (SOLO > 0) ===
     const datosDescripciones = recopilarDatosDescripciones();
 
     console.log("📦 Datos para tipos_defectos:", datosParaGuardar);
     console.log("📋 Datos para tipos_defectos_descripcion:", datosDescripciones);
 
-    // === 🚀 ENVIAR DATOS A AMBAS TABLAS ===
-    
     // Guardar en tipos_defectos
     if (datosParaGuardar.length > 0) {
       const resTipos = await fetch("/guardar_defectos/", {
@@ -1070,28 +1075,28 @@ async function ejecutarGuardado() {
 
     alert("✅ Datos guardados correctamente en ambas tablas.");
 
-    // === 🧹 LIMPIAR TABLA ===
+    // Limpiar tabla
     document.querySelectorAll(".celda-input").forEach(c => (c.textContent = ""));
     document.querySelectorAll(".total-dia").forEach(c => (c.textContent = "0"));
     
-    // === Limpiar formulario principal ===
+    // Limpiar formulario
     document.getElementById("fecha").value = "";
     document.getElementById("inspector").value = "";
     document.getElementById("codigoAX").value = "";
     document.getElementById("lote").value = "";
 
-    // === Limpiar información del producto ===
+    // Limpiar información del producto
     document.getElementById("codigoInfo").textContent = "---";
     document.getElementById("nombreInfo").textContent = "---";
     document.getElementById("envaseInfo").textContent = "---";
     document.getElementById("destinoInfo").textContent = "---";
     document.getElementById("lineasInfo").textContent = "---";
 
-    // 🆕 LIMPIAR OBSERVACIONES
-    document.getElementById("observaciones").value = "";
-    document.getElementById("contadorObservaciones").textContent = "0";
+    // 🆕 LIMPIAR OBSERVACIONES POR TIPO
+    document.querySelectorAll(".observacion-input").forEach(input => {
+      input.value = "";
+    });
     
-    // 🆕 Refrescar historial después de guardar
     paginaActualHistorial = 1;
     cargarHistorial(currentLinea);
 
@@ -1489,35 +1494,31 @@ window.eliminarInspector = eliminarInspector;
 // MARK: HISTORIAL DE REGISTROS
 // ======================================================
 
-let paginaActualHistorial = 1;
-let filtroFechaInicio = '';
-let filtroFechaFin = '';
-let filtroTipoDefecto = 'todos';
 
-/**
- * Muestra la sección de historial y configura los event listeners
- */
+
 function mostrarSeccionHistorial(linea) {
   const historialSection = document.getElementById("seccionHistorial");
   const tituloLinea = document.getElementById("tituloLineaHistorial");
   
-  // Mostrar sección
   historialSection.style.display = "block";
-  
-  // Actualizar título
   tituloLinea.textContent = linea === "Admin" ? "Todas las Líneas" : linea;
   
-  // Cargar tipos de defectos para el filtro
   cargarTiposDefectosParaFiltro(linea);
-  
-  // Cargar historial inicial
   cargarHistorial(linea);
   
-  // Configurar event listeners (solo una vez)
+  // Configurar botones de alternancia
+  const btnDetallado = document.getElementById("btnHistorialDetallado");
+  const btnResumen = document.getElementById("btnHistorialResumen");
   const btnRefrescar = document.getElementById("btnRefrescarHistorial");
   const btnAplicarFiltros = document.getElementById("btnAplicarFiltros");
   
-  // Remover listeners anteriores si existen
+  // Remover listeners anteriores
+  const nuevoDetallado = btnDetallado.cloneNode(true);
+  btnDetallado.parentNode.replaceChild(nuevoDetallado, btnDetallado);
+  
+  const nuevoResumen = btnResumen.cloneNode(true);
+  btnResumen.parentNode.replaceChild(nuevoResumen, btnResumen);
+  
   const nuevoRefrescar = btnRefrescar.cloneNode(true);
   btnRefrescar.parentNode.replaceChild(nuevoRefrescar, btnRefrescar);
   
@@ -1525,6 +1526,20 @@ function mostrarSeccionHistorial(linea) {
   btnAplicarFiltros.parentNode.replaceChild(nuevoAplicar, btnAplicarFiltros);
   
   // Agregar nuevos listeners
+  document.getElementById("btnHistorialDetallado").addEventListener("click", () => {
+    tipoHistorialActual = "detallado";
+    actualizarEstadoBotones();
+    paginaActualHistorial = 1;
+    cargarHistorial(currentLinea);
+  });
+  
+  document.getElementById("btnHistorialResumen").addEventListener("click", () => {
+    tipoHistorialActual = "resumen";
+    actualizarEstadoBotones();
+    paginaActualHistorial = 1;
+    cargarHistorial(currentLinea);
+  });
+  
   document.getElementById("btnRefrescarHistorial").addEventListener("click", () => {
     paginaActualHistorial = 1;
     cargarHistorial(currentLinea);
@@ -1537,6 +1552,31 @@ function mostrarSeccionHistorial(linea) {
     paginaActualHistorial = 1;
     cargarHistorial(currentLinea);
   });
+  
+  actualizarEstadoBotones();
+}
+
+function actualizarEstadoBotones() {
+  const btnDetallado = document.getElementById("btnHistorialDetallado");
+  const btnResumen = document.getElementById("btnHistorialResumen");
+  
+  if (tipoHistorialActual === "detallado") {
+    btnDetallado.classList.add("active");
+    btnDetallado.classList.remove("btn-outline-primary");
+    btnDetallado.classList.add("btn-primary");
+    
+    btnResumen.classList.remove("active");
+    btnResumen.classList.remove("btn-success");
+    btnResumen.classList.add("btn-outline-success");
+  } else {
+    btnResumen.classList.add("active");
+    btnResumen.classList.remove("btn-outline-success");
+    btnResumen.classList.add("btn-success");
+    
+    btnDetallado.classList.remove("active");
+    btnDetallado.classList.remove("btn-primary");
+    btnDetallado.classList.add("btn-outline-primary");
+  }
 }
 
 /**
@@ -1573,17 +1613,17 @@ async function cargarTiposDefectosParaFiltro(linea) {
 async function cargarHistorial(linea, pagina = 1) {
   try {
     const tbody = document.getElementById("historialTableBody");
-    tbody.innerHTML = '<tr><td colspan="9" class="text-center">Cargando...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" class="text-center">Cargando...</td></tr>';
     
-    // Construir URL con parámetros
-    let url = `/api/historial/?pagina=${pagina}&limite=20`;
+    // Determinar qué endpoint usar
+    const endpoint = tipoHistorialActual === "detallado" ? "/api/historial/" : "/api/historial-resumen/";
     
-    // Filtrar por línea (excepto Admin)
+    let url = `${endpoint}?pagina=${pagina}&limite=20`;
+    
     if (linea !== "Admin") {
       url += `&linea=${encodeURIComponent(linea)}`;
     }
     
-    // Aplicar filtros adicionales
     if (filtroFechaInicio) url += `&fecha_inicio=${filtroFechaInicio}`;
     if (filtroFechaFin) url += `&fecha_fin=${filtroFechaFin}`;
     if (filtroTipoDefecto !== "todos") url += `&tipo_defecto=${encodeURIComponent(filtroTipoDefecto)}`;
@@ -1596,7 +1636,7 @@ async function cargarHistorial(linea, pagina = 1) {
   } catch (error) {
     console.error("Error al cargar historial:", error);
     const tbody = document.getElementById("historialTableBody");
-    tbody.innerHTML = '<tr><td colspan="9" class="text-center text-danger">Error al cargar historial</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" class="text-center text-danger">Error al cargar historial</td></tr>';
   }
 }
 
@@ -1607,12 +1647,11 @@ function mostrarHistorial(data) {
   const tbody = document.getElementById("historialTableBody");
   
   if (data.registros.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No hay registros</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">No hay registros</td></tr>';
     document.getElementById("paginacionHistorial").innerHTML = '';
     return;
   }
   
-  // Mapeo de colores por tipo de defecto
   const coloresTipoDefecto = {
     "LLENADO": "#ffe6e6",
     "CAPSULADO": "#e6ffe6",
@@ -1624,25 +1663,46 @@ function mostrarHistorial(data) {
     "DEFECTOS GENERALES": "#f0f0f0"
   };
   
-  tbody.innerHTML = data.registros.map(reg => {
-    const color = coloresTipoDefecto[reg.tipo_defecto] || "#ffffff";
-    return `
-      <tr style="background-color: ${color};">
-        <td>${reg.id || '---'}</td>
-        <td>${reg.fecha || '---'}</td>
-        <td>${reg.hora || '---'}</td>
-        <td><strong>${reg.codigo || '---'}</strong></td>
-        <td>${reg.nombre || '---'}</td>
-        <td>${reg.envase || '---'}</td>
-        <td>${reg.destino || '---'}</td>
-        <td><span class="badge" style="background-color: ${color}; color: #000; border: 1px solid #ddd;">${reg.tipo_defecto || '---'}</span></td>
-        <td>${reg.descripcion_defecto || '---'}</td>
-        <td class="text-center"><strong>${reg.cantidad_defectos || 0}</strong></td>
-      </tr>
-    `;
-  }).join('');
+  if (tipoHistorialActual === "detallado") {
+    // Vista detallada (tipos_defectos_descripcion)
+    tbody.innerHTML = data.registros.map(reg => {
+      const color = coloresTipoDefecto[reg.tipo_defecto] || "#ffffff";
+      return `
+        <tr style="background-color: ${color};">
+          <td>${reg.id || '---'}</td>
+          <td>${reg.fecha || '---'}</td>
+          <td>${reg.hora || '---'}</td>
+          <td><strong>${reg.codigo || '---'}</strong></td>
+          <td>${reg.nombre || '---'}</td>
+          <td>${reg.envase || '---'}</td>
+          <td>${reg.destino || '---'}</td>
+          <td><span class="badge" style="background-color: ${color}; color: #000; border: 1px solid #ddd;">${reg.tipo_defecto || '---'}</span></td>
+          <td>${reg.descripcion_defecto || '---'}</td>
+          <td class="text-center"><strong>${reg.cantidad_defectos || 0}</strong></td>
+        </tr>
+      `;
+    }).join('');
+  } else {
+    // Vista resumen (tipos_defectos)
+    tbody.innerHTML = data.registros.map(reg => {
+      const color = coloresTipoDefecto[reg.tipo_defecto] || "#ffffff";
+      const fechaHora = reg.fecha_hora ? new Date(reg.fecha_hora).toLocaleString('es-CO') : '---';
+      return `
+        <tr style="background-color: ${color};">
+          <td>${reg.id || '---'}</td>
+          <td colspan="2">${fechaHora}</td>
+          <td><strong>${reg.codigo || '---'}</strong></td>
+          <td>${reg.nombre || '---'}</td>
+          <td>${reg.envase || '---'}</td>
+          <td>${reg.destino || '---'}</td>
+          <td><span class="badge" style="background-color: ${color}; color: #000; border: 1px solid #ddd;">${reg.tipo_defecto || '---'}</span></td>
+          <td>${reg.observaciones || '---'}</td>
+          <td class="text-center"><strong>${reg.suma_tipo_defecto || 0}</strong></td>
+        </tr>
+      `;
+    }).join('');
+  }
   
-  // Mostrar paginación
   mostrarPaginacion(data, currentLinea);
 }
 

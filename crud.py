@@ -131,3 +131,56 @@ def obtener_tipos_defectos_unicos(db: Session, linea_produccion: str = None):
         query = query.filter(models.TiposDefectosDescripcion.linea_produccion == linea_produccion)
     
     return [tipo[0] for tipo in query.all() if tipo[0]]
+
+# Agregar después de la función obtener_tipos_defectos_unicos (línea ~110)
+
+def obtener_historial_resumen(
+    db: Session, 
+    linea_produccion: str = None, 
+    limite: int = 20, 
+    offset: int = 0,
+    fecha_inicio: str = None,
+    fecha_fin: str = None,
+    tipo_defecto: str = None
+):
+    """
+    Obtiene el historial de la tabla tipos_defectos (resumen por tipo).
+    """
+    query = db.query(models.TiposDefectos)
+    
+    # Filtrar por línea de producción
+    if linea_produccion:
+        query = query.filter(models.TiposDefectos.linea_produccion == linea_produccion)
+    
+    # Filtrar por rango de fechas (usando fecha_hora)
+    if fecha_inicio:
+        from datetime import datetime
+        fecha_inicio_dt = datetime.strptime(fecha_inicio, "%Y-%m-%d")
+        query = query.filter(models.TiposDefectos.fecha_hora >= fecha_inicio_dt)
+    if fecha_fin:
+        from datetime import datetime
+        fecha_fin_dt = datetime.strptime(fecha_fin, "%Y-%m-%d")
+        # Agregar 1 día para incluir todo el día
+        from datetime import timedelta
+        fecha_fin_dt = fecha_fin_dt + timedelta(days=1)
+        query = query.filter(models.TiposDefectos.fecha_hora < fecha_fin_dt)
+    
+    # Filtrar por tipo de defecto
+    if tipo_defecto and tipo_defecto != "todos":
+        query = query.filter(models.TiposDefectos.tipo_defecto == tipo_defecto)
+    
+    # Ordenar por fecha descendente
+    query = query.order_by(models.TiposDefectos.id.desc())
+    
+    # Aplicar paginación
+    registros = query.offset(offset).limit(limite).all()
+    
+    # Obtener total de registros
+    total = query.count()
+    
+    return {
+        "registros": registros,
+        "total": total,
+        "pagina_actual": offset // limite + 1,
+        "total_paginas": (total + limite - 1) // limite
+    }

@@ -276,3 +276,51 @@ def admin_login(request: LoginRequest):
             detail="Contraseña incorrecta"
         )
 
+
+# 🆕 NUEVO: Obtener historial de resumen (tipos_defectos)
+@app.get("/api/historial-resumen/")
+def obtener_historial_resumen(
+    linea: str = None,
+    limite: int = 20,
+    pagina: int = 1,
+    fecha_inicio: str = None,
+    fecha_fin: str = None,
+    tipo_defecto: str = None,
+    db: Session = Depends(get_db)
+):
+    """
+    Obtiene el historial de la tabla tipos_defectos (resumen por tipo).
+    """
+    offset = (pagina - 1) * limite
+    resultado = crud.obtener_historial_resumen(
+        db=db,
+        linea_produccion=linea,
+        limite=limite,
+        offset=offset,
+        fecha_inicio=fecha_inicio,
+        fecha_fin=fecha_fin,
+        tipo_defecto=tipo_defecto
+    )
+    
+    # Serializar registros
+    registros_serializados = []
+    for reg in resultado["registros"]:
+        registros_serializados.append({
+            "id": reg.id,
+            "fecha_hora": reg.fecha_hora.isoformat() if reg.fecha_hora else None,
+            "codigo": reg.codigo,
+            "nombre": reg.nombre,
+            "envase": reg.envase,
+            "destino": reg.destino,
+            "linea_produccion": reg.linea_produccion,
+            "tipo_defecto": reg.tipo_defecto,
+            "suma_tipo_defecto": reg.suma_tipo_defecto,
+            "observaciones": reg.observaciones
+        })
+    
+    return {
+        "registros": registros_serializados,
+        "total": resultado["total"],
+        "pagina_actual": resultado["pagina_actual"],
+        "total_paginas": resultado["total_paginas"]
+    }

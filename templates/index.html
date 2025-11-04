@@ -101,34 +101,17 @@
       
     </div>
 
-
-
-    <!-- 🔹 Tabla simulada (placeholder visual) -->
+    <!-- 🆕 NUEVO: Campo de observaciones -->
+    <!-- 📹 Tabla simulada (placeholder visual) -->
     <div id="tablaDefectos" class="mt-4 text-center text-muted border p-5 rounded">
       <p>[ Aquí se cargará dinámicamente la tabla de defectos según la línea seleccionada ]</p>
     </div>
 
-    <!-- 🆕 NUEVO: Campo de observaciones -->
-    <div class="card mt-4 p-3" id="contenedorObservaciones">
-      <div class="row align-items-end">
-        <div class="col-md-10">
-          <label class="form-label fw-bold">Observaciones:</label>
-          <input 
-            type="text" 
-            id="observaciones" 
-            class="form-control" 
-            placeholder="Ingrese observaciones adicionales (opcional, máx. 100 caracteres)"
-            maxlength="100">
-          <small class="text-muted">
-            <span id="contadorObservaciones">0</span>/100 caracteres
-          </small>
-        </div>
-        <div class="col-md-2 text-end">
-          <button class="btn btn-success w-100" id="btnGuardar">
-            💾 Guardar
-          </button>
-        </div>
-      </div>
+    <!-- 🆕 Botón Guardar fuera del contenedor de observaciones -->
+    <div class="text-end mt-3">
+      <button class="btn btn-success btn-lg px-5" id="btnGuardar">
+        💾 Guardar
+      </button>
     </div>
 
     <!-- 🆕 NUEVO: Modal de Login para Admin -->
@@ -220,9 +203,17 @@
     <div id="seccionHistorial" class="historial-section mt-5">
       <div class="historial-header d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">📋 Historial de Registros - <span id="tituloLineaHistorial">Línea 1</span></h4>
-        <button class="btn btn-sm btn-primary" id="btnRefrescarHistorial">
-          🔄 Refrescar
-        </button>
+        <div class="btn-group" role="group">
+          <button class="btn btn-sm btn-primary active" id="btnHistorialDetallado">
+            📊 Detallado
+          </button>
+          <button class="btn btn-sm btn-outline-success" id="btnHistorialResumen">
+            📈 Resumen
+          </button>
+          <button class="btn btn-sm btn-outline-secondary" id="btnRefrescarHistorial">
+            🔄 Refrescar
+          </button>
+        </div>
       </div>
 
       <!-- Filtros -->
