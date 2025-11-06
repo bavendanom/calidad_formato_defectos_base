@@ -186,7 +186,7 @@ def obtener_historial(
     for reg in resultado["registros"]:
         registros_serializados.append({
             "id": reg.id,
-            "fecha": reg.fecha.isoformat() if reg.fecha else None,
+            "fecha": reg.fecha.strftime("%d/%m/%Y") if reg.fecha else None,
             "hora": reg.hora,
             "codigo": reg.codigo,
             "nombre": reg.nombre,
