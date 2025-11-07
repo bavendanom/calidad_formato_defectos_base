@@ -87,6 +87,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let filtroFechaInicio = '';
   let filtroFechaFin = '';
   let filtroTipoDefecto = 'todos';
+  let filtroLote = ''; 
+  let filtroCodigoAX = ''; 
 
 
   // ==============================
@@ -1625,6 +1627,8 @@ function mostrarSeccionHistorial(linea) {
     filtroFechaInicio = document.getElementById("filtroFechaInicio").value;
     filtroFechaFin = document.getElementById("filtroFechaFin").value;
     filtroTipoDefecto = document.getElementById("filtroTipoDefecto").value;
+    filtroLote = document.getElementById("filtroLote").value.trim(); 
+    filtroCodigoAX = document.getElementById("filtroCodigoAX").value.trim(); 
     paginaActualHistorial = 1;
     cargarHistorial(currentLinea);
   });
@@ -1703,6 +1707,8 @@ async function cargarHistorial(linea, pagina = 1) {
     if (filtroFechaInicio) url += `&fecha_inicio=${filtroFechaInicio}`;
     if (filtroFechaFin) url += `&fecha_fin=${filtroFechaFin}`;
     if (filtroTipoDefecto !== "todos") url += `&tipo_defecto=${encodeURIComponent(filtroTipoDefecto)}`;
+    if (filtroLote) url += `&lote=${encodeURIComponent(filtroLote)}`;
+    if (filtroCodigoAX) url += `&codigo=${encodeURIComponent(filtroCodigoAX)}`;
     
     const res = await fetch(url);
     if (!res.ok) throw new Error("Error al cargar historial");

@@ -165,6 +165,8 @@ def obtener_historial(
     fecha_inicio: str = None,
     fecha_fin: str = None,
     tipo_defecto: str = None,
+    lote: str = None, 
+    codigo: str = None,
     db: Session = Depends(get_db)
 ):
     """
@@ -178,7 +180,9 @@ def obtener_historial(
         offset=offset,
         fecha_inicio=fecha_inicio,
         fecha_fin=fecha_fin,
-        tipo_defecto=tipo_defecto
+        tipo_defecto=tipo_defecto,
+        lote=lote,  # 🆕 NUEVO
+        codigo=codigo
     )
     
     # Serializar registros
@@ -287,6 +291,8 @@ def obtener_historial_resumen(
     fecha_inicio: str = None,
     fecha_fin: str = None,
     tipo_defecto: str = None,
+    lote: str = None,  # 🆕 NUEVO
+    codigo: str = None,
     db: Session = Depends(get_db)
 ):
     """
@@ -300,7 +306,9 @@ def obtener_historial_resumen(
         offset=offset,
         fecha_inicio=fecha_inicio,
         fecha_fin=fecha_fin,
-        tipo_defecto=tipo_defecto
+        tipo_defecto=tipo_defecto,
+        lote=lote,
+        codigo=codigo
     )
     
     # Serializar registros

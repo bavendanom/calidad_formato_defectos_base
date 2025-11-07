@@ -218,19 +218,32 @@
       <!-- Filtros -->
       <div class="filtros-historial card p-3 mb-3">
         <div class="row g-2">
+          <!-- Filtro por Fecha de inicio -->
           <div class="col-md-3">
-            <label class="form-label fw-bold">Fecha Inicio:</label>
+            <label class="form-label fw-bold">Fecha inicio:</label>
             <input type="date" id="filtroFechaInicio" class="form-control form-control-sm">
           </div>
+          <!-- Filtro por Fecha de fin -->
           <div class="col-md-3">
-            <label class="form-label fw-bold">Fecha Fin:</label>
+            <label class="form-label fw-bold">Fecha fin:</label>
             <input type="date" id="filtroFechaFin" class="form-control form-control-sm">
           </div>
+          <!-- Filtro por Tipo de defeccto -->
           <div class="col-md-3">
-            <label class="form-label fw-bold">Tipo de Defecto:</label>
+            <label class="form-label fw-bold">Tipo de defecto:</label>
             <select id="filtroTipoDefecto" class="form-select form-select-sm">
               <option value="todos">Todos</option>
             </select>
+          </div>
+          <!-- Filtro por Lote -->
+          <div class="col-md-2">
+            <label class="form-label fw-bold">Lote:</label>
+            <input type="text" id="filtroLote" class="form-control form-control-sm" placeholder="Ej: 115">
+          </div>
+          <!-- Filtro por Código AX -->
+          <div class="col-md-2">
+            <label class="form-label fw-bold">Código AX:</label>
+            <input type="text" id="filtroCodigoAX" class="form-control form-control-sm" placeholder="Ej: 4-03-0000-0019">
           </div>
           <div class="col-md-3 d-flex align-items-end">
             <button class="btn btn-success btn-sm w-100" id="btnAplicarFiltros">

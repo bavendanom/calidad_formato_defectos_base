@@ -72,7 +72,9 @@ def obtener_historial_registros(
     offset: int = 0,
     fecha_inicio: str = None,
     fecha_fin: str = None,
-    tipo_defecto: str = None
+    tipo_defecto: str = None,
+    lote: str = None,  
+    codigo: str = None
 ):
     """
     Obtiene el historial de registros con filtros opcionales.
@@ -101,6 +103,14 @@ def obtener_historial_registros(
     # Filtrar por tipo de defecto
     if tipo_defecto and tipo_defecto != "todos":
         query = query.filter(models.TiposDefectosDescripcion.tipo_defecto == tipo_defecto)
+
+    # Filtrar por lote
+    if lote:
+        query = query.filter(models.TiposDefectosDescripcion.lote.ilike(f"%{lote}%"))
+    
+    # Filtrar por código
+    if codigo:
+        query = query.filter(models.TiposDefectosDescripcion.codigo.ilike(f"%{codigo}%"))
     
     # Ordenar por fecha y hora descendente (más recientes primero)
     query = query.order_by(
@@ -141,7 +151,9 @@ def obtener_historial_resumen(
     offset: int = 0,
     fecha_inicio: str = None,
     fecha_fin: str = None,
-    tipo_defecto: str = None
+    tipo_defecto: str = None,
+    lote: str = None,  
+    codigo: str = None 
 ):
     """
     Obtiene el historial de la tabla tipos_defectos (resumen por tipo).
@@ -168,6 +180,14 @@ def obtener_historial_resumen(
     # Filtrar por tipo de defecto
     if tipo_defecto and tipo_defecto != "todos":
         query = query.filter(models.TiposDefectos.tipo_defecto == tipo_defecto)
+    
+    # Filtrar por lote
+    if lote:
+        query = query.filter(models.TiposDefectos.lote.ilike(f"%{lote}%"))
+    
+    # Filtrar por código
+    if codigo:
+        query = query.filter(models.TiposDefectos.codigo.ilike(f"%{codigo}%"))
     
     # Ordenar por fecha descendente
     query = query.order_by(models.TiposDefectos.id.desc())
