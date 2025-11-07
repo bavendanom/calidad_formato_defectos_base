@@ -44,6 +44,7 @@ from datetime import datetime
 
 class TiposDefectosBase(BaseModel):
     codigo: str
+    lote: str  
     nombre: str
     envase: str
     destino: str
@@ -69,6 +70,7 @@ class TiposDefectosDescripcionBase(BaseModel):
     fecha: date                            
     hora: str 
     codigo: str
+    lote: str  
     nombre: str
     envase: str
     destino: str

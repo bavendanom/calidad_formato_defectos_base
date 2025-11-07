@@ -935,6 +935,7 @@ function calcularSumaPorTipo() {
 function recopilarDatosParaGuardar() {
   const linea = currentLinea;
   const codigo = document.getElementById("codigoInfo").textContent || document.getElementById("codigoAX").value || "";
+  const lote = document.getElementById("lote").value || "---"; 
   const nombre = document.getElementById("nombreInfo").textContent || "";
   const envase = document.getElementById("envaseInfo").textContent || "";
   const destino = document.getElementById("destinoInfo").textContent || "";
@@ -1078,6 +1079,7 @@ async function ejecutarGuardado() {
 
     const linea = currentLinea;
     const codigo = document.getElementById("codigoInfo").textContent || document.getElementById("codigoAX").value || "---";
+    const lote = document.getElementById("lote").value || "---"; 
     const nombre = document.getElementById("nombreInfo").textContent || "---";
     const envase = document.getElementById("envaseInfo").textContent || "---";
     const destino = document.getElementById("destinoInfo").textContent || "---";
@@ -1097,6 +1099,7 @@ async function ejecutarGuardado() {
       if (suma > 0) {
         datosParaGuardar.push({
           codigo,
+          lote,
           nombre,
           envase,
           destino,
@@ -1178,6 +1181,7 @@ function recopilarDatosDescripciones() {
   const linea = currentLinea;
   const fecha = document.getElementById("fecha").value || new Date().toISOString().slice(0, 10);
   const codigo = document.getElementById("codigoInfo").textContent || document.getElementById("codigoAX").value || "";
+  const lote = document.getElementById("lote").value || "---"; 
   const nombre = document.getElementById("nombreInfo").textContent || "";
   const envase = document.getElementById("envaseInfo").textContent || "";
   const destino = document.getElementById("destinoInfo").textContent || "";
@@ -1210,6 +1214,7 @@ function recopilarDatosDescripciones() {
           fecha,
           hora,
           codigo,
+          lote,
           nombre,
           envase,
           destino,
@@ -1739,6 +1744,7 @@ function mostrarHistorial(data) {
           <td>${reg.fecha || '---'}</td>
           <td>${reg.hora || '---'}</td>
           <td><strong>${reg.codigo || '---'}</strong></td>
+          <td>${reg.lote || '---'}</td>
           <td>${reg.nombre || '---'}</td>
           <td>${reg.envase || '---'}</td>
           <td>${reg.destino || '---'}</td>
@@ -1758,6 +1764,7 @@ function mostrarHistorial(data) {
           <td>${reg.id || '---'}</td>
           <td colspan="2">${fechaHora}</td>
           <td><strong>${reg.codigo || '---'}</strong></td>
+          <td>${reg.lote || '---'}</td>
           <td>${reg.nombre || '---'}</td>
           <td>${reg.envase || '---'}</td>
           <td>${reg.destino || '---'}</td>
