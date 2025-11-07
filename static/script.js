@@ -90,6 +90,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let filtroLote = ''; 
   let filtroCodigoAX = ''; 
 
+  let autocompletadoFiltroContainer = null;
+
 
   // ==============================
   // MARK: CAMBIO DE TURNO (MANTIENE DATOS POR POSICIÓN)
@@ -1583,6 +1585,12 @@ function mostrarSeccionHistorial(linea) {
   
   cargarTiposDefectosParaFiltro(linea);
   cargarHistorial(linea);
+
+  setTimeout(() => {
+    inicializarAutocompletadoFiltro();
+  }, 100);
+
+  inicializarAutocompletadoFiltro();
   
   // Configurar botones de alternancia
   const btnDetallado = document.getElementById("btnHistorialDetallado");
@@ -1800,6 +1808,9 @@ function mostrarPaginacion(data, linea) {
     container.innerHTML = '';
     return;
   }
+
+  // 🆕 LIMITAR A MÁXIMO 10 PÁGINAS
+  const totalPaginasMostrar = Math.min(data.total_paginas, 10);
   
   let html = '<div class="d-flex justify-content-between align-items-center mt-3">';
   html += `<span class="text-muted">Mostrando ${data.registros.length} de ${data.total} registros</span>`;
@@ -1811,7 +1822,7 @@ function mostrarPaginacion(data, linea) {
   }
   
   // Números de página
-  for (let i = 1; i <= data.total_paginas; i++) {
+  for (let i = 1; i <= totalPaginasMostrar; i++) {
     if (i === data.pagina_actual) {
       html += `<button class="btn btn-sm btn-primary" disabled>${i}</button>`;
     } else if (Math.abs(i - data.pagina_actual) <= 2 || i === 1 || i === data.total_paginas) {
@@ -1820,9 +1831,13 @@ function mostrarPaginacion(data, linea) {
       html += `<button class="btn btn-sm btn-outline-secondary" disabled>...</button>`;
     }
   }
+
+  if (data.total_paginas > 10) {
+    html += `<button class="btn btn-sm btn-outline-secondary" disabled>... (+${data.total_paginas - 10})</button>`;
+  }
   
   // Botón siguiente
-  if (data.pagina_actual < data.total_paginas) {
+  if (data.pagina_actual < totalPaginasMostrar) {
     html += `<button class="btn btn-sm btn-outline-primary" onclick="cambiarPagina(${data.pagina_actual + 1})">Siguiente →</button>`;
   }
   
@@ -1836,6 +1851,168 @@ function mostrarPaginacion(data, linea) {
 function cambiarPagina(pagina) {
   paginaActualHistorial = pagina;
   cargarHistorial(currentLinea, pagina);
+}
+
+
+// ======================================================
+// MARK: AUTOCOMPLETADO DE CÓDIGO AX EN FILTROS DEL HISTORIAL
+// ======================================================
+
+let autocompletadoFiltroActivo = false;
+let sugerenciaFiltroSeleccionada = -1;
+
+/**
+ * Inicializa el autocompletado para el filtro de código AX
+ */
+function inicializarAutocompletadoFiltro() {
+  const inputFiltroCodigo = document.getElementById("filtroCodigoAX");
+  
+  if (!inputFiltroCodigo) {
+    console.warn("Input filtroCodigoAX no encontrado");
+    return;
+  }
+  
+  // Crear contenedor de autocompletado si no existe
+  if (!autocompletadoFiltroContainer) {
+    autocompletadoFiltroContainer = document.createElement("div");
+    autocompletadoFiltroContainer.id = "autocompletadoFiltro";
+    autocompletadoFiltroContainer.className = "autocompletado-container";
+    inputFiltroCodigo.parentElement.style.position = "relative";
+    inputFiltroCodigo.parentElement.appendChild(autocompletadoFiltroContainer);
+  }
+  
+  // Limpiar listeners anteriores clonando el elemento
+  const nuevoInput = inputFiltroCodigo.cloneNode(true);
+  inputFiltroCodigo.parentNode.replaceChild(nuevoInput, inputFiltroCodigo);
+  
+  // Evento: Escribir en el campo
+  nuevoInput.addEventListener("input", async (e) => {
+    const termino = e.target.value.trim();
+    
+    if (termino.length < 2) {
+      ocultarAutocompletadoFiltro();
+      return;
+    }
+    
+    await buscarSugerenciasFiltro(termino);
+  });
+  
+  // Evento: Navegación con teclado
+  nuevoInput.addEventListener("keydown", (e) => {
+    if (!autocompletadoFiltroActivo) return;
+    
+    const sugerencias = autocompletadoFiltroContainer.querySelectorAll(".sugerencia-item");
+    
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      sugerenciaFiltroSeleccionada = Math.min(sugerenciaFiltroSeleccionada + 1, sugerencias.length - 1);
+      actualizarSeleccionFiltro(sugerencias);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      sugerenciaFiltroSeleccionada = Math.max(sugerenciaFiltroSeleccionada - 1, -1);
+      actualizarSeleccionFiltro(sugerencias);
+    } else if (e.key === "Enter" && sugerenciaFiltroSeleccionada >= 0) {
+      e.preventDefault();
+      sugerencias[sugerenciaFiltroSeleccionada].click();
+    } else if (e.key === "Escape") {
+      ocultarAutocompletadoFiltro();
+    }
+  });
+  
+  // Cerrar al hacer clic fuera
+  document.addEventListener("click", (e) => {
+    if (!nuevoInput.contains(e.target) && !autocompletadoFiltroContainer.contains(e.target)) {
+      ocultarAutocompletadoFiltro();
+    }
+  });
+}
+
+/**
+ * Busca sugerencias de códigos en los registros de defectos
+ */
+async function buscarSugerenciasFiltro(termino) {
+  try {
+    const lineaParam = currentLinea === "Admin" ? "" : `&linea=${encodeURIComponent(currentLinea)}`;
+    const tipoParam = `&tipo_historial=${tipoHistorialActual}`;
+    
+    const res = await fetch(`/api/codigos/buscar/?q=${encodeURIComponent(termino)}${lineaParam}${tipoParam}`);
+    
+    if (!res.ok) throw new Error("Error en búsqueda");
+    
+    const resultados = await res.json();
+    mostrarSugerenciasFiltro(resultados);
+  } catch (error) {
+    console.error("Error al buscar sugerencias de códigos:", error);
+    ocultarAutocompletadoFiltro();
+  }
+}
+
+/**
+ * Muestra las sugerencias en el DOM
+ */
+function mostrarSugerenciasFiltro(resultados) {
+  if (resultados.length === 0) {
+    ocultarAutocompletadoFiltro();
+    return;
+  }
+  
+  autocompletadoFiltroContainer.innerHTML = resultados.map((item, index) => `
+    <div class="sugerencia-item" data-codigo="${item.codigo}" data-index="${index}">
+      <span class="codigo-sugerencia">${item.codigo}</span>
+    </div>
+  `).join('');
+  
+  // Agregar eventos de clic a cada sugerencia
+  autocompletadoFiltroContainer.querySelectorAll(".sugerencia-item").forEach(item => {
+    item.addEventListener("click", () => seleccionarSugerenciaFiltro(item.dataset.codigo));
+  });
+  
+  autocompletadoFiltroActivo = true;
+  sugerenciaFiltroSeleccionada = -1;
+  autocompletadoFiltroContainer.style.display = "block";
+}
+
+/**
+ * Oculta el panel de sugerencias
+ */
+function ocultarAutocompletadoFiltro() {
+  if (autocompletadoFiltroContainer) {
+    autocompletadoFiltroContainer.style.display = "none";
+  }
+  autocompletadoFiltroActivo = false;
+  sugerenciaFiltroSeleccionada = -1;
+}
+
+/**
+ * Actualiza la selección visual con teclado
+ */
+function actualizarSeleccionFiltro(sugerencias) {
+  sugerencias.forEach((item, index) => {
+    if (index === sugerenciaFiltroSeleccionada) {
+      item.classList.add("seleccionado");
+      // Scroll automático para mantener la selección visible
+      item.scrollIntoView({ block: "nearest" });
+    } else {
+      item.classList.remove("seleccionado");
+    }
+  });
+}
+
+/**
+ * Selecciona una sugerencia (solo llena el campo, NO aplica el filtro automáticamente)
+ */
+function seleccionarSugerenciaFiltro(codigo) {
+  const inputFiltroCodigo = document.getElementById("filtroCodigoAX");
+  
+  if (inputFiltroCodigo) {
+    inputFiltroCodigo.value = codigo;
+    
+    // Feedback visual
+    inputFiltroCodigo.classList.add("consulta-exitosa");
+    setTimeout(() => inputFiltroCodigo.classList.remove("consulta-exitosa"), 1000);
+  }
+  
+  ocultarAutocompletadoFiltro();
 }
 
 // Hacer función global para onclick

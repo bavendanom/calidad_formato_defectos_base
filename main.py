@@ -334,3 +334,49 @@ def obtener_historial_resumen(
         "pagina_actual": resultado["pagina_actual"],
         "total_paginas": resultado["total_paginas"]
     }
+
+# 🆕 NUEVO: Búsqueda de códigos AX en registros de defectos para autocompletado
+@app.get("/api/codigos/buscar/")
+def buscar_codigos_defectos(
+    q: str, 
+    linea: str = None,
+    tipo_historial: str = "detallado",  # "detallado" o "resumen"
+    db: Session = Depends(get_db)
+):
+    """
+    Busca códigos AX en los registros de defectos para autocompletado.
+    Parámetro q: término de búsqueda (mínimo 2 caracteres)
+    Parámetro linea: filtrar por línea de producción (opcional)
+    Parámetro tipo_historial: buscar en tabla detallada o resumen
+    """
+    if len(q) < 2:
+        return []
+    
+    # Determinar en qué tabla buscar según el tipo de historial activo
+    if tipo_historial == "detallado":
+        query = db.query(models.TiposDefectosDescripcion.codigo).distinct()
+        
+        # Filtrar por código
+        query = query.filter(models.TiposDefectosDescripcion.codigo.ilike(f"%{q}%"))
+        
+        # Filtrar por línea si se especifica
+        if linea and linea != "Admin":
+            query = query.filter(models.TiposDefectosDescripcion.linea_produccion == linea)
+        
+        # Limitar resultados
+        codigos = query.limit(10).all()
+    else:  # resumen
+        query = db.query(models.TiposDefectos.codigo).distinct()
+        
+        # Filtrar por código
+        query = query.filter(models.TiposDefectos.codigo.ilike(f"%{q}%"))
+        
+        # Filtrar por línea si se especifica
+        if linea and linea != "Admin":
+            query = query.filter(models.TiposDefectos.linea_produccion == linea)
+        
+        # Limitar resultados
+        codigos = query.limit(10).all()
+    
+    # Retornar solo los códigos únicos
+    return [{"codigo": codigo[0]} for codigo in codigos if codigo[0]]

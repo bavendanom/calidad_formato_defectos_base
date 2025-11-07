@@ -243,7 +243,14 @@
           <!-- Filtro por Código AX -->
           <div class="col-md-2">
             <label class="form-label fw-bold">Código AX:</label>
-            <input type="text" id="filtroCodigoAX" class="form-control form-control-sm" placeholder="Ej: 4-03-0000-0019">
+            <div style="position: relative;">
+              <input 
+                type="text" 
+                id="filtroCodigoAX" 
+                class="form-control form-control-sm" 
+                placeholder="Ej: 4-03-0000-0019"
+                autocomplete="off">
+            </div>
           </div>
           <div class="col-md-3 d-flex align-items-end">
             <button class="btn btn-success btn-sm w-100" id="btnAplicarFiltros">

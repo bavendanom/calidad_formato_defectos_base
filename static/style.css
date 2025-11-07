@@ -612,3 +612,69 @@ tbody tr:nth-child(even) {
   transform: scale(1.05);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
+
+/* ============ AUTOCOMPLETADO EN FILTROS DEL HISTORIAL ============ */
+
+#autocompletadoFiltro {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid #0d6efd;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  max-height: 200px; /* Más pequeño que el del formulario */
+  overflow-y: auto;
+  z-index: 1050; /* Mayor z-index que el del formulario para estar sobre todo */
+  display: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-top: 2px;
+}
+
+/* Reutilizar estilos de sugerencia-item del autocompletado principal */
+#autocompletadoFiltro .sugerencia-item {
+  padding: 10px 12px; /* Más compacto */
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem; /* Texto más pequeño */
+}
+
+#autocompletadoFiltro .sugerencia-item:last-child {
+  border-bottom: none;
+}
+
+#autocompletadoFiltro .sugerencia-item:hover,
+#autocompletadoFiltro .sugerencia-item.seleccionado {
+  background-color: #e7f3ff;
+  border-left: 4px solid #0d6efd;
+}
+
+#autocompletadoFiltro .codigo-sugerencia {
+  font-weight: 600;
+  color: #0d6efd;
+  font-size: 0.85rem;
+  font-family: 'Courier New', monospace;
+}
+
+/* Scrollbar personalizado para sugerencias del filtro */
+#autocompletadoFiltro::-webkit-scrollbar {
+  width: 6px; /* Más delgado */
+}
+
+#autocompletadoFiltro::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+#autocompletadoFiltro::-webkit-scrollbar-thumb {
+  background: #0d6efd;
+  border-radius: 3px;
+}
+
+#autocompletadoFiltro::-webkit-scrollbar-thumb:hover {
+  background: #0b5ed7;
+}
