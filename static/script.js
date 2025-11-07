@@ -936,6 +936,7 @@ function recopilarDatosParaGuardar() {
   const linea = currentLinea;
   const codigo = document.getElementById("codigoInfo").textContent || document.getElementById("codigoAX").value || "";
   const lote = document.getElementById("lote").value || "---"; 
+  const inspector = document.getElementById("inspector").value || "---"; 
   const nombre = document.getElementById("nombreInfo").textContent || "";
   const envase = document.getElementById("envaseInfo").textContent || "";
   const destino = document.getElementById("destinoInfo").textContent || "";
@@ -1080,6 +1081,7 @@ async function ejecutarGuardado() {
     const linea = currentLinea;
     const codigo = document.getElementById("codigoInfo").textContent || document.getElementById("codigoAX").value || "---";
     const lote = document.getElementById("lote").value || "---"; 
+    const inspector = document.getElementById("inspector").value || "---"; 
     const nombre = document.getElementById("nombreInfo").textContent || "---";
     const envase = document.getElementById("envaseInfo").textContent || "---";
     const destino = document.getElementById("destinoInfo").textContent || "---";
@@ -1099,6 +1101,7 @@ async function ejecutarGuardado() {
       if (suma > 0) {
         datosParaGuardar.push({
           codigo,
+          inspector,
           lote,
           nombre,
           envase,
@@ -1149,10 +1152,10 @@ async function ejecutarGuardado() {
     document.querySelectorAll(".total-dia").forEach(c => (c.textContent = "0"));
     
     // Limpiar formulario
-    document.getElementById("fecha").value = "";
-    document.getElementById("inspector").value = "";
-    document.getElementById("codigoAX").value = "";
-    document.getElementById("lote").value = "";
+    //document.getElementById("fecha").value = "";
+    //document.getElementById("inspector").value = "";
+    //document.getElementById("codigoAX").value = "";
+    //document.getElementById("lote").value = "";
 
     // Limpiar información del producto
     document.getElementById("codigoInfo").textContent = "---";
@@ -1181,6 +1184,7 @@ function recopilarDatosDescripciones() {
   const linea = currentLinea;
   const fecha = document.getElementById("fecha").value || new Date().toISOString().slice(0, 10);
   const codigo = document.getElementById("codigoInfo").textContent || document.getElementById("codigoAX").value || "";
+  const inspector = document.getElementById("inspector").value || "---"; 
   const lote = document.getElementById("lote").value || "---"; 
   const nombre = document.getElementById("nombreInfo").textContent || "";
   const envase = document.getElementById("envaseInfo").textContent || "";
@@ -1214,6 +1218,7 @@ function recopilarDatosDescripciones() {
           fecha,
           hora,
           codigo,
+          inspector,
           lote,
           nombre,
           envase,

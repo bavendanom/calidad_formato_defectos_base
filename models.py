@@ -33,6 +33,7 @@ class TiposDefectos(Base):
     id = Column(Integer, primary_key=True, index=True)
     fecha_hora = Column(DateTime(timezone=True), server_default=func.now())
     codigo = Column(String)
+    inspector = Column(String)
     lote = Column(String)
     nombre = Column(String)
     envase = Column(String)

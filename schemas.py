@@ -44,6 +44,7 @@ from datetime import datetime
 
 class TiposDefectosBase(BaseModel):
     codigo: str
+    inspector: str
     lote: str  
     nombre: str
     envase: str
