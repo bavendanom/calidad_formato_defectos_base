@@ -27,7 +27,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-    healthcheck:                         # 👇 Añadido para verificar disponibilidad real
+    healthcheck:                         # Añadido para verificar disponibilidad real
       test: ["CMD-SHELL", "pg_isready -U admin_calidad -d control_calidad"]
       interval: 5s
       timeout: 5s

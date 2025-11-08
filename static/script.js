@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   botonesTurno.forEach(btn => {
     btn.addEventListener("click", () => {
-      // 🆕 CAPTURAR DATOS ACTUALES POR POSICIÓN (no por hora)
+      // CAPTURAR DATOS ACTUALES POR POSICIÓN (no por hora)
       const datosActuales = capturarDatosPorPosicion();
       
       turnoActual = parseInt(btn.dataset.turno);
@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Renderizar nueva tabla
       renderTabla(currentLinea);
       
-      // 🆕 RESTAURAR DATOS POR POSICIÓN después de renderizar
+      // RESTAURAR DATOS POR POSICIÓN después de renderizar
       setTimeout(() => {
         restaurarDatosPorPosicion(datosActuales);
       }, 100);
@@ -172,7 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tbody.appendChild(fila);
       });
 
-      // 🆕 NUEVA FILA: Observaciones para este tipo
+      // NUEVA FILA: Observaciones para este tipo
       const rowObservaciones = document.createElement("tr");
       rowObservaciones.innerHTML = `
         <td class="text-start fw-bold">📝 Observaciones:</td>
@@ -287,7 +287,7 @@ function saveState(linea) {
     destinoInfo: document.getElementById("destinoInfo").textContent || "---",
     lineasInfo: document.getElementById("lineasInfo").textContent || "---"
   };
-  // 📊 Guardar datos de la tabla
+  // Guardar datos de la tabla
   state.celdas = [];
   document.querySelectorAll(".celda-input").forEach(cell => {
     const tipo = cell.dataset.tipo || "";
@@ -297,7 +297,7 @@ function saveState(linea) {
     state.celdas.push({ tipo, desc, hora, valor });
   });
   
-  // 🆕 GUARDAR OBSERVACIONES POR TIPO
+  // GUARDAR OBSERVACIONES POR TIPO
   state.observaciones = [];
   document.querySelectorAll(".observacion-input").forEach(input => {
     const tipo = input.dataset.tipo || "";
@@ -328,7 +328,7 @@ function loadState(linea) {
       document.getElementById("destinoInfo").textContent = state.form.destinoInfo || "---";
       document.getElementById("lineasInfo").textContent = state.form.lineasInfo || "---";
     }
-    // 📊 Restaurar tabla
+    // Restaurar tabla
     if (Array.isArray(state.celdas)) {
       // Limpiar celdas primero
       document.querySelectorAll(".celda-input").forEach(c => c.textContent = "");
@@ -341,7 +341,7 @@ function loadState(linea) {
       });
     }
     
-    // 🆕 RESTAURAR OBSERVACIONES POR TIPO
+    // RESTAURAR OBSERVACIONES POR TIPO
     if (Array.isArray(state.observaciones)) {
       // Limpiar observaciones primero
       document.querySelectorAll(".observacion-input").forEach(input => input.value = "");
@@ -381,7 +381,7 @@ function recalcularTotal(fila) {
 function capturarDatosPorPosicion() {
   const datos = [];
   const filas = document.querySelectorAll("tbody tr");
-  let filaRealIndex = 0; // 🆕 Solo cuenta filas de datos, no encabezados
+  let filaRealIndex = 0; // Solo cuenta filas de datos, no encabezados
   
   filas.forEach((fila, filaIndex) => {
     // Saltar filas de tipo (encabezados)
@@ -398,14 +398,14 @@ function capturarDatosPorPosicion() {
     });
     
     datos.push({
-      filaIndex: filaRealIndex, // 🆕 Usar índice real de filas de datos
+      filaIndex: filaRealIndex, // Usar índice real de filas de datos
       celdas: filaDatos
     });
     
-    filaRealIndex++; // 🆕 Incrementar solo para filas de datos
+    filaRealIndex++; // Incrementar solo para filas de datos
   });
   
-  // 🆕 CAPTURAR OBSERVACIONES
+  // CAPTURAR OBSERVACIONES
   const observaciones = [];
   document.querySelectorAll(".observacion-input").forEach(input => {
     observaciones.push({
@@ -425,11 +425,11 @@ function capturarDatosPorPosicion() {
  */
 function restaurarDatosPorPosicion(datos) {
 
-  // 🆕 Manejar formato antiguo y nuevo
+  // Manejar formato antiguo y nuevo
   const datosCeldas = datos.celdas || datos;
   const datosObservaciones = datos.observaciones || [];
   const filas = document.querySelectorAll("tbody tr");
-  let filaRealIndex = 0; // 🆕 Solo contar filas de datos
+  let filaRealIndex = 0; // Solo contar filas de datos
   
   filas.forEach((fila, filaIndex) => {
     // Saltar filas de tipo
@@ -450,9 +450,9 @@ function restaurarDatosPorPosicion(datos) {
       recalcularTotal(fila);
     }
     
-    filaRealIndex++; // 🆕 Incrementar solo para filas de datos
+    filaRealIndex++; // Incrementar solo para filas de datos
   });
-  // 🆕 RESTAURAR OBSERVACIONES
+  // RESTAURAR OBSERVACIONES
   datosObservaciones.forEach(obs => {
     const input = document.querySelector(`.observacion-input[data-tipo="${CSS.escape(obs.tipo)}"]`);
     if (input) {
@@ -512,15 +512,15 @@ function resaltarCelda(celda) {
   const fila = celda.closest("tr");
   const colIndex = Array.from(celda.parentNode.children).indexOf(celda);
 
-  // 👇 Resaltar TODA la fila (no solo una clase)
+  // Resaltar TODA la fila (no solo una clase)
   fila.classList.add("highlight-row");
   
-  // 👇 Resaltar columna
+  // Resaltar columna
   tabla.querySelectorAll(`tr td:nth-child(${colIndex + 1}), tr th:nth-child(${colIndex + 1})`).forEach(td => {
     td.classList.add("highlight-col");
   });
   
-  // 👇 Resaltar la celda activa con efecto especial
+  // Resaltar la celda activa con efecto especial
   celda.classList.add("highlight-active-cell");
 }
 
@@ -539,11 +539,11 @@ function quitarResaltado() {
     tab.addEventListener("click", () => {
       const linea = tab.dataset.linea;
 
-      // 🆕 Si es pestaña Admin, verificar autenticación
+      // Si es pestaña Admin, verificar autenticación
       if (linea === "Admin") {
         ocultarFormulario();
         ocultarHistorial();
-        ocultarBotonGuardar(); // 🆕 Ocultar botón Guardar
+        ocultarBotonGuardar(); // Ocultar botón Guardar
         verificarAccesoAdmin(linea);
         
         // Cambiar visualmente la pestaña activa
@@ -553,9 +553,9 @@ function quitarResaltado() {
         return;
       }
 
-      // 🆕 Si NO es Admin, mostrar formulario y botón guardar
+      // Si NO es Admin, mostrar formulario y botón guardar
       mostrarFormulario();
-      mostrarBotonGuardar(); // 🆕 Mostrar botón Guardar
+      mostrarBotonGuardar(); // Mostrar botón Guardar
 
       // Cerrar sesión de admin al cambiar de pestaña
       if (adminAutenticado) {
@@ -1092,7 +1092,7 @@ async function ejecutarGuardado() {
 
     const datosParaGuardar = [];
 
-    // 🆕 OBTENER OBSERVACIONES POR TIPO
+    // OBTENER OBSERVACIONES POR TIPO
     const observacionesPorTipo = {};
     document.querySelectorAll(".observacion-input").forEach(input => {
       const tipo = input.dataset.tipo;
@@ -1182,7 +1182,7 @@ async function ejecutarGuardado() {
   }
 }
 // ======================================================
-// 🔹 FUNCIÓN PARA RECOPILAR DATOS POR HORA Y DESCRIPCIÓN
+// FUNCIÓN PARA RECOPILAR DATOS POR HORA Y DESCRIPCIÓN
 // ======================================================
 function recopilarDatosDescripciones() {
   const linea = currentLinea;
@@ -1809,7 +1809,7 @@ function mostrarPaginacion(data, linea) {
     return;
   }
 
-  // 🆕 LIMITAR A MÁXIMO 10 PÁGINAS
+  // LIMITAR A MÁXIMO 10 PÁGINAS
   const totalPaginasMostrar = Math.min(data.total_paginas, 10);
   
   let html = '<div class="d-flex justify-content-between align-items-center mt-3">';

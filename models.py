@@ -1,4 +1,9 @@
 # models.py
+"""
+Autor: Brayan Avendaño / Maquinando Controls
+Versión: 2.0
+Fecha: 2024
+"""
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.sql import func
 from database import Base
@@ -6,7 +11,6 @@ from sqlalchemy import Date
 
 
 #MARK: INFO PRODUCTO
-# --- MODELO PARA INFORMACION DEL PRODUCTO ---
 class InfoProducto(Base):
     __tablename__ = "info_producto"
     id = Column(Integer, primary_key=True, index=True)
@@ -18,7 +22,6 @@ class InfoProducto(Base):
 
 
 #MARK: INSPECTORES
-# --- MODELO PARA INSPECTORES ---
 class Inspector(Base):
     __tablename__ = "inspectores"
 
