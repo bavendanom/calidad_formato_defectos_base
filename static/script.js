@@ -595,9 +595,9 @@ function quitarResaltado() {
   // MARK: Función para ocultar botón Guardar Y observaciones
   // ==============================
   function ocultarBotonGuardar() {
-    const contenedorObservaciones = document.getElementById("contenedorObservaciones");
-    if (contenedorObservaciones) {
-      contenedorObservaciones.style.display = "none";
+    const btnGuardar = document.getElementById("btnGuardar");
+    if (btnGuardar) {
+      btnGuardar.style.display = "none";
     }
   }
 
@@ -605,9 +605,9 @@ function quitarResaltado() {
   // MARK: Función para mostrar botón Guardar Y observaciones
   // ==============================
   function mostrarBotonGuardar() {
-    const contenedorObservaciones = document.getElementById("contenedorObservaciones");
-    if (contenedorObservaciones) {
-      contenedorObservaciones.style.display = "block";
+    const btnGuardar = document.getElementById("btnGuardar");
+    if (btnGuardar) {
+      btnGuardar.style.display = "block";
     }
   }
 
