@@ -1,298 +1,720 @@
 <!DOCTYPE html>
 <html lang="es">
+<!--
+================================================================================
+SISTEMA DE REGISTRO DE DEFECTOS - INTERFAZ PRINCIPAL
+================================================================================
+Descripción: Interfaz web para el registro y seguimiento de defectos en líneas
+             de producción. Permite gestión en tiempo real, autoguardado,
+             historial con filtros y panel de administración.
+
+Autor: Brayan Avendaño / Maquinando Controls
+Versión: 2.0
+Fecha: 2024
+
+Tecnologías:
+  - Bootstrap 5.3.3 (UI Framework)
+  - Vanilla JavaScript (Lógica de negocio)
+  - FastAPI Backend (API REST)
+  
+Estructura de pestañas:
+  - Líneas 1-4: Líneas de producción principales
+  - Tetrapack: Línea especializada
+  - Shot: Línea de productos shot
+  - Admin: Panel de administración (requiere autenticación)
+================================================================================
+-->
+
 <head>
+  <!-- ============================================ -->
+  <!-- META INFORMACIÓN -->
+  <!-- ============================================ -->
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sistema de registro de defectos para control de calidad en líneas de producción">
+  <meta name="author" content="Brayan Avendaño / Maquinando Controls">
+  
   <title>Registro de Defectos v2</title>
+  
+  <!-- ============================================ -->
+  <!-- FAVICON -->
+  <!-- ============================================ -->
+  <link rel="icon" type="image/x-icon" href="../static/img/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="../static/img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../static/img/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="../static/img/apple-touch-icon.png">
+  
+  <!-- ============================================ -->
+  
+  <!-- ============================================ -->
+  <!-- ESTILOS EXTERNOS -->
+  <!-- ============================================ -->
+  <!-- Bootstrap 5.3.3 - Framework CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Estilos personalizados del sistema -->
   <link rel="stylesheet" href="../static/style.css">
 </head>
+
 <body>
-
-<div class="container-fluid p-4">
-  <div class="d-flex justify-content-between align-items-center mb-3 header-logos">
-    <div class="logo-left">
-      <img src="../static/img/logo_MC.png" alt="Logo Izquierdo" class="img-fluid">
+  <!-- ============================================ -->
+  <!-- CONTENEDOR PRINCIPAL -->
+  <!-- ============================================ -->
+  <div class="container-fluid p-4">
+    
+    <!-- ============================================ -->
+    <!-- HEADER: LOGOS Y TÍTULO -->
+    <!-- ============================================ -->
+    <div class="d-flex justify-content-between align-items-center mb-3 header-logos">
+      <!-- Logo izquierdo -->
+      <div class="logo-left">
+        <img src="../static/img/logo_MC.png" alt="Logo Maquinando Controls" class="img-fluid">
+      </div>
+      
+      <!-- Título central -->
+      <h3 class="text-primary text-center mb-0 flex-grow-1">
+        📋 Registro de Defectos
+      </h3>
+      
+      <!-- Logo derecho -->
+      <div class="logo-right">
+        <img src="../static/img/logo_ILC.png" alt="Logo ILC" class="img-fluid">
+      </div>
     </div>
-    <h3 class="text-primary text-center mb-0 flex-grow-1">📋 Registro de Defectos</h3>
-    <div class="logo-right">
-      <img src="../static/img/logo_ILC.png" alt="Logo Derecho" class="img-fluid">
-    </div>
-  </div>
-  <!-- 🔹 Pestañas -->
-  <ul class="nav nav-pills justify-content-center mb-4" id="lineTabs">
-    <li class="nav-item"><button class="nav-link active" data-linea="Linea 1">Línea 1</button></li>
-    <li class="nav-item"><button class="nav-link" data-linea="Linea 2">Línea 2</button></li>
-    <li class="nav-item"><button class="nav-link" data-linea="Linea 3">Línea 3</button></li>
-    <li class="nav-item"><button class="nav-link" data-linea="Linea 4">Línea 4</button></li>
-    <li class="nav-item"><button class="nav-link" data-linea="Tetrapack">Tetrapack</button></li>
-    <li class="nav-item"><button class="nav-link" data-linea="Shot">Shot</button></li>
-    <li class="nav-item"><button class="nav-link" data-linea="Admin">Admin</button></li>
-  </ul>
 
-  <!-- 🔹 Contenido principal -->
-  <div class="card shadow-sm p-4" id="mainCard">
-    <div id="formSection">
-      <!-- Formulario (izquierda) + Info Producto (derecha) -->
-      <div class="row g-4 mb-3">
+    <!-- ============================================ -->
+    <!-- NAVEGACIÓN: PESTAÑAS DE LÍNEAS -->
+    <!-- ============================================ -->
+    <!--
+      Sistema de navegación por pestañas que permite cambiar entre diferentes
+      líneas de producción y el panel de administración.
+      
+      Comportamiento:
+        - Click en pestaña: Cambia línea activa
+        - La pestaña "Admin" requiere autenticación
+        - Se mantiene estado por línea en localStorage
+        - Cada línea tiene su propia configuración de turnos
+    -->
+    <ul class="nav nav-pills justify-content-center mb-4" id="lineTabs">
+      <li class="nav-item">
+        <button class="nav-link active" data-linea="Linea 1">Línea 1</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" data-linea="Linea 2">Línea 2</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" data-linea="Linea 3">Línea 3</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" data-linea="Linea 4">Línea 4</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" data-linea="Tetrapack">Tetrapack</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" data-linea="Shot">Shot</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" data-linea="Admin">Admin</button>
+      </li>
+    </ul>
+
+    <!-- ============================================ -->
+    <!-- TARJETA PRINCIPAL DE CONTENIDO -->
+    <!-- ============================================ -->
+    <div class="card shadow-sm p-4" id="mainCard">
+      
+      <!-- ============================================ -->
+      <!-- SECCIÓN: FORMULARIO DE REGISTRO -->
+      <!-- ============================================ -->
+      <!--
+        Formulario principal para registrar defectos.
+        Contiene campos de información general y consulta de productos.
         
-        <!-- COLUMNA IZQUIERDA: Campos del formulario -->
-        <div class="col-lg-6">
-          <div class="row g-3">
+        Estados:
+          - Visible: En líneas de producción (1-4, Tetrapack, Shot)
+          - Oculto: En pestaña Admin
+      -->
+      <div id="formSection">
+        <div class="row g-4 mb-3">
+          
+          <!-- ========================================== -->
+          <!-- COLUMNA IZQUIERDA: CAMPOS DE ENTRADA -->
+          <!-- ========================================== -->
+          <div class="col-lg-6">
+            <div class="row g-3">
+              
+              <!-- Campo: Fecha -->
+              <!--
+                Input de fecha con botón "Hoy" para autocompletar.
+                Formato: YYYY-MM-DD
+              -->
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Fecha:</label>
+                <div class="input-group">
+                  <input 
+                    type="date" 
+                    id="fecha" 
+                    class="form-control"
+                    aria-label="Fecha de registro">
+                  <button 
+                    class="btn btn-outline-success" 
+                    id="btnHoy"
+                    title="Establecer fecha de hoy">
+                    Hoy
+                  </button>
+                </div>
+              </div>
+
+              <!-- Campo: Inspector -->
+              <!--
+                Selector de inspector cargado dinámicamente desde la API.
+                Se llena en la inicialización mediante cargarInspectores()
+              -->
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Inspector:</label>
+                <select 
+                  id="inspector" 
+                  class="form-select" 
+                  required
+                  aria-label="Seleccionar inspector">
+                  <option value="">Cargando...</option>
+                </select>
+              </div>
+
+              <!-- Campo: Código AX -->
+              <!--
+                Input con autocompletado para código de producto.
+                Características:
+                  - Autocompletado en tiempo real (>= 1 carácter)
+                  - Navegación con teclado (↑↓ Enter Escape)
+                  - Consulta automática al seleccionar
+              -->
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Código AX:</label>
+                <div class="input-group">
+                  <input 
+                    type="text" 
+                    id="codigoAX" 
+                    class="form-control" 
+                    placeholder="Ej: 4-03-0000-0019"
+                    autocomplete="off"
+                    aria-label="Código AX del producto">
+                  <button 
+                    class="btn btn-outline-primary" 
+                    id="btnConsultar"
+                    title="Consultar información del producto">
+                    Consultar
+                  </button>
+                </div>
+              </div>
+
+              <!-- Campo: Lote -->
+              <!--
+                Número de lote del producto inspeccionado.
+              -->
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Lote:</label>
+                <input 
+                  type="text" 
+                  id="lote" 
+                  class="form-control" 
+                  placeholder="Ej: 115"
+                  aria-label="Número de lote">
+              </div>
+
+            </div>
             
-            <!-- Fecha -->
-            <div class="col-md-6">
-              <label class="form-label fw-bold">Fecha:</label>
-              <div class="input-group">
-                <input type="date" id="fecha" class="form-control">
-                <button class="btn btn-outline-success" id="btnHoy">Hoy</button>
+            <!-- ========================================== -->
+            <!-- SELECTOR DE TURNO -->
+            <!-- ========================================== -->
+            <!--
+              Selector de turno de trabajo.
+              
+              Turnos disponibles:
+                1. 7:00 - 15:30   (Turno mañana)
+                2. 15:30 - 00:00  (Turno tarde)
+                3. 7:00 - 18:00   (Turno extendido)
+                4. 18:00 - 6:00   (Turno noche)
+              
+              Comportamiento:
+                - Cambia horas de columnas en la tabla
+                - Mantiene datos por posición (no por hora)
+                - Se guarda en localStorage por línea
+            -->
+            <div class="mt-3 mb-2 d-flex flex-column align-items-start">
+              <label class="fw-bold mb-2">Turno:</label>
+              <div class="d-flex flex-wrap gap-2">
+                <button 
+                  class="btn btn-outline-primary btn-turno" 
+                  data-turno="1"
+                  title="Turno 1: Mañana">
+                  7:00 - 15:30
+                </button>
+                <button 
+                  class="btn btn-outline-primary btn-turno" 
+                  data-turno="2"
+                  title="Turno 2: Tarde">
+                  15:30 - 00:00
+                </button>
+                <button 
+                  class="btn btn-outline-primary btn-turno" 
+                  data-turno="3"
+                  title="Turno 3: Extendido">
+                  7:00 - 18:00
+                </button>
+                <button 
+                  class="btn btn-outline-primary btn-turno" 
+                  data-turno="4"
+                  title="Turno 4: Noche">
+                  18:00 - 6:00
+                </button>
               </div>
             </div>
+          </div>
 
-            <!-- Inspector -->
-            <div class="col-md-6">
-              <label class="form-label fw-bold">Inspector:</label>
-              <select id="inspector" class="form-select" required>
-                <option value="">Cargando...</option>
+          <!-- ========================================== -->
+          <!-- COLUMNA DERECHA: INFORMACIÓN DEL PRODUCTO -->
+          <!-- ========================================== -->
+          <!--
+            Panel que muestra información consultada del producto.
+            Se llena automáticamente al consultar un código AX válido.
+            
+            Campos mostrados:
+              - Código AX
+              - Nombre del producto
+              - Tipo de envase
+              - Destino (nacional/exportación)
+              - Líneas de producción posibles
+          -->
+          <div class="col-lg-6">
+            <label class="form-label fw-bold mb-2">Información del Producto:</label>
+            <div id="infoProducto" class="p-3 border rounded bg-light h-95">
+              <p class="mb-2">
+                <strong>Código:</strong> 
+                <span id="codigoInfo">---</span>
+              </p>
+              <p class="mb-2">
+                <strong>Nombre:</strong> 
+                <span id="nombreInfo">---</span>
+              </p>
+              <p class="mb-2">
+                <strong>Envase:</strong> 
+                <span id="envaseInfo">---</span>
+              </p>
+              <p class="mb-2">
+                <strong>Destino:</strong> 
+                <span id="destinoInfo">---</span>
+              </p>
+              <p class="mb-0">
+                <strong>Líneas de producción:</strong> 
+                <span id="lineasInfo">---</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- SECCIÓN: TABLA DE DEFECTOS -->
+      <!-- ============================================ -->
+      <!--
+        Contenedor donde se renderiza dinámicamente la tabla de defectos.
+        
+        Características:
+          - Generada 100% por JavaScript según línea activa
+          - Celdas editables (contenteditable)
+          - Validación en tiempo real (solo números)
+          - Autoguardado en localStorage
+          - Suma automática por fila (Total día)
+          - Resaltado de celda/fila/columna activa
+          - Observaciones por tipo de defecto
+        
+        Estructura generada:
+          thead: Encabezado con horas del turno
+          tbody:
+            - Fila tipo de defecto (color, nombre)
+            - Filas de descripción (celdas editables)
+            - Fila de observaciones (input texto)
+            - [Se repite para cada tipo de defecto]
+      -->
+      <div 
+        id="tablaDefectos" 
+        class="mt-4 text-center text-muted border p-5 rounded"
+        role="region"
+        aria-label="Tabla de registro de defectos">
+        <p>[ Aquí se cargará dinámicamente la tabla de defectos según la línea seleccionada ]</p>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- BOTÓN: GUARDAR REGISTRO -->
+      <!-- ============================================ -->
+      <!--
+        Botón principal de guardado.
+        
+        Flujo:
+          1. Valida campos obligatorios
+          2. Verifica que haya datos (suma > 0)
+          3. Muestra modal de confirmación
+          4. Al confirmar: Guarda en backend
+          5. Limpia formulario y recarga historial
+        
+        Guarda en dos tablas:
+          - tipos_defectos: Totales por tipo
+          - tipos_defectos_descripcion: Detalle por hora
+      -->
+      <div class="text-end mt-3">
+        <button 
+          class="btn btn-success btn-lg px-5" 
+          id="btnGuardar"
+          title="Guardar registro de defectos">
+          💾 Guardar
+        </button>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- MODAL: CONFIRMACIÓN DE GUARDADO -->
+      <!-- ============================================ -->
+      <!--
+        Modal de confirmación antes de guardar datos.
+        Previene guardados accidentales.
+      -->
+      <div 
+        class="modal fade" 
+        id="modalConfirmarGuardado" 
+        tabindex="-1" 
+        aria-labelledby="modalConfirmarGuardadoLabel" 
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <!-- Header del modal -->
+            <div class="modal-header bg-warning text-dark">
+              <div class="d-flex justify-content-between align-items-center mb-3 header-logos">
+                <div class="logo-left" style="width: 40px; height: 40px;">
+                  <img src="../static/img/logo_ILC.png" alt="Logo ILC" class="img-fluid">
+                </div>
+                <h5 class="text-primary text-center mb-0 flex-grow-1">
+                  Confirmar guardado
+                </h5>
+              </div>
+              <button 
+                type="button" 
+                class="btn-close" 
+                data-bs-dismiss="modal" 
+                aria-label="Cerrar">
+              </button>
+            </div>
+            
+            <!-- Cuerpo del modal -->
+            <div class="modal-body text-center">
+              <div class="mb-3">
+                <i class="bi bi-question-circle-fill text-warning" style="font-size: 3rem;"></i>
+              </div>
+              <h5>¿Está seguro de guardar los datos?</h5>
+              <p class="text-muted mb-0">
+                Esta acción guardará los registros en la base de datos.
+              </p>
+            </div>
+            
+            <!-- Footer con botones -->
+            <div class="modal-footer justify-content-center">
+              <button 
+                type="button" 
+                class="btn btn-secondary px-4" 
+                data-bs-dismiss="modal">
+                ❌ Cancelar
+              </button>
+              <button 
+                type="button" 
+                class="btn btn-success px-4" 
+                id="btnConfirmarGuardado">
+                ✅ Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- MODAL: LOGIN ADMINISTRADOR -->
+      <!-- ============================================ -->
+      <!--
+        Modal de autenticación para acceder al panel de administración.
+        
+        Características:
+          - 3 intentos fallidos → bloqueo temporal (30 segundos)
+          - Contador de intentos visible
+          - Feedback de error en tiempo real
+          - No se puede cerrar con click fuera (backdrop="static")
+      -->
+      <div 
+        class="modal fade" 
+        id="modalLoginAdmin" 
+        data-bs-backdrop="static" 
+        data-bs-keyboard="false" 
+        tabindex="-1" 
+        aria-labelledby="modalLoginAdminLabel" 
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <!-- Header del modal -->
+            <div class="modal-header bg-primary text-white">
+              <h5 class="modal-title" id="modalLoginAdminLabel">
+                🔒 Acceso Administrativo
+              </h5>
+            </div>
+            
+            <!-- Cuerpo del modal -->
+            <div class="modal-body">
+              <!-- Icono de seguridad -->
+              <div class="text-center mb-3">
+                <i class="bi bi-shield-lock-fill text-primary" style="font-size: 3rem;"></i>
+              </div>
+              
+              <p class="text-center mb-3">
+                Ingrese la contraseña de administrador para continuar
+              </p>
+              
+              <!-- Campo de contraseña -->
+              <div class="mb-3">
+                <label for="passwordAdmin" class="form-label fw-bold">Contraseña:</label>
+                <input 
+                  type="password" 
+                  class="form-control" 
+                  id="passwordAdmin" 
+                  placeholder="Ingrese la contraseña"
+                  autocomplete="off"
+                  aria-label="Contraseña de administrador">
+              </div>
+
+              <!-- Mensaje de error (oculto por defecto) -->
+              <div id="errorLoginAdmin" class="alert alert-danger d-none" role="alert">
+                <strong>❌ Error:</strong> 
+                <span id="mensajeErrorLogin"></span>
+              </div>
+
+              <!-- Mensaje de bloqueo (oculto por defecto) -->
+              <div id="bloqueoLoginAdmin" class="alert alert-warning d-none" role="alert">
+                <strong>⏳ Bloqueado:</strong> 
+                Demasiados intentos fallidos. Espere 
+                <span id="tiempoBloqueo">30</span> segundos.
+              </div>
+
+              <!-- Contador de intentos -->
+              <div class="text-muted small">
+                <strong>Intentos restantes:</strong> 
+                <span id="intentosRestantes">3</span>/3
+              </div>
+            </div>
+            
+            <!-- Footer con botones -->
+            <div class="modal-footer">
+              <button 
+                type="button" 
+                class="btn btn-secondary" 
+                id="btnCancelarLoginAdmin">
+                ❌ Cancelar
+              </button>
+              <button 
+                type="button" 
+                class="btn btn-primary" 
+                id="btnIngresarAdmin">
+                ✅ Ingresar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- SECCIÓN: HISTORIAL DE REGISTROS -->
+      <!-- ============================================ -->
+      <!--
+        Panel de historial con filtros avanzados y paginación.
+        
+        Características:
+          - Dos vistas: Detallado y Resumen
+          - Filtros múltiples (fecha, tipo, lote, código)
+          - Paginación (20 registros por página)
+          - Autocompletado en filtro de código
+          - Colores por tipo de defecto
+          - Actualización automática después de guardar
+      -->
+      <div id="seccionHistorial" class="historial-section mt-5">
+        
+        <!-- Header del historial -->
+        <div class="historial-header d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">
+            📋 Historial de Registros - 
+            <span id="tituloLineaHistorial">Línea 1</span>
+          </h4>
+          
+          <!-- Botones de control -->
+          <div class="btn-group" role="group" aria-label="Controles de historial">
+            <button 
+              class="btn btn-sm btn-primary active" 
+              id="btnHistorialDetallado"
+              title="Vista detallada por hora">
+              📊 Detallado
+            </button>
+            <button 
+              class="btn btn-sm btn-outline-success" 
+              id="btnHistorialResumen"
+              title="Vista resumida por tipo">
+              📈 Resumen
+            </button>
+            <button 
+              class="btn btn-sm btn-outline-secondary" 
+              id="btnRefrescarHistorial"
+              title="Recargar historial">
+              🔄 Refrescar
+            </button>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PANEL DE FILTROS -->
+        <!-- ========================================== -->
+        <div class="filtros-historial card p-3 mb-3">
+          <div class="row g-2">
+            
+            <!-- Filtro: Fecha de inicio -->
+            <div class="col-md-3">
+              <label class="form-label fw-bold">Fecha inicio:</label>
+              <input 
+                type="date" 
+                id="filtroFechaInicio" 
+                class="form-control form-control-sm"
+                aria-label="Fecha de inicio del filtro">
+            </div>
+            
+            <!-- Filtro: Fecha de fin -->
+            <div class="col-md-3">
+              <label class="form-label fw-bold">Fecha fin:</label>
+              <input 
+                type="date" 
+                id="filtroFechaFin" 
+                class="form-control form-control-sm"
+                aria-label="Fecha de fin del filtro">
+            </div>
+            
+            <!-- Filtro: Tipo de defecto -->
+            <div class="col-md-3">
+              <label class="form-label fw-bold">Tipo de defecto:</label>
+              <select 
+                id="filtroTipoDefecto" 
+                class="form-select form-select-sm"
+                aria-label="Filtrar por tipo de defecto">
+                <option value="todos">Todos</option>
+                <!-- Opciones cargadas dinámicamente -->
               </select>
             </div>
-
-            <!-- Código AX -->
-            <div class="col-md-6">
-              <label class="form-label fw-bold">Código AX:</label>
-              <div class="input-group">
-                <input type="text" id="codigoAX" class="form-control" placeholder="Ej: 4-03-0000-0019">
-                <button class="btn btn-outline-primary" id="btnConsultar">Consultar</button>
-              </div>
-            </div>
-
-            <!-- Lote -->
-            <div class="col-md-6">
-              <label class="form-label fw-bold">Lote:</label>
-              <input type="text" id="lote" class="form-control" placeholder="Ej: 115">
-            </div>
-
-          </div>
-          <!-- Selector de Turno (se mantiene igual) -->
-          <div class="mt-3 mb-2 d-flex flex-column align-items-start">
-            <label class="fw-bold mb-2">Turno:</label>
-            <div class="d-flex flex-wrap gap-2">
-              <button class="btn btn-outline-primary btn-turno" data-turno="1">7:00 - 15:30</button>
-              <button class="btn btn-outline-primary btn-turno" data-turno="2">15:30 - 00:00</button>
-              <button class="btn btn-outline-primary btn-turno" data-turno="3">7:00 - 18:00</button>
-              <button class="btn btn-outline-primary btn-turno" data-turno="4">18:00 - 6:00</button>
-            </div>
-          </div>
-        </div>
-
-        <!--  COLUMNA DERECHA: Información del producto -->
-        <div class="col-lg-6">
-          <label class="form-label fw-bold mb-2">Información del Producto:</label>
-          <div id="infoProducto" class="p-3 border rounded bg-light h-95">
-            <p class="mb-2"><strong>Código:</strong> <span id="codigoInfo">---</span></p>
-            <p class="mb-2"><strong>Nombre:</strong> <span id="nombreInfo">---</span></p>
-            <p class="mb-2"><strong>Envase:</strong> <span id="envaseInfo">---</span></p>
-            <p class="mb-2"><strong>Destino:</strong> <span id="destinoInfo">---</span></p>
-            <p class="mb-0"><strong>Lineas de producción:</strong> <span id="lineasInfo">---</span></p>
-          </div>
-        </div>
-      </div>
-
-      
-    </div>
-
-    <!-- Campo de observaciones -->
-    <!-- Tabla simulada (placeholder visual) -->
-    <div id="tablaDefectos" class="mt-4 text-center text-muted border p-5 rounded">
-      <p>[ Aquí se cargará dinámicamente la tabla de defectos según la línea seleccionada ]</p>
-    </div>
-
-    <!-- Botón Guardar fuera del contenedor de observaciones -->
-    <div class="text-end mt-3">
-      <button class="btn btn-success btn-lg px-5" id="btnGuardar">
-        💾 Guardar
-      </button>
-    </div>
-
-    <!-- Modal de Login para Admin -->
-    <div class="modal fade" id="modalLoginAdmin" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalLoginAdminLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header bg-primary text-white">
-            <h5 class="modal-title" id="modalLoginAdminLabel">
-              🔒 Acceso Administrativo
-            </h5>
-          </div>
-          <div class="modal-body">
-            <div class="text-center mb-3">
-              <i class="bi bi-shield-lock-fill text-primary" style="font-size: 3rem;"></i>
-            </div>
-            <p class="text-center mb-3">Ingrese la contraseña de administrador para continuar</p>
             
-            <div class="mb-3">
-              <label for="passwordAdmin" class="form-label fw-bold">Contraseña:</label>
-              <input 
-                type="password" 
-                class="form-control" 
-                id="passwordAdmin" 
-                placeholder="Ingrese la contraseña"
-                autocomplete="off">
-            </div>
-
-            <!-- Mensaje de error -->
-            <div id="errorLoginAdmin" class="alert alert-danger d-none" role="alert">
-              <strong>❌ Error:</strong> <span id="mensajeErrorLogin"></span>
-            </div>
-
-            <!-- Mensaje de bloqueo -->
-            <div id="bloqueoLoginAdmin" class="alert alert-warning d-none" role="alert">
-              <strong>⏳ Bloqueado:</strong> Demasiados intentos fallidos. Espere <span id="tiempoBloqueo">30</span> segundos.
-            </div>
-
-            <div class="text-muted small">
-              <strong>Intentos restantes:</strong> <span id="intentosRestantes">3</span>/3
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" id="btnCancelarLoginAdmin">
-              ❌ Cancelar
-            </button>
-            <button type="button" class="btn btn-primary" id="btnIngresarAdmin">
-              ✅ Ingresar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal de confirmación para guardar -->
-    <div class="modal fade" id="modalConfirmarGuardado" tabindex="-1" aria-labelledby="modalConfirmarGuardadoLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header bg-warning text-dark">
-            <div class="d-flex justify-content-between align-items-center mb-3 header-logos">
-              <div class="logo-left" style="width: 40px; height: 40px;">
-                <img src="../static/img/logo_ILC.png" alt="Logo Izquierdo" class="img-fluid">
-              </div>
-              <h5 class="text-primary text-center mb-0 flex-grow-1">Confirmar guardado</h5>
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body text-center">
-            <div class="mb-3">
-              <i class="bi bi-question-circle-fill text-warning" style="font-size: 3rem;"></i>
-            </div>
-            <h5>¿Está seguro de guardar los datos?</h5>
-            <p class="text-muted mb-0">Esta acción guardará los registros en la base de datos.</p>
-          </div>
-          <div class="modal-footer justify-content-center">
-            <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
-              ❌ Cancelar
-            </button>
-            <button type="button" class="btn btn-success px-4" id="btnConfirmarGuardado">
-              ✅ Aceptar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-
-
-    <!-- SECCIÓN DE HISTORIAL -->
-    <div id="seccionHistorial" class="historial-section mt-5">
-      <div class="historial-header d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">📋 Historial de Registros - <span id="tituloLineaHistorial">Línea 1</span></h4>
-        <div class="btn-group" role="group">
-          <button class="btn btn-sm btn-primary active" id="btnHistorialDetallado">
-            📊 Detallado
-          </button>
-          <button class="btn btn-sm btn-outline-success" id="btnHistorialResumen">
-            📈 Resumen
-          </button>
-          <button class="btn btn-sm btn-outline-secondary" id="btnRefrescarHistorial">
-            🔄 Refrescar
-          </button>
-        </div>
-      </div>
-
-      <!-- Filtros -->
-      <div class="filtros-historial card p-3 mb-3">
-        <div class="row g-2">
-          <!-- Filtro por Fecha de inicio -->
-          <div class="col-md-3">
-            <label class="form-label fw-bold">Fecha inicio:</label>
-            <input type="date" id="filtroFechaInicio" class="form-control form-control-sm">
-          </div>
-          <!-- Filtro por Fecha de fin -->
-          <div class="col-md-3">
-            <label class="form-label fw-bold">Fecha fin:</label>
-            <input type="date" id="filtroFechaFin" class="form-control form-control-sm">
-          </div>
-          <!-- Filtro por Tipo de defeccto -->
-          <div class="col-md-3">
-            <label class="form-label fw-bold">Tipo de defecto:</label>
-            <select id="filtroTipoDefecto" class="form-select form-select-sm">
-              <option value="todos">Todos</option>
-            </select>
-          </div>
-          <!-- Filtro por Lote -->
-          <div class="col-md-2">
-            <label class="form-label fw-bold">Lote:</label>
-            <input type="text" id="filtroLote" class="form-control form-control-sm" placeholder="Ej: 115">
-          </div>
-          <!-- Filtro por Código AX -->
-          <div class="col-md-2">
-            <label class="form-label fw-bold">Código AX:</label>
-            <div style="position: relative;">
+            <!-- Filtro: Lote -->
+            <div class="col-md-2">
+              <label class="form-label fw-bold">Lote:</label>
               <input 
                 type="text" 
-                id="filtroCodigoAX" 
+                id="filtroLote" 
                 class="form-control form-control-sm" 
-                placeholder="Ej: 4-03-0000-0019"
-                autocomplete="off">
+                placeholder="Ej: 115"
+                aria-label="Filtrar por lote">
+            </div>
+            
+            <!-- Filtro: Código AX (con autocompletado) -->
+            <div class="col-md-2">
+              <label class="form-label fw-bold">Código AX:</label>
+              <div style="position: relative;">
+                <input 
+                  type="text" 
+                  id="filtroCodigoAX" 
+                  class="form-control form-control-sm" 
+                  placeholder="Ej: 4-03-0000-0019"
+                  autocomplete="off"
+                  aria-label="Filtrar por código AX">
+                <!-- Contenedor de autocompletado generado por JS -->
+              </div>
+            </div>
+            
+            <!-- Botón aplicar filtros -->
+            <div class="col-md-3 d-flex align-items-end">
+              <button 
+                class="btn btn-success btn-sm w-100" 
+                id="btnAplicarFiltros"
+                title="Aplicar filtros seleccionados">
+                🔍 Aplicar Filtros
+              </button>
             </div>
           </div>
-          <div class="col-md-3 d-flex align-items-end">
-            <button class="btn btn-success btn-sm w-100" id="btnAplicarFiltros">
-              🔍 Aplicar Filtros
-            </button>
-          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TABLA DE HISTORIAL -->
+        <!-- ========================================== -->
+        <!--
+          Tabla responsive con scroll vertical.
+          Las columnas se adaptan según la vista (detallado/resumen).
+          
+          Vista Detallada:
+            ID | Fecha | Hora | Código | Lote | Nombre | Envase | 
+            Destino | Tipo | Descripción | Cantidad
+          
+          Vista Resumen:
+            ID | Fecha/Hora | Código | Lote | Nombre | Envase | 
+            Destino | Tipo | Observaciones | Total
+        -->
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered historial-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Código</th>
+                <th>Lote</th>
+                <th>Nombre</th>
+                <th>Envase</th>
+                <th>Destino</th>
+                <th>Tipo Defecto</th>
+                <th>Descripción</th>
+                <th>Cantidad</th>
+              </tr>
+            </thead>
+            <tbody id="historialTableBody">
+              <tr>
+                <td colspan="11" class="text-center">Cargando...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PAGINACIÓN -->
+        <!-- ========================================== -->
+        <!--
+          Controles de paginación generados dinámicamente.
+          Muestra: Anterior | 1 2 ... 5 6 7 ... 10 | Siguiente
+          Límite: Máximo 10 páginas visibles
+        -->
+        <div 
+          class="paginacion-historial" 
+          id="paginacionHistorial"
+          role="navigation"
+          aria-label="Paginación del historial">
+          <!-- Contenido generado dinámicamente por JS -->
         </div>
       </div>
 
-      <!-- Tabla de historial -->
-      <div class="table-responsive">
-        <table class="table table-sm table-bordered historial-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Fecha</th>
-              <th>Hora</th>
-              <th>Código</th>
-              <th>Lote</th>
-              <th>Nombre</th>
-              <th>Envase</th>
-              <th>Destino</th>
-              <th>Tipo Defecto</th>
-              <th>Descripción</th>
-              <th>Cantidad</th>
-            </tr>
-          </thead>
-          <tbody id="historialTableBody">
-            <tr>
-              <td colspan="9" class="text-center">Cargando...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Paginación -->
-      <div class="paginacion-historial" id="paginacionHistorial"></div>
     </div>
   </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../static/script.js"></script>
+  <!-- ============================================ -->
+  <!-- SCRIPTS EXTERNOS -->
+  <!-- ============================================ -->
+  <!-- Bootstrap Bundle (incluye Popper.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Script principal del sistema -->
+  <script src="../static/script.js"></script>
 </body>
 </html>

@@ -1,94 +1,182 @@
-/* ============ ESTILOS GENERALES ============ */
+/*
+================================================================================
+SISTEMA DE REGISTRO DE DEFECTOS - ESTILOS PRINCIPALES
+================================================================================
+Descripción: Hoja de estilos principal del sistema de registro de defectos.
+             Define la apariencia visual, interacciones y responsividad de
+             toda la interfaz.
+
+Autor: Brayan Avendaño / Maquinando Controls
+Versión: 2.0
+Fecha: 2024
+
+Estructura:
+  1. Estilos generales (tipografía, colores base)
+  2. Layout y navegación (header, pestañas, contenedores)
+  3. Tabla de defectos (estructura, interacción)
+  4. Validación y feedback visual
+  5. Autocompletado (formulario y filtros)
+  6. Modales (confirmación, login)
+  7. Panel de administración
+  8. Historial y paginación
+
+Paleta de colores:
+  - Primario: #0d6efd (Bootstrap blue)
+  - Éxito: #28a745 (Bootstrap green)
+  - Advertencia: #ffc107 (Bootstrap yellow)
+  - Peligro: #dc3545 (Bootstrap red)
+  - Fondo: #f5f8fa (Gris claro)
+================================================================================
+*/
+
+
+/* ============================================================================
+   MARK: ESTILOS GENERALES
+   ============================================================================ */
+
+/**
+ * Configuración del body principal.
+ * Define el fondo y la tipografía base de toda la aplicación.
+ */
 body {
   background-color: #f5f8fa;
-  font-family: "Segoe UI", sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/**
+ * Títulos principales con línea decorativa inferior.
+ */
 h2 {
   border-bottom: 2px dashed #0d6efd;
   padding-bottom: 5px;
 }
 
-/* ============ LAYOUT Y NAVEGACIÓN ============ */
-/* 🔹 Estilo para los botones de las líneas */
+
+/* ============================================================================
+   MARK: LAYOUT Y NAVEGACIÓN
+   ============================================================================ */
+
+/**
+ * Pestañas de líneas de producción.
+ * Botones redondeados con efecto hover y transiciones suaves.
+ */
 #lineTabs .nav-link {
-  font-size: 1.1rem;        /* tamaño del texto (aumenta o reduce) */
-  padding: 0.6rem 1.4rem;   /* altura y ancho del botón */
-  border-radius: 30px;      /* forma más redondeada */
-  font-weight: 600;         /* texto más marcado */
-  transition: all 0.2s ease; /* Suaviza el efecto al pasar el mouse */
+  font-size: 1.1rem;
+  padding: 0.6rem 1.4rem;
+  border-radius: 30px;
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
-/* 🔹 Espaciado entre botones */
+/**
+ * Espaciado horizontal entre botones de pestañas.
+ */
 #lineTabs .nav-item {
-  margin: 0 10px;             /* Espacio horizontal entre los botones */
+  margin: 0 10px;
 }
 
-/* 🔹 Botón activo (seleccionado) */
+/**
+ * Estado activo de pestaña.
+ * Resalta la pestaña seleccionada con color azul y efecto de escala.
+ */
 #lineTabs .nav-link.active {
-  background-color: #0d6efd; /* azul Bootstrap */
+  background-color: #0d6efd;
   color: white;
-  transform: scale(1.05);    /* efecto leve de agrandado al activo */
+  transform: scale(1.05);
 }
 
-/* 🔹 Efecto hover (opcional para mejor sensación visual) */
+/**
+ * Efecto hover en pestañas.
+ * Cambia color de fondo y aplica ligero zoom al pasar el mouse.
+ */
 #lineTabs .nav-link:hover {
   background-color: #3c84f0;
   transform: scale(1.03);
 }
 
+/**
+ * Tarjeta principal que contiene formulario y tabla.
+ * Define fondo, bordes y espaciado del contenedor principal.
+ */
 #mainCard {
   background-color: #eaf3f8;
   border: 1px dashed #0d6efd;
   border-radius: 10px;
 }
 
+/**
+ * Panel de información del producto consultado.
+ */
 #infoProducto {
   background-color: #f0f7ff;
 }
 
+/**
+ * Botón de turno activo.
+ * Resalta el turno seleccionado actualmente.
+ */
 .btn-turno.active {
   background-color: #0d6efd;
   color: white;
 }
 
-/* ============ ESTILOS DE TABLA DE DEFECTOS ============ */
 
-/* Contenedor de la tabla (para scroll) */
+/* ============================================================================
+   MARK: TABLA DE DEFECTOS
+   ============================================================================ */
+
+/**
+ * Contenedor principal de la tabla con scroll vertical.
+ * Limita la altura y permite desplazamiento para tablas grandes.
+ */
 #tablaDefectos {
   background-color: #ffffff;
-  font-style: italic; /* Estilo original */
+  font-style: italic;
   max-height: 600px;
   overflow-y: auto;
   position: relative;
 }
 
-/* Tabla principal */
+/**
+ * Tabla principal de defectos.
+ * Configuración base con separación de bordes para sticky header.
+ */
 .defectos-table {
   font-size: 0.9rem;
   background-color: white;
-  border-collapse: separate; /* Necesario para 'position: sticky' */
+  border-collapse: separate; /* Requerido para position: sticky */
   border-spacing: 0;
 }
 
-/* Encabezado fijo (sticky) */
+/**
+ * Encabezado fijo (sticky) de la tabla.
+ * Se mantiene visible al hacer scroll vertical.
+ * 
+ * Nota: position: sticky requiere border-collapse: separate en la tabla padre.
+ */
 .defectos-table thead {
   position: sticky;
   top: 0;
   z-index: 10;
-  background-color: #9ab8e6; /* Fondo para el 'thead' pegajoso */
+  background-color: #9ab8e6;
 }
 
-/* Celdas del encabezado (th) */
+/**
+ * Celdas del encabezado (th).
+ * Define estilos para las celdas de horas en el encabezado.
+ */
 .defectos-table th {
   background-color: #9ab8e6;
   font-weight: bold;
   text-align: center;
   border: 1px solid #b8c8e2;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Sombra para destacar */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Celdas del cuerpo (td) */
+/**
+ * Celdas del cuerpo (td).
+ * Establece tamaño mínimo y alineación vertical.
+ */
 .defectos-table td {
   border: 1px solid #b8c8e2;
   min-width: 60px;
@@ -96,7 +184,10 @@ h2 {
   vertical-align: middle;
 }
 
-/* Filas de tipo de defecto (separadores) */
+/**
+ * Filas de tipo de defecto (encabezados de grupo).
+ * Separan visualmente cada tipo de defecto en la tabla.
+ */
 .tipo-defecto {
   background-color: #f6faff;
   text-transform: uppercase;
@@ -104,211 +195,145 @@ h2 {
   border: 1px dashed #a0b8e0 !important;
 }
 
-/* Estilos de filas y celdas específicas */
+/**
+ * Columna de totales del día.
+ * Resalta los totales calculados por fila.
+ */
 .total-dia {
   font-weight: bold;
   color: #0d6efd;
 }
 
+/**
+ * Primera columna de cada fila (descripción del defecto).
+ */
 tr td:first-child {
   font-weight: 500;
 }
 
+/**
+ * Filas alternadas (zebra striping).
+ * Mejora la legibilidad de tablas largas.
+ */
 tbody tr:nth-child(even) {
   background-color: #fdfdfd;
 }
 
-/* ============ INTERACCIÓN DE CELDAS ============ */
 
-/* Hover mejorado */
+/* ============================================================================
+   MARK: INTERACCIÓN DE CELDAS
+   ============================================================================ */
+
+/**
+ * Efecto hover en celdas editables.
+ * Resalta la celda al pasar el mouse indicando que es editable.
+ */
 .celda-input:hover {
-  background-color: #fff3cd; /* Amarillo suave */
+  background-color: #fff3cd;
   cursor: pointer;
   border: 1px solid #ffc107;
 }
 
-/* Focus mejorado (con sintaxis corregida) */
+/**
+ * Celda con foco (activa para edición).
+ * Resalta visualmente la celda que está siendo editada.
+ */
 .celda-input:focus {
   outline: none;
   background-color: #eef6ff;
   box-shadow: 0 0 5px rgba(13, 110, 253, 0.4);
 }
 
-/* ============ RESALTADO DE FILA/COLUMNA/CELDA ============ */
 
-/* Resaltar la fila completa */
+/* ============================================================================
+   MARK: RESALTADO DE FILA/COLUMNA/CELDA
+   ============================================================================ */
+
+/**
+ * Resaltado de toda la fila de la celda activa.
+ * Se aplica cuando una celda tiene foco para mejorar orientación visual.
+ */
 .highlight-row td {
-  background-color: rgba(173, 216, 230, 0.4) !important; /* Amarillo muy claro */
+  background-color: rgba(173, 216, 230, 0.4) !important;
 }
 
-/* Resaltar la columna completa */
+/**
+ * Resaltado de toda la columna de la celda activa.
+ * Facilita el seguimiento vertical de la hora seleccionada.
+ */
 .highlight-col {
-  background-color: rgba(173, 216, 230, 0.4) !important; /* Azul claro */
+  background-color: rgba(173, 216, 230, 0.4) !important;
 }
 
-/* Resaltar la celda activa (la que tiene el foco) */
+/**
+ * Resaltado de la celda activa (la que tiene el foco).
+ * Combina resaltado de fila + columna + énfasis adicional en la celda.
+ */
 .highlight-active-cell {
-  background-color: rgba(13, 110, 253, 0.3) !important; /* Azul más fuerte */
+  background-color: rgba(13, 110, 253, 0.3) !important;
   box-shadow: 0 0 8px rgba(13, 110, 253, 0.5);
   border: 2px solid #0d6efd !important;
 }
 
-/* Asegurar que el texto sea legible al resaltar */
+/**
+ * Asegura legibilidad del texto en celdas resaltadas.
+ */
 .highlight-row td,
 .highlight-col td {
   color: #000 !important;
 }
 
-/* ============ VALIDACIÓN ============ */
 
+/* ============================================================================
+   MARK: VALIDACIÓN Y FEEDBACK VISUAL
+   ============================================================================ */
+
+/**
+ * Campo faltante u obligatorio sin completar.
+ * Se aplica temporalmente cuando falta información requerida.
+ * 
+ * Uso: Se activa al intentar guardar sin campos completos.
+ * Duración: 2.5 segundos (removido por JavaScript).
+ */
 .campo-faltante {
   border: 2px solid red !important;
   box-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
 }
 
-
-/* ============ PANEL DE ADMINISTRACIÓN ============ */
-
-.admin-panel {
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 10px;
-}
-
-.admin-panel h4 {
-  color: #0d6efd;
-  border-bottom: 3px solid #0d6efd;
-  padding-bottom: 10px;
-  margin-bottom: 20px;
-}
-
-.admin-panel .card {
-  border: 1px solid #dee2e6;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.admin-panel .table {
-  margin-bottom: 0;
-}
-
-.admin-panel .table thead {
-  background-color: #0d6efd;
-  color: white;
-}
-
-.admin-panel .btn-danger:hover {
-  transform: scale(1.05);
-  transition: transform 0.2s;
-}
-
-#nuevoInspector {
-  border: 2px solid #ced4da;
-}
-
-#nuevoInspector:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-}
-
-/* ============ PANEL DE ADMINISTRACIÓN MEJORADO ============ */
-
-.admin-panel {
-  padding: 30px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 15px;
-  min-height: 500px;
-}
-
-.admin-panel h4 {
-  color: #0d6efd;
-  border-bottom: 3px solid #0d6efd;
-  padding-bottom: 10px;
-  margin-bottom: 30px;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.admin-panel .card {
-  border: 1px solid #dee2e6;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  transition: transform 0.2s;
-}
-
-.admin-panel .card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-}
-
-.admin-panel .table {
-  margin-bottom: 0;
-  font-size: 0.95rem;
-}
-
-.admin-panel .table thead {
-  background-color: #0d6efd;
-  color: white;
-}
-
-.admin-panel .table tbody tr:hover {
-  background-color: #f0f7ff;
-}
-
-.admin-panel .btn-danger:hover {
-  transform: scale(1.05);
-  transition: transform 0.2s;
-}
-
-#nuevoInspector {
-  border: 2px solid #ced4da;
-  font-size: 1rem;
-  padding: 10px;
-}
-
-#nuevoInspector:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-}
-
-#btnAgregarInspector {
-  padding: 10px 20px;
-  font-weight: 600;
-}
-
-/* ============ VALIDACIÓN DE ENTRADA ============ */
-
-/* Efecto cuando se intenta ingresar caracter inválido */
+/**
+ * Celda inválida (intento de ingresar carácter no numérico).
+ * Animación de "shake" para indicar entrada rechazada.
+ */
 .celda-invalida {
   background-color: #ffe6e6 !important;
   animation: shake 0.2s;
 }
 
+/**
+ * Animación shake para celdas inválidas.
+ * Efecto de sacudida horizontal breve.
+ */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-3px); }
   75% { transform: translateX(3px); }
 }
 
-/* Indicador visual de que solo acepta números */
-.celda-input::before {
-  content: '';
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 6px;
-  height: 6px;
-  background-color: #28a745;
-  border-radius: 50%;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
 
-.celda-input:focus::before {
-  opacity: 1;
-}
+/* ============================================================================
+   MARK: AUTOCOMPLETADO (FORMULARIO)
+   ============================================================================ */
 
-
-/* ============ AUTOCOMPLETADO DE CÓDIGO AX ============ */
-
+/**
+ * Contenedor de sugerencias de autocompletado.
+ * Panel flotante que aparece debajo del input de código AX.
+ * 
+ * Características:
+ *   - Posición absoluta debajo del input
+ *   - Scroll vertical para muchos resultados
+ *   - Z-index alto para aparecer sobre otros elementos
+ *   - Bordes redondeados y sombra
+ */
 .autocompletado-container {
   position: absolute;
   top: 100%;
@@ -321,11 +346,15 @@ tbody tr:nth-child(even) {
   max-height: 300px;
   overflow-y: auto;
   z-index: 1000;
-  display: none;
+  display: none; /* Oculto por defecto */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   margin-top: 2px;
 }
 
+/**
+ * Item individual de sugerencia.
+ * Cada resultado del autocompletado.
+ */
 .sugerencia-item {
   padding: 12px 15px;
   cursor: pointer;
@@ -335,16 +364,27 @@ tbody tr:nth-child(even) {
   align-items: center;
 }
 
+/**
+ * Último item de sugerencia (sin borde inferior).
+ */
 .sugerencia-item:last-child {
   border-bottom: none;
 }
 
+/**
+ * Sugerencia en hover o seleccionada con teclado.
+ * Cambia fondo y agrega borde izquierdo azul.
+ */
 .sugerencia-item:hover,
 .sugerencia-item.seleccionado {
   background-color: #e7f3ff;
   border-left: 4px solid #0d6efd;
 }
 
+/**
+ * Código dentro de la sugerencia.
+ * Resalta el código con fuente monoespaciada y color azul.
+ */
 .codigo-sugerencia {
   font-weight: 600;
   color: #0d6efd;
@@ -352,12 +392,19 @@ tbody tr:nth-child(even) {
   font-family: 'Courier New', monospace;
 }
 
-/* Animación al consultar exitosamente */
+/**
+ * Animación de consulta exitosa.
+ * Se aplica al input después de seleccionar y consultar exitosamente.
+ */
 .consulta-exitosa {
   animation: pulso-verde 0.5s ease;
   border-color: #28a745 !important;
 }
 
+/**
+ * Animación de pulso verde.
+ * Efecto de expansión de sombra verde.
+ */
 @keyframes pulso-verde {
   0%, 100% {
     box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4);
@@ -367,12 +414,18 @@ tbody tr:nth-child(even) {
   }
 }
 
+/**
+ * Input de código AX con foco.
+ */
 #codigoAX:focus {
   border-color: #0d6efd;
   box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 
-/* Scrollbar personalizado para sugerencias */
+/**
+ * Scrollbar personalizado para sugerencias.
+ * Estilo moderno y minimalista.
+ */
 .autocompletado-container::-webkit-scrollbar {
   width: 8px;
 }
@@ -391,230 +444,20 @@ tbody tr:nth-child(even) {
   background: #0b5ed7;
 }
 
-/* Indicador de carga (opcional) */
-.autocompletado-loading {
-  padding: 15px;
-  text-align: center;
-  color: #6c757d;
-  font-style: italic;
-}
 
-/*MARK: HISTORIAL DE REGISTROS*/
-/* ============ HISTORIAL DE REGISTROS ============ */
+/* ============================================================================
+   MARK: AUTOCOMPLETADO (FILTROS DEL HISTORIAL)
+   ============================================================================ */
 
-.historial-section {
-  background-color: #f8f9fa;
-  border-radius: 10px;
-  padding: 20px;
-  margin-top: 30px;
-}
-
-.historial-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #0d6efd;
-}
-
-.historial-header h4 {
-  margin: 0;
-  color: #0d6efd;
-}
-
-.filtros-historial {
-  background-color: #ffffff;
-  border: 1px solid #dee2e6;
-}
-
-.historial-table {
-  font-size: 0.85rem;
-  background-color: white;
-}
-
-.historial-table thead {
-  background-color: #0d6efd;
-  color: white;
-  position: sticky;
-  top: 0;
-  z-index: 5;
-}
-
-.historial-table thead th {
-  font-weight: 600;
-  text-align: center;
-  vertical-align: middle;
-  white-space: nowrap;
-}
-
-.historial-table tbody td {
-  vertical-align: middle;
-}
-
-.historial-table tbody tr {
-  transition: transform 0.2s;
-}
-
-.historial-table tbody tr:hover {
-  transform: scale(1.01);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.paginacion-historial {
-  margin-top: 15px;
-}
-
-.table-responsive {
-  max-height: 600px;
-  overflow-y: auto;
-}
-
-/* Scrollbar del historial */
-.table-responsive::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-.table-responsive::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-.table-responsive::-webkit-scrollbar-thumb {
-  background: #6b7280;
-  border-radius: 5px;
-}
-
-.table-responsive::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
-}
-
-/* ============ MODAL DE CONFIRMACIÓN ============ */
-
-.modal-content {
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-
-.modal-header {
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
-  border-bottom: none;
-}
-
-.modal-footer {
-  border-top: none;
-  padding: 1.5rem;
-}
-
-#modalConfirmarGuardado .modal-body {
-  padding: 2rem;
-}
-
-#modalConfirmarGuardado .btn {
-  min-width: 120px;
-  font-weight: 600;
-}
-
-/* Animación de entrada del modal */
-.modal.fade .modal-dialog {
-  transition: transform 0.3s ease-out;
-  transform: translate(0, -50px);
-}
-
-.modal.show .modal-dialog {
-  transform: none;
-}
-
-/* Icono de advertencia animado */
-@keyframes pulse-warning {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
-
-#modalConfirmarGuardado .bi-question-circle-fill {
-  animation: pulse-warning 2s infinite;
-}
-
-/* ============ MODAL DE LOGIN ADMIN ============ */
-
-#modalLoginAdmin .modal-content {
-  border-radius: 15px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-}
-
-#modalLoginAdmin .modal-header {
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
-}
-
-#modalLoginAdmin .bi-shield-lock-fill {
-  animation: pulse-lock 2s infinite;
-}
-
-@keyframes pulse-lock {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.8;
-  }
-}
-
-#passwordAdmin {
-  border: 2px solid #ced4da;
-  transition: all 0.3s;
-}
-
-#passwordAdmin:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-}
-
-.admin-panel .btn-danger {
-  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
-}
-
-.admin-panel .btn-danger:hover {
-  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.5);
-  transform: translateY(-2px);
-}
-
-/* ============ OBSERVACIONES POR TIPO ============ */
-.observaciones-tipo {
-  padding: 8px !important;
-  background-color: #fffbf0;
-}
-
-.observacion-input {
-  border: 1px solid #dee2e6;
-  font-size: 0.9rem;
-}
-
-.observacion-input:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
-}
-
-/* ============ BOTONES DE HISTORIAL ============ */
-.historial-header .btn-group .btn {
-  font-weight: 600;
-  transition: all 0.2s;
-}
-
-.historial-header .btn-group .btn.active {
-  transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* ============ AUTOCOMPLETADO EN FILTROS DEL HISTORIAL ============ */
-
+/**
+ * Contenedor de autocompletado para filtros del historial.
+ * Similar al autocompletado del formulario pero más compacto.
+ * 
+ * Diferencias con el autocompletado principal:
+ *   - Más pequeño (max-height: 200px)
+ *   - Z-index mayor (1050 vs 1000)
+ *   - Items más compactos
+ */
 #autocompletadoFiltro {
   position: absolute;
   top: 100%;
@@ -624,23 +467,25 @@ tbody tr:nth-child(even) {
   border: 2px solid #0d6efd;
   border-top: none;
   border-radius: 0 0 8px 8px;
-  max-height: 200px; /* Más pequeño que el del formulario */
+  max-height: 200px;
   overflow-y: auto;
-  z-index: 1050; /* Mayor z-index que el del formulario para estar sobre todo */
+  z-index: 1050;
   display: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   margin-top: 2px;
 }
 
-/* Reutilizar estilos de sugerencia-item del autocompletado principal */
+/**
+ * Items de sugerencia en filtros (más compactos).
+ */
 #autocompletadoFiltro .sugerencia-item {
-  padding: 10px 12px; /* Más compacto */
+  padding: 10px 12px;
   cursor: pointer;
   transition: all 0.2s;
   border-bottom: 1px solid #f0f0f0;
   display: flex;
   align-items: center;
-  font-size: 0.85rem; /* Texto más pequeño */
+  font-size: 0.85rem;
 }
 
 #autocompletadoFiltro .sugerencia-item:last-child {
@@ -660,9 +505,11 @@ tbody tr:nth-child(even) {
   font-family: 'Courier New', monospace;
 }
 
-/* Scrollbar personalizado para sugerencias del filtro */
+/**
+ * Scrollbar personalizado para autocompletado de filtros.
+ */
 #autocompletadoFiltro::-webkit-scrollbar {
-  width: 6px; /* Más delgado */
+  width: 6px;
 }
 
 #autocompletadoFiltro::-webkit-scrollbar-track {
@@ -678,3 +525,403 @@ tbody tr:nth-child(even) {
 #autocompletadoFiltro::-webkit-scrollbar-thumb:hover {
   background: #0b5ed7;
 }
+
+
+/* ============================================================================
+   MARK: MODALES
+   ============================================================================ */
+
+/**
+ * Contenido general de modales.
+ * Bordes redondeados y sombra pronunciada.
+ */
+.modal-content {
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/**
+ * Header de modales.
+ */
+.modal-header {
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  border-bottom: none;
+}
+
+/**
+ * Footer de modales.
+ */
+.modal-footer {
+  border-top: none;
+  padding: 1.5rem;
+}
+
+/**
+ * Cuerpo del modal de confirmación.
+ */
+#modalConfirmarGuardado .modal-body {
+  padding: 2rem;
+}
+
+/**
+ * Botones del modal de confirmación.
+ */
+#modalConfirmarGuardado .btn {
+  min-width: 120px;
+  font-weight: 600;
+}
+
+/**
+ * Animación de entrada del modal.
+ * Desliza desde arriba con transición suave.
+ */
+.modal.fade .modal-dialog {
+  transition: transform 0.3s ease-out;
+  transform: translate(0, -50px);
+}
+
+.modal.show .modal-dialog {
+  transform: none;
+}
+
+/**
+ * Animación de pulso para icono de advertencia.
+ */
+@keyframes pulse-warning {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+#modalConfirmarGuardado .bi-question-circle-fill {
+  animation: pulse-warning 2s infinite;
+}
+
+/**
+ * Estilos específicos del modal de login admin.
+ */
+#modalLoginAdmin .modal-content {
+  border-radius: 15px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+#modalLoginAdmin .modal-header {
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+
+/**
+ * Animación del icono de candado en login.
+ */
+#modalLoginAdmin .bi-shield-lock-fill {
+  animation: pulse-lock 2s infinite;
+}
+
+@keyframes pulse-lock {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+/**
+ * Input de contraseña en modal de login.
+ */
+#passwordAdmin {
+  border: 2px solid #ced4da;
+  transition: all 0.3s;
+}
+
+#passwordAdmin:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+
+/* ============================================================================
+   MARK: PANEL DE ADMINISTRACIÓN
+   ============================================================================ */
+
+/**
+ * Contenedor principal del panel de administración.
+ * Fondo degradado y bordes redondeados.
+ */
+.admin-panel {
+  padding: 30px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 15px;
+  min-height: 500px;
+}
+
+/**
+ * Título del panel de administración.
+ */
+.admin-panel h4 {
+  color: #0d6efd;
+  border-bottom: 3px solid #0d6efd;
+  padding-bottom: 10px;
+  margin-bottom: 30px;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/**
+ * Tarjetas dentro del panel de administración.
+ */
+.admin-panel .card {
+  border: 1px solid #dee2e6;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+/**
+ * Efecto hover en tarjetas del panel.
+ */
+.admin-panel .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/**
+ * Tabla dentro del panel de administración.
+ */
+.admin-panel .table {
+  margin-bottom: 0;
+  font-size: 0.95rem;
+}
+
+/**
+ * Encabezado de tabla en panel de administración.
+ */
+.admin-panel .table thead {
+  background-color: #0d6efd;
+  color: white;
+}
+
+/**
+ * Filas de tabla con hover.
+ */
+.admin-panel .table tbody tr:hover {
+  background-color: #f0f7ff;
+}
+
+/**
+ * Botón de eliminar con efecto hover.
+ */
+.admin-panel .btn-danger:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s;
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.5);
+}
+
+/**
+ * Input para agregar nuevo inspector.
+ */
+#nuevoInspector {
+  border: 2px solid #ced4da;
+  font-size: 1rem;
+  padding: 10px;
+}
+
+#nuevoInspector:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/**
+ * Botón de agregar inspector.
+ */
+#btnAgregarInspector {
+  padding: 10px 20px;
+  font-weight: 600;
+}
+
+/**
+ * Botones de peligro con sombra.
+ */
+.admin-panel .btn-danger {
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+.admin-panel .btn-danger:hover {
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.5);
+  transform: translateY(-2px);
+}
+
+
+/* ============================================================================
+   MARK: HISTORIAL DE REGISTROS
+   ============================================================================ */
+
+/**
+ * Sección contenedora del historial.
+ */
+.historial-section {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 30px;
+}
+
+/**
+ * Header del historial con título y botones de control.
+ */
+.historial-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #0d6efd;
+}
+
+.historial-header h4 {
+  margin: 0;
+  color: #0d6efd;
+}
+
+/**
+ * Panel de filtros del historial.
+ */
+.filtros-historial {
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+}
+
+/**
+ * Tabla de historial.
+ */
+.historial-table {
+  font-size: 0.85rem;
+  background-color: white;
+}
+
+/**
+ * Encabezado sticky de la tabla de historial.
+ */
+.historial-table thead {
+  background-color: #0d6efd;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.historial-table thead th {
+  font-weight: 600;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/**
+ * Celdas del cuerpo del historial.
+ */
+.historial-table tbody td {
+  vertical-align: middle;
+}
+
+/**
+ * Filas del historial con efecto hover.
+ */
+.historial-table tbody tr {
+  transition: transform 0.2s;
+}
+
+.historial-table tbody tr:hover {
+  transform: scale(1.01);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/**
+ * Contenedor de paginación.
+ */
+.paginacion-historial {
+  margin-top: 15px;
+}
+
+/**
+ * Contenedor responsive de la tabla.
+ * Permite scroll vertical con altura máxima.
+ */
+.table-responsive {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/**
+ * Scrollbar personalizado para tabla de historial.
+ */
+.table-responsive::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #6b7280;
+  border-radius: 5px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
+}
+
+/**
+ * Botones del grupo de control del historial.
+ */
+.historial-header .btn-group .btn {
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+/**
+ * Botón activo en el grupo de control.
+ */
+.historial-header .btn-group .btn.active {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+
+/* ============================================================================
+   MARK: OBSERVACIONES POR TIPO
+   ============================================================================ */
+
+/**
+ * Celda de observaciones en la tabla.
+ * Fondo ligeramente amarillento para diferenciar.
+ */
+.observaciones-tipo {
+  padding: 8px !important;
+  background-color: #fffbf0;
+}
+
+/**
+ * Input de observaciones.
+ */
+.observacion-input {
+  border: 1px solid #dee2e6;
+  font-size: 0.9rem;
+}
+
+.observacion-input:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+
+/* ============================================================================
+   FIN DE ESTILOS
+   ============================================================================ */
