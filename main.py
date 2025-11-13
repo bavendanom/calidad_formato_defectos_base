@@ -438,22 +438,22 @@ def obtener_historial(
         codigo=codigo
     )
     
-    # Serializar registros
+    # Los registros YA vienen formateados como diccionarios desde crud
     registros_serializados = []
     for reg in resultado["registros"]:
         registros_serializados.append({
-            "id": reg.id,
-            "fecha": reg.fecha.strftime("%d/%m/%Y") if reg.fecha else None,
-            "hora": reg.hora,
-            "codigo": reg.codigo,
-            "lote": reg.lote,
-            "nombre": reg.nombre,
-            "envase": reg.envase,
-            "destino": reg.destino,
-            "linea_produccion": reg.linea_produccion,
-            "tipo_defecto": reg.tipo_defecto,
-            "descripcion_defecto": reg.descripcion_defecto,
-            "cantidad_defectos": reg.cantidad_defectos
+            "id": reg["id"],
+            "fecha": reg["fecha"].strftime("%d/%m/%Y") if hasattr(reg["fecha"], 'strftime') else str(reg["fecha"]),
+            "hora": reg["hora"],
+            "codigo": reg["codigo"],
+            "lote": reg["lote"],
+            "nombre": reg["nombre"],
+            "envase": reg["envase"],
+            "destino": reg["destino"],
+            "linea_produccion": reg["linea_produccion"],
+            "tipo_defecto": reg["tipo_defecto"],
+            "descripcion_defecto": reg["descripcion_defecto"],
+            "cantidad_defectos": reg["cantidad_defectos"]
         })
     
     return {
@@ -629,29 +629,31 @@ def buscar_codigos_defectos(
     
     # Determinar en qué tabla buscar según el tipo de historial activo
     if tipo_historial == "detallado":
-        query = db.query(models.TiposDefectosDescripcion.codigo).distinct()
-        
-        # Filtrar por código
-        query = query.filter(models.TiposDefectosDescripcion.codigo.ilike(f"%{q}%"))
-        
-        # Filtrar por línea si se especifica
-        if linea and linea != "Admin":
-            query = query.filter(models.TiposDefectosDescripcion.linea_produccion == linea)
-        
-        # Limitar resultados
-        codigos = query.limit(10).all()
-    else:  # resumen
+        # Consultar tabla padre con JOIN explícito
         query = db.query(models.TiposDefectos.codigo).distinct()
         
-        # Filtrar por código
+        # JOIN para asegurar que solo traemos códigos que tienen descripciones
+        query = query.join(
+            models.TiposDefectosDescripcion,
+            models.TiposDefectos.id == models.TiposDefectosDescripcion.id_tipos_defectos
+        )
+        
+        # Filtros en la tabla padre
         query = query.filter(models.TiposDefectos.codigo.ilike(f"%{q}%"))
         
-        # Filtrar por línea si se especifica
         if linea and linea != "Admin":
             query = query.filter(models.TiposDefectos.linea_produccion == linea)
         
-        # Limitar resultados
         codigos = query.limit(10).all()
+    else:  # resumen
+        # Para resumen es más simple, solo consultar tabla padre
+        query = db.query(models.TiposDefectos.codigo).distinct()
+        query = query.filter(models.TiposDefectos.codigo.ilike(f"%{q}%"))
+        
+    if linea and linea != "Admin":
+        query = query.filter(models.TiposDefectos.linea_produccion == linea)
+    
+    codigos = query.limit(10).all()
     
     # Retornar solo los códigos únicos
     return [{"codigo": codigo[0]} for codigo in codigos if codigo[0]]
@@ -754,8 +756,23 @@ def auto_guardado(
     """
     try:
         for data in registros:
+            # Validar que exista el padre
+            padre = db.query(models.TiposDefectos).filter(
+                models.TiposDefectos.id == data.id_tipos_defectos
+            ).first()
+            
+            if not padre:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"No existe registro padre con ID {data.id_tipos_defectos}"
+                )
+            
             crud.crear_tipos_defectos_descripcion(db, data)
-        return {"status": "ok", "message": f"{len(registros)} registros autoguardados correctamente."}
+        
+        return {
+            "status": "ok",
+            "message": f"{len(registros)} registros autoguardados correctamente."
+        }
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
@@ -828,3 +845,62 @@ def admin_login(request: LoginRequest):
             status_code=401,
             detail="Contraseña incorrecta"
         )
+
+# ===============================
+# MARK: ENDPOINTS DE API - Obtener IDs de Padres
+# ===============================  
+@app.get("/api/ultimos-ids-tipos-defectos/")
+def obtener_ultimos_ids_tipos_defectos(
+    cantidad: int = 10,
+    db: Session = Depends(get_db)
+):
+    """
+    Obtiene los últimos IDs de tipos_defectos creados.
+    Usado después de guardar para obtener IDs de padres recién creados.
+    """
+    registros = db.query(models.TiposDefectos).order_by(
+        models.TiposDefectos.id.desc()
+    ).limit(cantidad).all()
+    
+    return [
+        {
+            "id": r.id,
+            "tipo_defecto": r.tipo_defecto,
+            "fecha_hora": r.fecha_hora.isoformat()
+        }
+        for r in registros
+    ]
+
+
+# ===============================
+# MARK: ENDPOINT HELPER PARA GUARDADO
+# ===============================
+
+@app.get("/api/ultimos-tipos-defectos/")
+def obtener_ultimos_tipos_defectos(
+    cantidad: int = 10,
+    db: Session = Depends(get_db)
+):
+    """
+    Obtiene los últimos registros de tipos_defectos creados.
+    Usado por el frontend después de guardar para obtener IDs de padres.
+    
+    Args:
+        cantidad: Número de registros a retornar (default: 10)
+    
+    Returns:
+        Lista de objetos con id, tipo_defecto, fecha_hora
+    """
+    registros = db.query(models.TiposDefectos).order_by(
+        models.TiposDefectos.id.desc()
+    ).limit(cantidad).all()
+    
+    return [
+        {
+            "id": r.id,
+            "tipo_defecto": r.tipo_defecto,
+            "linea_produccion": r.linea_produccion,
+            "fecha_hora": r.fecha_hora.isoformat() if r.fecha_hora else None
+        }
+        for r in registros
+    ]

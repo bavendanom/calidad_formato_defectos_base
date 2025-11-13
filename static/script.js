@@ -102,7 +102,8 @@ const COLORES_TIPO_DEFECTO = {
   "ETIQUETADO": "#fff3e6",
   "VIDEO JET": "#ffe6ff",
   "EMBALAJE": "#e6ffff",
-  "DEFECTOS GENERALES": "#f0f0f0"
+  "DEFECTOS GENERALES": "#f0f0f0",
+  "SIN DEFECTOS": "#d4edda"
 };
 
 
@@ -1067,13 +1068,124 @@ function mostrarModalConfirmacion() {
   const sumasPorTipo = calcularSumaPorTipo();
   const datosDescripciones = recopilarDatosDescripciones();
   
-  if (Object.keys(sumasPorTipo).every(tipo => sumasPorTipo[tipo] === 0) && datosDescripciones.length === 0) {
-    alert("⚠️ No hay datos para guardar (todos los valores son 0).");
+  // Verificar si todos los valores son 0
+  const todosCero = Object.keys(sumasPorTipo).every(tipo => sumasPorTipo[tipo] === 0) && datosDescripciones.length === 0;
+  
+  if (todosCero) {
+    // Mostrar modal especial para inspección sin defectos
+    mostrarModalInspeccionSinDefectos();
     return;
   }
 
+  // Modal normal de confirmación
   const modal = new bootstrap.Modal(document.getElementById('modalConfirmarGuardado'));
   modal.show();
+}
+
+/**
+ * Muestra modal especial para confirmar guardado sin defectos.
+ */
+function mostrarModalInspeccionSinDefectos() {
+  // Crear modal dinámicamente si no existe
+  let modalElement = document.getElementById('modalInspeccionSinDefectos');
+  
+  if (!modalElement) {
+    const modalHTML = `
+      <div class="modal fade" id="modalInspeccionSinDefectos" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+              <h5 class="modal-title">🔍 Inspección Sin Defectos</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body text-center">
+              <div class="mb-3">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+              </div>
+              <h5 class="mb-3">No se registraron defectos</h5>
+              <p class="text-muted mb-4">
+                ¿Deseas guardar este registro de inspección sin defectos?
+              </p>
+              <div class="alert alert-info text-start mb-0">
+                <strong>ℹ️ Nota:</strong> Esto registrará que se realizó la inspección 
+                y el producto cumplió con todos los estándares de calidad.
+              </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+              <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+                ❌ Cancelar
+              </button>
+              <button type="button" class="btn btn-success px-4" id="btnConfirmarSinDefectos">
+                ✅ Sí, guardar inspección
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    modalElement = document.getElementById('modalInspeccionSinDefectos');
+    
+    // Configurar evento del botón de confirmación
+    document.getElementById('btnConfirmarSinDefectos').addEventListener('click', () => {
+      const modal = bootstrap.Modal.getInstance(modalElement);
+      modal.hide();
+      guardarInspeccionSinDefectos();
+    });
+  }
+  
+  const modal = new bootstrap.Modal(modalElement);
+  modal.show();
+}
+
+/**
+ * Guarda un registro de inspección sin defectos.
+ */
+async function guardarInspeccionSinDefectos() {
+  try {
+    const linea = currentLinea;
+    const codigo = document.getElementById("codigoInfo").textContent || "---";
+    const lote = document.getElementById("lote").value || "---";
+    const inspector = document.getElementById("inspector").value || "---";
+    const nombre = document.getElementById("nombreInfo").textContent || "---";
+    const envase = document.getElementById("envaseInfo").textContent || "---";
+    const destino = document.getElementById("destinoInfo").textContent || "---";
+
+    // Crear un registro especial con tipo "SIN DEFECTOS"
+    const registroSinDefectos = {
+      codigo,
+      inspector,
+      lote,
+      nombre,
+      envase,
+      destino,
+      linea_produccion: linea,
+      tipo_defecto: "SIN DEFECTOS",
+      suma_tipo_defecto: 0,
+      observaciones: "Inspección realizada - No se encontraron defectos"
+    };
+
+    console.log("📋 Guardando inspección sin defectos...", registroSinDefectos);
+
+    // Guardar en tipos_defectos
+    const res = await fetch("/guardar_defectos/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify([registroSinDefectos])
+    });
+
+    if (!res.ok) throw new Error(`Error ${res.status} al guardar`);
+
+    alert("✅ Inspección sin defectos registrada correctamente");
+    limpiarFormularioDespuesGuardar();
+    paginaActualHistorial = 1;
+    cargarHistorial(currentLinea);
+
+  } catch (err) {
+    console.error("❌ Error al guardar inspección sin defectos:", err);
+    alert("❌ Error al guardar: " + err.message);
+  }
 }
 
 /**
@@ -1104,12 +1216,24 @@ function validarCamposObligatorios() {
 
   campos.forEach(campo => {
     const elemento = document.getElementById(campo.id);
-    const valor = elemento.value || elemento.textContent || "";
-
-    if (!valor.trim() || valor === "---") {
-      faltantes.push(campo.nombre);
-      elemento.classList.add("campo-faltante");
-      setTimeout(() => elemento.classList.remove("campo-faltante"), 2500);
+    
+    // Validación específica para <select> (inspector)
+    if (elemento.tagName === 'SELECT') {
+      const valor = elemento.value;
+      if (!valor || valor === "" || valor === "Seleccionar..." || valor === "Cargando...") {
+        faltantes.push(campo.nombre);
+        elemento.classList.add("campo-faltante");
+        setTimeout(() => elemento.classList.remove("campo-faltante"), 2500);
+      }
+    } 
+    // Validación para otros campos (input, span)
+    else {
+      const valor = elemento.value || elemento.textContent || "";
+      if (!valor.trim() || valor === "---") {
+        faltantes.push(campo.nombre);
+        elemento.classList.add("campo-faltante");
+        setTimeout(() => elemento.classList.remove("campo-faltante"), 2500);
+      }
     }
   });
 
@@ -1144,33 +1268,27 @@ async function ejecutarGuardado() {
   try {
     const sumasPorTipo = calcularSumaPorTipo();
     const linea = currentLinea;
-    const codigo = document.getElementById("codigoInfo").textContent || document.getElementById("codigoAX").value || "---";
+    const codigo = document.getElementById("codigoInfo").textContent || "---";
     const lote = document.getElementById("lote").value || "---";
     const inspector = document.getElementById("inspector").value || "---";
     const nombre = document.getElementById("nombreInfo").textContent || "---";
     const envase = document.getElementById("envaseInfo").textContent || "---";
     const destino = document.getElementById("destinoInfo").textContent || "---";
 
+    // PASO 1: Guardar registros padre primero
     const datosParaGuardar = [];
-
-    // Obtener observaciones por tipo
     const observacionesPorTipo = {};
+
     document.querySelectorAll(".observacion-input").forEach(input => {
       const tipo = input.dataset.tipo;
-      const obs = input.value.trim() || "---";
-      observacionesPorTipo[tipo] = obs;
+      observacionesPorTipo[tipo] = input.value.trim() || "---";
     });
 
-    // Guardar solo tipos con suma > 0
+    // Crear registros padre solo para tipos con suma > 0
     for (const [tipo, suma] of Object.entries(sumasPorTipo)) {
       if (suma > 0) {
         datosParaGuardar.push({
-          codigo,
-          inspector,
-          lote,
-          nombre,
-          envase,
-          destino,
+          codigo, inspector, lote, nombre, envase, destino,
           linea_produccion: linea,
           tipo_defecto: tipo,
           suma_tipo_defecto: suma,
@@ -1179,12 +1297,11 @@ async function ejecutarGuardado() {
       }
     }
 
-    const datosDescripciones = recopilarDatosDescripciones();
+    console.log("📦 Guardando registros padre...", datosParaGuardar);
 
-    console.log("📦 Datos para tipos_defectos:", datosParaGuardar);
-    console.log("📋 Datos para tipos_defectos_descripcion:", datosDescripciones);
-
-    // Guardar en tipos_defectos
+    // GUARDAR PADRES Y OBTENER IDs
+    let padresGuardados = [];
+    
     if (datosParaGuardar.length > 0) {
       const resTipos = await fetch("/guardar_defectos/", {
         method: "POST",
@@ -1192,12 +1309,25 @@ async function ejecutarGuardado() {
         body: JSON.stringify(datosParaGuardar)
       });
 
-      if (!resTipos.ok) throw new Error(`Error ${resTipos.status} en tipos_defectos`);
+      if (!resTipos.ok) throw new Error(`Error ${resTipos.status} guardando padres`);
+      
       const dataTipos = await resTipos.json();
-      console.log("Tipos defectos guardados:", dataTipos);
+      console.log("✅ Padres guardados:", dataTipos);
+      
+      // PASO 2: Obtener IDs de los padres recién creados
+      // Necesitamos hacer una consulta para obtener los IDs
+      const idsResponse = await fetch(`/api/ultimos-ids-tipos-defectos/?cantidad=${datosParaGuardar.length}`);
+      if (!idsResponse.ok) throw new Error("Error obteniendo IDs de padres");
+      
+      padresGuardados = await idsResponse.json();
     }
 
-    // Guardar en tipos_defectos_descripcion
+    // PASO 3: Preparar descripciones CON id_tipos_defectos
+    const datosDescripciones = recopilarDatosDescripcionesConFK(padresGuardados);
+
+    console.log("📋 Guardando descripciones con FK...", datosDescripciones);
+
+    // GUARDAR DESCRIPCIONES
     if (datosDescripciones.length > 0) {
       const resDesc = await fetch("/auto_guardado/", {
         method: "POST",
@@ -1205,21 +1335,68 @@ async function ejecutarGuardado() {
         body: JSON.stringify(datosDescripciones)
       });
 
-      if (!resDesc.ok) throw new Error(`Error ${resDesc.status} en tipos_defectos_descripcion`);
+      if (!resDesc.ok) throw new Error(`Error ${resDesc.status} guardando descripciones`);
       const dataDesc = await resDesc.json();
-      console.log("Descripciones guardadas:", dataDesc);
+      console.log("✅ Descripciones guardadas:", dataDesc);
     }
 
-    alert("Datos guardados correctamente");
+    alert("✅ Datos guardados correctamente");
     limpiarFormularioDespuesGuardar();
-    
     paginaActualHistorial = 1;
     cargarHistorial(currentLinea);
 
   } catch (err) {
     console.error("❌ Error al guardar:", err);
-    alert("❌ Error al guardar los datos.");
+    alert("❌ Error al guardar los datos: " + err.message);
   }
+}
+
+/**
+ * NUEVA FUNCIÓN: Recopila descripciones CON id_tipos_defectos
+ */
+function recopilarDatosDescripcionesConFK(padresGuardados) {
+  const fecha = document.getElementById("fecha").value || new Date().toISOString().slice(0, 10);
+  const datosDescripciones = [];
+
+  document.querySelectorAll("tbody tr").forEach(fila => {
+    if (fila.querySelector('.tipo-defecto')) return;
+
+    const descripcion = fila.querySelector('td:first-child').textContent.trim();
+
+    // Encontrar tipo de defecto
+    let filaAnterior = fila.previousElementSibling;
+    while (filaAnterior && !filaAnterior.querySelector('.tipo-defecto')) {
+      filaAnterior = filaAnterior.previousElementSibling;
+    }
+    if (!filaAnterior) return;
+
+    const tipo = filaAnterior.querySelector('.tipo-defecto').textContent.trim();
+
+    // BUSCAR EL ID DEL PADRE correspondiente a este tipo
+    const padre = padresGuardados.find(p => p.tipo_defecto === tipo);
+    
+    if (!padre) {
+      console.error(`❌ No se encontró padre para tipo: ${tipo}`);
+      return;
+    }
+
+    fila.querySelectorAll(".celda-input").forEach(celda => {
+      const valor = parseInt(celda.textContent.trim()) || 0;
+      const hora = celda.dataset.hora;
+
+      if (valor > 0 && hora && hora !== "Total día") {
+        datosDescripciones.push({
+          fecha,
+          hora,
+          id_tipos_defectos: padre.id,  // 🔑 FOREIGN KEY
+          descripcion_defecto: descripcion,
+          cantidad_defectos: valor
+        });
+      }
+    });
+  });
+
+  return datosDescripciones;
 }
 
 /**

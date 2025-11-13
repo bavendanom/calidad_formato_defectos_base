@@ -10,7 +10,7 @@ services:
     ports:
       - "8001:8001"
     command: >
-      sh -c "python load_info_producto.py && uvicorn main:app --host 0.0.0.0 --port 8001"
+      sh -c "uvicorn main:app --host 0.0.0.0 --port 8001"
     # IMPORTANTE: Eliminar el volumen para usar la imagen construida
     # volumes:
     #   - .:/app

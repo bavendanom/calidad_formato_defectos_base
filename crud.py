@@ -383,42 +383,58 @@ def obtener_historial_registros(
         - Para datasets grandes (>100k registros), considerar agregar índices compuestos
         - El count() puede ser costoso con muchos filtros; considerar caching
     """
-    query = db.query(models.TiposDefectosDescripcion)
+    query = db.query(
+        models.TiposDefectosDescripcion,
+        models.TiposDefectos
+    ).join(
+        models.TiposDefectos,
+        models.TiposDefectosDescripcion.id_tipos_defectos == models.TiposDefectos.id
+    )
     
-    # Filtrar por línea de producción
+    # Filtros aplicados a la tabla PADRE
     if linea_produccion:
-        query = query.filter(models.TiposDefectosDescripcion.linea_produccion == linea_produccion)
+        query = query.filter(models.TiposDefectos.linea_produccion == linea_produccion)
     
-    # Filtrar por rango de fechas
     if fecha_inicio:
         query = query.filter(models.TiposDefectosDescripcion.fecha >= fecha_inicio)
     if fecha_fin:
         query = query.filter(models.TiposDefectosDescripcion.fecha <= fecha_fin)
     
-    # Filtrar por tipo de defecto
     if tipo_defecto and tipo_defecto != "todos":
-        query = query.filter(models.TiposDefectosDescripcion.tipo_defecto == tipo_defecto)
+        query = query.filter(models.TiposDefectos.tipo_defecto == tipo_defecto)
 
-    # Filtrar por lote
     if lote:
-        query = query.filter(models.TiposDefectosDescripcion.lote.ilike(f"%{lote}%"))
+        query = query.filter(models.TiposDefectos.lote.ilike(f"%{lote}%"))
     
-    # Filtrar por código
     if codigo:
-        query = query.filter(models.TiposDefectosDescripcion.codigo.ilike(f"%{codigo}%"))
+        query = query.filter(models.TiposDefectos.codigo.ilike(f"%{codigo}%"))
     
-    # Ordenar por fecha y hora descendente (más recientes primero)
-    query = query.order_by(
-        #models.TiposDefectosDescripcion.fecha.desc(),
-        #models.TiposDefectosDescripcion.hora.desc(),
-        models.TiposDefectosDescripcion.id.desc()
-    )
+    # Ordenar por ID de descripción (más recientes primero)
+    query = query.order_by(models.TiposDefectosDescripcion.id.desc())
+    
+    # IMPORTANTE: Contar ANTES de paginar
+    total = query.count()
     
     # Aplicar paginación
-    registros = query.offset(offset).limit(limite).all()
+    resultados = query.offset(offset).limit(limite).all()
     
-    # Obtener total de registros (para paginación)
-    total = query.count()
+    # 🔧 CORRECCIÓN: Formatear correctamente las tuplas del JOIN
+    registros = []
+    for desc, padre in resultados:  # desc = TiposDefectosDescripcion, padre = TiposDefectos
+        registros.append({
+            "id": desc.id,
+            "fecha": desc.fecha,
+            "hora": desc.hora,
+            "codigo": padre.codigo,
+            "lote": padre.lote,
+            "nombre": padre.nombre,
+            "envase": padre.envase,
+            "destino": padre.destino,
+            "linea_produccion": padre.linea_produccion,
+            "tipo_defecto": padre.tipo_defecto,
+            "descripcion_defecto": desc.descripcion_defecto,
+            "cantidad_defectos": desc.cantidad_defectos
+        })
     
     return {
         "registros": registros,
@@ -465,12 +481,18 @@ def obtener_tipos_defectos_unicos(db: Session, linea_produccion: str = None):
         Frontend hace llamada a /api/tipos-defectos/ al cargar página del historial
         para poblar el <select> de filtros dinámicamente basado en datos reales.
     """
-    query = db.query(models.TiposDefectosDescripcion.tipo_defecto).distinct()
+    # Consultar la tabla correcta (TiposDefectos)
+    query = db.query(models.TiposDefectos.tipo_defecto).distinct()
     
+    # Filtrar por línea de producción en la misma tabla
     if linea_produccion:
-        query = query.filter(models.TiposDefectosDescripcion.linea_produccion == linea_produccion)
-    
-    return [tipo[0] for tipo in query.all() if tipo[0]]
+        # Esto filtra la consulta para que solo devuelva tipos de defecto
+        # que realmente existen en la línea seleccionada.
+        query = query.filter(models.TiposDefectos.linea_produccion == linea_produccion)
+
+    resultados = query.all()
+        
+    return [tipo[0] for tipo in resultados if tipo[0]]
 
 
 def obtener_historial_resumen(

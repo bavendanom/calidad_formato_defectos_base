@@ -310,12 +310,7 @@ class TiposDefectosDescripcionBase(BaseModel):
     Attributes:
         fecha (date): Fecha del registro en formato YYYY-MM-DD.
         hora (str): Hora del registro en formato "HH:MM" (ej: "08:00", "15:30").
-        codigo (str): Código AX del producto.
-        lote (str): Número de lote.
-        nombre (str): Nombre del producto.
-        envase (str): Tipo de envase.
-        destino (str): Destino del producto.
-        linea_produccion (str): Línea de producción.
+        id_tipos_defectos: 
         tipo_defecto (str): Tipo general del defecto (LLENADO, CAPSULADO, etc.).
         descripcion_defecto (str): Descripción específica del defecto.
             Ej: "Nivel de llenado bajo", "Tapa descentrada".
@@ -333,15 +328,9 @@ class TiposDefectosDescripcionBase(BaseModel):
         tipo_defecto: "LLENADO" (categoría general)
         descripcion_defecto: "Nivel de llenado bajo" (detalle específico)
     """
-    fecha: date                            
-    hora: str 
-    codigo: str
-    lote: str  
-    nombre: str
-    envase: str
-    destino: str
-    linea_produccion: str
-    tipo_defecto: str
+    fecha: date
+    hora: str
+    id_tipos_defectos: int  # Foreign key al registro padre
     descripcion_defecto: str = "---"
     cantidad_defectos: int = 0
 
@@ -440,4 +429,5 @@ class TiposDefectosDescripcionOut(TiposDefectosDescripcionBase):
     class Config:
         orm_mode = True
 
-
+# Actualizar forward reference
+TiposDefectosDescripcionOut.update_forward_refs()

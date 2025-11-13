@@ -11,8 +11,8 @@ COPY . .
 
 # 🔹 Asegurar que los archivos CSV y scripts estén incluidos en la imagen final
 # (ya lo hace COPY . ., pero lo dejamos explícito)
-COPY data/ ./data/
-COPY load_info_producto.py ./load_info_producto.py
+#COPY data/ ./data/
+#COPY load_info_producto.py ./load_info_producto.py
 
 # Exponer puerto
 EXPOSE 8001
