@@ -11,9 +11,6 @@ services:
       - "8001:8001"
     command: >
       sh -c "uvicorn main:app --host 0.0.0.0 --port 8001"
-    # IMPORTANTE: Eliminar el volumen para usar la imagen construida
-    # volumes:
-    #   - .:/app
 
   db:
     image: postgres:15

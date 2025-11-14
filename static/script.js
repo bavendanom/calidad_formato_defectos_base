@@ -1145,6 +1145,7 @@ function mostrarModalInspeccionSinDefectos() {
 async function guardarInspeccionSinDefectos() {
   try {
     const linea = currentLinea;
+    const fecha = document.getElementById("fecha").value || new Date().toISOString().slice(0, 10);
     const codigo = document.getElementById("codigoInfo").textContent || "---";
     const lote = document.getElementById("lote").value || "---";
     const inspector = document.getElementById("inspector").value || "---";
@@ -1154,6 +1155,7 @@ async function guardarInspeccionSinDefectos() {
 
     // Crear un registro especial con tipo "SIN DEFECTOS"
     const registroSinDefectos = {
+      fecha,
       codigo,
       inspector,
       lote,
@@ -1268,6 +1270,7 @@ async function ejecutarGuardado() {
   try {
     const sumasPorTipo = calcularSumaPorTipo();
     const linea = currentLinea;
+    const fecha = document.getElementById("fecha").value || new Date().toISOString().slice(0, 10); 
     const codigo = document.getElementById("codigoInfo").textContent || "---";
     const lote = document.getElementById("lote").value || "---";
     const inspector = document.getElementById("inspector").value || "---";
@@ -1288,6 +1291,7 @@ async function ejecutarGuardado() {
     for (const [tipo, suma] of Object.entries(sumasPorTipo)) {
       if (suma > 0) {
         datosParaGuardar.push({
+          fecha,
           codigo, inspector, lote, nombre, envase, destino,
           linea_produccion: linea,
           tipo_defecto: tipo,
@@ -1355,7 +1359,6 @@ async function ejecutarGuardado() {
  * NUEVA FUNCIÓN: Recopila descripciones CON id_tipos_defectos
  */
 function recopilarDatosDescripcionesConFK(padresGuardados) {
-  const fecha = document.getElementById("fecha").value || new Date().toISOString().slice(0, 10);
   const datosDescripciones = [];
 
   document.querySelectorAll("tbody tr").forEach(fila => {
@@ -1386,7 +1389,6 @@ function recopilarDatosDescripcionesConFK(padresGuardados) {
 
       if (valor > 0 && hora && hora !== "Total día") {
         datosDescripciones.push({
-          fecha,
           hora,
           id_tipos_defectos: padre.id,  // 🔑 FOREIGN KEY
           descripcion_defecto: descripcion,
@@ -2073,11 +2075,10 @@ function mostrarHistorial(data) {
   } else {
     tbody.innerHTML = data.registros.map(reg => {
       const color = COLORES_TIPO_DEFECTO[reg.tipo_defecto] || "#ffffff";
-      const fechaHora = reg.fecha_hora ? new Date(reg.fecha_hora).toLocaleString('es-CO') : '---';
       return `
         <tr style="background-color: ${color};">
           <td>${reg.id || '---'}</td>
-          <td colspan="2">${fechaHora}</td>
+          <td colspan="2">${reg.fecha || '---'}</td>
           <td><strong>${reg.codigo || '---'}</strong></td>
           <td>${reg.lote || '---'}</td>
           <td>${reg.nombre || '---'}</td>

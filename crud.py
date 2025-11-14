@@ -396,9 +396,9 @@ def obtener_historial_registros(
         query = query.filter(models.TiposDefectos.linea_produccion == linea_produccion)
     
     if fecha_inicio:
-        query = query.filter(models.TiposDefectosDescripcion.fecha >= fecha_inicio)
+        query = query.filter(models.TiposDefectos.fecha >= fecha_inicio)
     if fecha_fin:
-        query = query.filter(models.TiposDefectosDescripcion.fecha <= fecha_fin)
+        query = query.filter(models.TiposDefectos.fecha <= fecha_fin)
     
     if tipo_defecto and tipo_defecto != "todos":
         query = query.filter(models.TiposDefectos.tipo_defecto == tipo_defecto)
@@ -423,7 +423,7 @@ def obtener_historial_registros(
     for desc, padre in resultados:  # desc = TiposDefectosDescripcion, padre = TiposDefectos
         registros.append({
             "id": desc.id,
-            "fecha": desc.fecha,
+            "fecha": padre.fecha,
             "hora": desc.hora,
             "codigo": padre.codigo,
             "lote": padre.lote,
@@ -577,14 +577,14 @@ def obtener_historial_resumen(
     if fecha_inicio:
         from datetime import datetime
         fecha_inicio_dt = datetime.strptime(fecha_inicio, "%Y-%m-%d")
-        query = query.filter(models.TiposDefectos.fecha_hora >= fecha_inicio_dt)
+        query = query.filter(models.TiposDefectos.fecha >= fecha_inicio_dt)
     if fecha_fin:
         from datetime import datetime
         fecha_fin_dt = datetime.strptime(fecha_fin, "%Y-%m-%d")
         # Agregar 1 día para incluir todo el día
         from datetime import timedelta
         fecha_fin_dt = fecha_fin_dt + timedelta(days=1)
-        query = query.filter(models.TiposDefectos.fecha_hora < fecha_fin_dt)
+        query = query.filter(models.TiposDefectos.fecha < fecha_fin_dt)
     
     # Filtrar por tipo de defecto
     if tipo_defecto and tipo_defecto != "todos":

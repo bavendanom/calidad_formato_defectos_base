@@ -35,6 +35,7 @@ class TiposDefectos(Base):
     __tablename__ = "tipos_defectos"
 
     id = Column(Integer, primary_key=True, index=True)
+    fecha = Column(Date, nullable=False, index=True) 
     fecha_hora = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     codigo = Column(String, index=True)
     inspector = Column(String)
@@ -57,6 +58,7 @@ class TiposDefectos(Base):
     # Índice compuesto para búsquedas comunes
     __table_args__ = (
         Index('idx_tipos_defectos_busqueda', 'linea_produccion', 'fecha_hora', 'tipo_defecto'),
+        Index('idx_tipos_defectos_fecha', 'fecha'), 
     )
 
 #MARK: TIPOS DEFECTOS DESCRIPCION
@@ -73,8 +75,6 @@ class TiposDefectosDescripcion(Base):
         index=True
     )
     
-    # Campos específicos del detalle
-    fecha = Column(Date, nullable=False, index=True) 
     hora = Column(String, nullable=False) 
     descripcion_defecto = Column(String, default="---")
     cantidad_defectos = Column(Integer, default=0)
@@ -84,6 +84,6 @@ class TiposDefectosDescripcion(Base):
 
     # Índice compuesto para mejorar JOINs
     __table_args__ = (
-        Index('idx_descripcion_fk_fecha', 'id_tipos_defectos', 'fecha'),
+        Index('idx_descripcion_fk_fecha', 'id_tipos_defectos'),
     )
 

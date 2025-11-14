@@ -210,6 +210,7 @@ class TiposDefectosBase(BaseModel):
         - Heredada por TiposDefectosCreate y TiposDefectosOut
         - No incluye id ni fecha_hora (campos auto-generados)
     """
+    fecha: date
     codigo: str
     inspector: str
     lote: str  
@@ -328,7 +329,6 @@ class TiposDefectosDescripcionBase(BaseModel):
         tipo_defecto: "LLENADO" (categoría general)
         descripcion_defecto: "Nivel de llenado bajo" (detalle específico)
     """
-    fecha: date
     hora: str
     id_tipos_defectos: int  # Foreign key al registro padre
     descripcion_defecto: str = "---"
