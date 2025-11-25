@@ -46,7 +46,7 @@ class TiposDefectos(Base):
     linea_produccion = Column(String, index=True)
     tipo_defecto = Column(String, index=True)
     suma_tipo_defecto = Column(Integer, default=0)
-    observaciones = Column(String(100), default="---")
+    observaciones = Column(String(400), default="---")
     
     # RELACIÓN 1:N con descripciones
     descripciones = relationship(

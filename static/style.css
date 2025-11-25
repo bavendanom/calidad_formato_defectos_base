@@ -914,6 +914,11 @@ tbody tr:nth-child(even) {
 .observacion-input {
   border: 1px solid #dee2e6;
   font-size: 0.9rem;
+  min-height: 60px;
+  resize: vertical;
+  overflow-y: auto;
+  font-family: inherit;
+  max-height: 300px;
 }
 
 .observacion-input:focus {

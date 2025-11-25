@@ -427,12 +427,12 @@ function crearFilaObservaciones(grupo) {
   rowObservaciones.innerHTML = `
     <td class="text-start fw-bold">📝 Observaciones:</td>
     <td colspan="${horas.length}" class="observaciones-tipo">
-      <input 
-        type="text" 
+      <textarea 
         class="form-control form-control-sm observacion-input" 
         data-tipo="${grupo.tipo}"
-        placeholder="Observaciones para ${grupo.tipo} (máx. 100 caracteres)" 
-        maxlength="100">
+        placeholder="Observaciones para ${grupo.tipo} (máx. 400 caracteres)" 
+        maxlength="400"
+        rows="2"></textarea>
     </td>
   `;
   return rowObservaciones;
