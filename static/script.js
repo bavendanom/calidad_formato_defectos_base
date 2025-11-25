@@ -38,7 +38,7 @@ const DEFECTOS_POR_LINEA = {
     ]},
     { tipo: "CAPSULADO", color: "green", descripciones: [
       "Botella sin tapa / sin capuchón",
-      "Tapa descentrada",
+      "Tapa desensamblada",
       "Tapa reventada",
       "Precinto roto",
       "Litografía diferente",
@@ -51,21 +51,21 @@ const DEFECTOS_POR_LINEA = {
       "Sin etiqueta",
       "Dos o más etiquetas",
       "Etiqueta equivocada",
-      "Posición incorrecta",
-      "Daño físico",
-      "Mal pegada",
+      "Posición incorrecta (torcida, descentrada, invertida)",
+      "Daño físico (rasgada, arrugada, doblada, pelada, rayada)",
+      "Mal pegada, despegada",
       "Defectos contraetiqueta"
     ]},
     { tipo: "VIDEO JET", color: "purple", descripciones: [
       "Sin video jet",
-      "Video jet sin código de barras",
-      "Diferente tape-etiqueta",
+      "Video jet sobre código de barras",
+      "Diferente tapa-etiqueta",
       "Incompleto, borroso",
-      "Incorrecto",
-      "Cinta mal pegada",
-      "Etiqueta dañada"
+      "Incorrecto"
     ]},
     { tipo: "EMBALAJE", color: "teal", descripciones: [
+      "Cinta mal pegada",
+      "Etiqueta dañada",
       "Faltante de unidades",
       "Partición incompleta o sin ella",
       "Caja deteriorada (rasgada, húmeda, sucia)",
